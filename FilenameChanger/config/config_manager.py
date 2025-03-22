@@ -6,9 +6,9 @@ import json
 """
 
 
-def load_config():
+def load_config(config_path):
     """加载配置文件"""
-    with open('config.json', 'r') as f:
+    with open(config_path, 'r') as f:
         return json.load(f)
 
 

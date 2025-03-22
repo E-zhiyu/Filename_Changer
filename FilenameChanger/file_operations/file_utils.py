@@ -14,3 +14,8 @@ def get_files_in_directory(directory):
 def rename_files(directory, old_name, new_name):
     """重命名文件"""
     os.rename(os.path.join(directory, old_name), os.path.join(directory, new_name))
+
+
+def generate_new_name(rule):
+    """根据已加载的规则生成新文件名"""
+    pass

@@ -10,11 +10,6 @@ def get_directory():
     return directory
 
 
-def get_rename_rule():
-    """获取用户自定义命名规则"""
-    pass
-
-
 def display_results():
     """显示重命名结果"""
     pass
