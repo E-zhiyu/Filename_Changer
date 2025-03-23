@@ -2,6 +2,7 @@
 from FilenameChanger.ui.cli import *
 from FilenameChanger.file_operations.file_utils import *
 from FilenameChanger.rename_rules.rule_manager import *
+from FilenameChanger.rename_rules.rule_kind_inputer import *
 
 """
 程序主模块
@@ -32,7 +33,7 @@ def Rename():
     old_names = get_files_in_directory(directory)  # old_file_names列表将包含该目录下所有文件的文件名（包含扩展名）
     rule = load_config(config_path)  # 加载已保存的规则
     new_names = generate_new_name(rule, old_names)  # 生成新文件名
-    for old,new in zip(old_names, new_names):
+    for old, new in zip(old_names, new_names):
         rename_files(directory, old, new)  # 执行重命名操作
 
 

@@ -12,8 +12,11 @@ def load_config(config_path):
     功能：加载配置文件
     返回：json文件内容
     """
-    with open(config_path, 'r', encoding='utf-8') as f:
-        return json.load(f)
+    try:
+        with open(config_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print('配置文件不存在！')
 
 
 def analysis_rules(rule, old_names):
@@ -44,24 +47,12 @@ def analysis_rules(rule, old_names):
 
 def save_new_rule(new_rule, config_path):
     """
+    功能：保存用户输入的规则
     :param new_rule:新规则列表
     :param config_path:规则文件路径
     """
-    json.dump(new_rule, open(config_path, 'w', encoding='utf-8'), indent=4, ensure_ascii=False)
-
-
-def input_new_rule(config_path):
-    """
-    功能：提示用户输入规则
-    :param config_path: 配置文件路径
-    """
-    print('【1】交换特定符号前后内容')
-    type = int(input('请选择规则类型：'))
-    if type == 1:
-        split_rule = {}  # 创建文件名分割规则字典
-        split_rule['type'] = type
-        split_rule['rule_name'] = input('请输入规则名称：')
-        split_rule['desc'] = input('请输入规则描述：')
-        split_rule['split_char'] = input('请输入分隔符：')
-
-        save_new_rule(split_rule, config_path)  # 保存输入的规则
+    try:
+        with open(config_path, 'w', encoding='utf-8') as f:
+            json.dump(new_rule, f, ensure_ascii=False, indent=4)
+    except FileNotFoundError:
+        print('配置文件不存在！')
