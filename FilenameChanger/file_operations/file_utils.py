@@ -33,16 +33,20 @@ def generate_new_name(rule, old_names):
         f, b, e = i
 
         # 去除前后空格
-        if f[0] == ' ':
+        if f != '' and f[0] == ' ':
             f = f[1:]
-        if f[-1] == ' ':
+        if f != '' and f[-1] == ' ':
             f = f[:-1]
-        if b[0] == ' ':
+        if b != '' and b[0] == ' ':
             b = b[1:]
-        if b[-1] == ' ':
+        if b != '' and b[-1] == ' ':
             b = b[:-1]
 
-        new = b + ' ' + split_char + ' ' + f + e  # 新文件名为"behind+空格+split_char+空格+front+ext"
+        if b != '':
+            new = b + ' ' + split_char + ' ' + f + e  # 新文件名为"behind+空格+split_char+空格+front+ext"
+        else:
+            new = f + e
+
         new_names.append(new)
 
     return new_names
