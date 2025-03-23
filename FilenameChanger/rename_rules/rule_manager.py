@@ -32,7 +32,9 @@ def analysis_rules(rule, old_names):
     front = []  # 前半部分文件名
     behind = []  # 后半部分文件名
     for i in names:
-        f, b = i.split(split_char, 1)  # 以第一个出现的分隔符为界限分割文件名
+        part = i.split(split_char, maxsplit=1)  # 确保至多拆分成两个部分
+        f = part[0]
+        b = part[1] if len(part) > 1 else ''  # 处理没有第二部分的情况
         front.append(f)
         behind.append(b)
 
