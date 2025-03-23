@@ -1,7 +1,7 @@
 # main.py
-from ui.cli import *
-from file_operations.file_utils import *
-from rename_rules.rule_manager import *
+from FilenameChanger.ui.cli import *
+from FilenameChanger.file_operations.file_utils import *
+from FilenameChanger.rename_rules.rule_manager import *
 
 """
 程序主模块

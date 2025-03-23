@@ -1,7 +1,7 @@
 # file_operations/file_utils.py
-import os
+from FilenameChanger.rename_rules.rule_manager import *
 
-from rename_rules.rule_manager import analysis_rules
+from FilenameChanger.rename_rules.rule_manager import analysis_rules
 
 """
 文件操作模块
@@ -31,6 +31,17 @@ def generate_new_name(rule, old_names):
     new_names = []
     for i in zipped_names:
         f, b, e = i
+
+        # 去除前后空格
+        if f[0] == ' ':
+            f = f[1:]
+        if f[-1] == ' ':
+            f = f[:-1]
+        if b[0] == ' ':
+            b = b[1:]
+        if b[-1] == ' ':
+            b = b[:-1]
+
         new = b + ' ' + split_char + ' ' + f + e  # 新文件名为"behind+空格+split_char+空格+front+ext"
         new_names.append(new)
 
