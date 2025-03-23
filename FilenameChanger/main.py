@@ -23,7 +23,7 @@ def main():
 
 # 功能：自定义规则
 def Set_rules():
-    print('【1】交换特定符号前后的字符')
+    input_new_rule(config_path)
 
 
 # 功能：文件重命名

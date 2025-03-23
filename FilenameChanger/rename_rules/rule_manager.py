@@ -1,8 +1,6 @@
 # config/rule_manager.py
 import json
 import os
-from os.path import split
-from pydoc import describe
 
 """
 规则文件模块：控制所有有关命名规则文件的操作
@@ -14,7 +12,7 @@ def load_config(config_path):
     功能：加载配置文件
     返回：json文件内容
     """
-    with open(config_path, 'r') as f:
+    with open(config_path, 'r', encoding='utf-8') as f:
         return json.load(f)
 
 
@@ -47,7 +45,7 @@ def save_new_rule(new_rule, config_path):
     :param new_rule:新规则列表
     :param config_path:规则文件路径
     """
-    json.dump(new_rule, open(config_path, 'w'), indent=4)
+    json.dump(new_rule, open(config_path, 'w', encoding='utf-8'), indent=4, ensure_ascii=False)
 
 
 def input_new_rule(config_path):
