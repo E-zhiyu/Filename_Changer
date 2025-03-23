@@ -1,3 +1,3 @@
 .venv/
 tests/
-rename_rules/*.json
+FilenameChanger/rename_rules/rename_rules.json
