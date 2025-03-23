@@ -9,7 +9,7 @@ from rename_rules.rule_manager import *
 version = "1.0.0"
 author = 'E_zhiyu'
 
-config_path = 'rename_rules/rename_rules.json'  # 默认重命名规则文件路径
+config_path = '../FilenameChanger/rename_rules/rename_rules.json'  # 默认重命名规则文件路径
 
 
 def main():
@@ -28,11 +28,12 @@ def Set_rules():
 
 # 功能：文件重命名
 def Rename():
-    directory = get_directory()
+    directory = get_directory()  # 获取目标路径
     old_names = get_files_in_directory(directory)  # old_file_names列表将包含该目录下所有文件的文件名（包含扩展名）
     rule = load_config(config_path)  # 加载已保存的规则
-    new_name = generate_new_name(rule, old_names)  # 生成新文件名
-    rename_files(directory, old_names, new_name)  # 执行重命名操作
+    new_names = generate_new_name(rule, old_names)  # 生成新文件名
+    for old,new in zip(old_names, new_names):
+        rename_files(directory, old, new)  # 执行重命名操作
 
 
 if __name__ == '__main__':
