@@ -30,8 +30,8 @@ def rename_files(directory, old_name, new_name):
     """
     try:
         os.rename(os.path.join(directory, old_name), os.path.join(directory, new_name))
-    except FileExistsError as e:
-        print(f'【文件存在异常】{e}，文件：{old_name}不存在！')
+    except FileNotFoundError as e:
+        print(f'【文件存在性异常】\n文件：{old_name}不存在！')
     else:
         print(f'成功：{old_name} -> {new_name}')
 
@@ -45,7 +45,7 @@ def generate_new_name(rule, old_names):
     zipped_names = analysis_rules(rule, old_names)
     new_names = []
     for i in zipped_names:
-        f, b, e = i
+        f, b, e = i  # 解包压缩的文件名
 
         # 去除前后空格
         if f != '':
@@ -61,7 +61,6 @@ def generate_new_name(rule, old_names):
             new = b + ' ' + split_char + ' ' + f + e  # 将f,b前后调换生成新文件名
         else:
             new = f + e  # 若没有第二部分文件名则保持原状
-
-        new_names.append(new)
+        new_names.append(new)  # 将新名字并入新文件名列表
 
     return new_names
