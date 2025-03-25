@@ -51,6 +51,12 @@ def save_new_rule(new_rule, config_path):
     :param new_rule:新规则列表
     :param config_path:规则文件路径
     """
-    with open(config_path, 'w', encoding='utf-8') as f:
-        json.dump(new_rule, f, ensure_ascii=False, indent=4)
-    print('规则写入成功！')
+    try:
+        with open(config_path, 'w', encoding='utf-8') as f:
+            json.dump(new_rule, f, ensure_ascii=False, indent=4)
+        print('规则写入成功！')
+    except FileNotFoundError:
+        os.makedirs(os.path.dirname(config_path), exist_ok=True)
+        with open(config_path, 'w', encoding='utf-8') as f:
+            json.dump(new_rule, f, ensure_ascii=False, indent=4)
+        print('规则写入成功！')
