@@ -16,24 +16,20 @@ config_path = './rename_rules/rename_rules.json'  # 重命名规则文件路径
 def main():
     print_welcome(version, author)
     while True:
-        print('【0】结束该程序 【1】文件重命名 【2】自定义规则预设')
+        print('操作选择'.center(42, '—'))
+        print('【0】结束该程序 【1】文件重命名 【2】写入规则')
         option = int(input('请选择操作：'))
         if option == 0:
             break
         elif option == 1:
             Rename()
         elif option == 2:
-            Set_rules()
+            input_new_rule(config_path)  # 输入新规则
         else:
             print('请选择有效的操作')
 
     print('程序已退出……')
     time.sleep(1)
-
-
-# 功能：自定义规则
-def Set_rules():
-    input_new_rule(config_path)
 
 
 # 功能：文件重命名

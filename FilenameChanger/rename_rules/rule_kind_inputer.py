@@ -15,17 +15,18 @@ def input_new_rule(config_path):
     class TypeLegalityError(Exception):
         def __init__(self, value):
             self.value = value
-            self.__class__.__name__ = '【规则种类合法性异常】' + self.__class__.__name__
 
     # 验证规则种类合法性
     legal_type = [1]  # 合法的种类值列表
     try:
+        print('规则写入'.center(42,'—'))
+        print('以下为所有规则类型')
         print('【1】交换特定符号前后内容')
-        rule_type = int(input('请选择规则类型：'))
+        rule_type = int(input('请选择：'))
         if rule_type not in legal_type:
-            raise TypeLegalityError
+            raise TypeLegalityError(rule_type)
     except TypeLegalityError as e:
-        print(e.__cause__.__name__, '已触发，错误的规则种类：', e.value, sep='')
+        print('【规则种类错误】 错误值：', e.value, sep='')
 
     if rule_type == 1:
         input_mode_1(config_path)

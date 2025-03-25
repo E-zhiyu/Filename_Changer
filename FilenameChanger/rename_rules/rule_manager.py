@@ -16,7 +16,6 @@ def load_config(config_path):
         with open(config_path, 'r', encoding='utf-8') as f:
             return json.load(f)
     except FileNotFoundError:
-        os.makedirs(os.path.dirname(config_path), exist_ok=True)
         return None
 
 
@@ -52,8 +51,6 @@ def save_new_rule(new_rule, config_path):
     :param new_rule:新规则列表
     :param config_path:规则文件路径
     """
-    try:
-        with open(config_path, 'w', encoding='utf-8') as f:
-            json.dump(new_rule, f, ensure_ascii=False, indent=4)
-    except FileNotFoundError:
-        print(f'【错误：文件不存在】\n无法在 {config_path} 中找到配置文件！')
+    with open(config_path, 'w', encoding='utf-8') as f:
+        json.dump(new_rule, f, ensure_ascii=False, indent=4)
+    print('规则写入成功！')
