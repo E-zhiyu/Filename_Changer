@@ -15,8 +15,9 @@ def load_config(config_path):
     try:
         with open(config_path, 'r', encoding='utf-8') as f:
             return json.load(f)
-    except FileNotFoundError as e:
-        print(f'【错误：文件不存在】\n无法在 {config_path} 中找到配置文件！')
+    except FileNotFoundError:
+        os.makedirs(os.path.dirname(config_path), exist_ok=True)
+        return None
 
 
 def analysis_rules(rule, old_names):
@@ -54,5 +55,5 @@ def save_new_rule(new_rule, config_path):
     try:
         with open(config_path, 'w', encoding='utf-8') as f:
             json.dump(new_rule, f, ensure_ascii=False, indent=4)
-    except FileNotFoundError as e:
+    except FileNotFoundError:
         print(f'【错误：文件不存在】\n无法在 {config_path} 中找到配置文件！')
