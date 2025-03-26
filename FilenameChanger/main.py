@@ -50,6 +50,7 @@ def Rename():
     new_names = generate_new_name(rule, old_names)  # 生成新文件名
 
     if confirm_to_rename():  # 用户确认重命名后再执行
+        print('文件重命名记录'.center(42, '—'))
         for old, new in zip(old_names, new_names):
             rename_files(directory, old, new)  # 执行重命名操作
 

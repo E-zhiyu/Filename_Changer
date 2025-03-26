@@ -27,22 +27,21 @@ def analysis_rules(rule, old_names):
     split_char = rule['split_char']
     names = []  # 文件名列表
     exts = []  # 扩展名列表
-    for i in range(len(old_names)):
-        signal_name, signal_ext = os.path.splitext(old_names[i])  # 分离文件名和扩展名
+    for file in old_names:
+        signal_name, signal_ext = os.path.splitext(file)  # 分离文件名和扩展名
         names.append(signal_name)
         exts.append(signal_ext)
 
     front = []  # 前半部分文件名
     behind = []  # 后半部分文件名
-    for i in names:
-        part = i.split(split_char, maxsplit=1)  # 确保至多拆分成两个部分
-        f = part[0]
-        b = part[1] if len(part) > 1 else ''  # 处理没有第二部分的情况
+    for signal_name in names:
+        parts = signal_name.split(split_char, maxsplit=1)  # 将拆分的两个部分存放至列表parts中
+        f = parts[0]
+        b = parts[1] if len(parts) > 1 else ''  # 默认第二部分为空，用于处理无法拆分的文件名
         front.append(f)
         behind.append(b)
 
-    zipped_names = zip(front, behind, exts)  # 内容为[(front,behind,exts),...]
-    return zipped_names
+    return zip(front, behind, exts)
 
 
 def save_new_rule(new_rule, config_path):

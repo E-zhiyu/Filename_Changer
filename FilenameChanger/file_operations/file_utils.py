@@ -79,14 +79,13 @@ def generate_new_name(rule, old_names):
     new_names = []
     for i in zipped_names:
         f, b, e = i  # 解包压缩的文件名
-
         # 去除前后空格
-        if f != '':
-            if f[0] == ' ':
-                f = f[1:]
-            if f[-1] == ' ':
-                f = f[:-1]
-        if b != '':
+
+        if f[0] == ' ':
+            f = f[1:]
+        if f[-1] == ' ':
+            f = f[:-1]
+        if b:
             if b[0] == ' ':
                 b = b[1:]
             if b[-1] == ' ':

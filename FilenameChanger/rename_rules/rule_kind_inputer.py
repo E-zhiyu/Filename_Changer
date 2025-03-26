@@ -11,31 +11,17 @@ def input_new_rule(config_path):
     功能：提示用户输入规则
     :param config_path: 配置文件路径
     """
-
-    class OptionError(Exception):
-        def __init__(self, value):
-            self.value = value
-
     all_rule_types = """
 【1】交换特定符号前后内容
     """
-    # 验证规则种类合法性
-    legal_type = [1]  # 合法的种类值列表
-
-    try:
-        print('规则写入'.center(42, '—'))
-        print('以下为所有规则类型')
-        print(all_rule_types)
-        rule_type = int(input('请选择：'))
-        if rule_type not in legal_type:
-            raise OptionError(rule_type)
-    except OptionError as e:
-        print('【选择错误】你选择了不存在的操作，错误值：', e.value, sep='')
-
+    print('规则写入'.center(42, '—'))
+    print('以下为所有规则类型')
+    print(all_rule_types)
+    rule_type = int(input('请选择：'))
     if rule_type == 1:
         input_mode_1(config_path)
-    elif rule_type == 2:
-        pass
+    else:
+        print('【选择错误】你选择了一个不存在的操作！')
 
 
 def input_mode_1(config_path):
