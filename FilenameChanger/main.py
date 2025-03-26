@@ -14,14 +14,14 @@ config_path = './rename_rules/rename_rules.json'  # 重命名规则文件路径
 
 
 def main():
-    print_welcome(version, author)
-    while True:
-        print('操作选择'.center(42, '—'))
-        all_options="""
+    all_options = """
 【0】结束该程序
 【1】文件重命名
 【2】写入规则
-"""
+    """
+    print_welcome(version, author)
+    while True:
+        print('操作选择'.center(42, '—'))
         print(all_options)
         option = int(input('请选择：'))
         if option == 0:
