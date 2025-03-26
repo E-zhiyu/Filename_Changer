@@ -9,7 +9,6 @@ import time
 """
 version = "1.0.0"
 author = 'GitHub@E-zhiyu'
-
 config_path = './rename_rules/rename_rules.json'  # 重命名规则文件路径
 
 

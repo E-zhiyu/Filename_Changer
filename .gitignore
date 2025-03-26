@@ -5,3 +5,4 @@ main.spec
 dist
 build
 docs/Bugs.md
+filenamechanger.egg-info
