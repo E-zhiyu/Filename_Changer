@@ -4,3 +4,4 @@ FilenameChanger/rename_rules/rename_rules.json
 main.spec
 dist
 build
+docs/Bugs.md

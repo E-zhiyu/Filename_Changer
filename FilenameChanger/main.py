@@ -45,8 +45,9 @@ def Rename():
         return
 
     directory = get_directory()  # 获取目标路径
-
     old_names = get_files_in_directory(directory)  # old_file_names列表将包含该目录下所有文件的文件名（包含扩展名）
+    if not old_names:
+        return
     new_names = generate_new_name(rule, old_names)  # 生成新文件名
 
     if confirm_to_rename():  # 用户确认重命名后再执行

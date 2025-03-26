@@ -1,11 +1,11 @@
 # file_operations/file_utils.py
-from os import stat
-import platform
+import platform  # 判断系统类型
+import stat  # 判断文件属性
 
 from FilenameChanger.rename_rules.rule_manager import *
 
 """
-文件操作模块
+功能：实现对文件的操作
 """
 
 
@@ -16,9 +16,8 @@ def is_hidden_or_is_protected(directory):
     :return: 是否为需要排除的文件文件（布尔值）
     """
     name = os.path.basename(directory)
-    if name.startswith('.'):
+    if name.startswith('.'):  # 若文件名以'.'开头则直接判断为隐藏文件
         return True
-
     if platform.system() == 'Windows':
         try:
             # 获取 Windows 文件属性标志位

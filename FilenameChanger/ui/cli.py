@@ -1,24 +1,24 @@
 # ui/cli.py
 import os
 
-from FilenameChanger.main import version
-
 """
 此模块负责在命令行窗口与用户交互
 """
 
-def print_welcome(version,author):
+
+def print_welcome(version, author):
     """
     功能：打印程序打开时的提示语
     """
-    title='文件名管理器'
-    welcom_mes=f"""
+    title = '文件名管理器'
+    welcom_mes = f"""
   版本：{version}
   作者：{author}
   欢迎使用本程序！本程序能够帮助您更加便捷地管理文件名。
     """
-    print(title.center(42,'—'))
+    print(title.center(42, '—'))
     print(welcom_mes)
+
 
 def confirm_to_rename():
     """
