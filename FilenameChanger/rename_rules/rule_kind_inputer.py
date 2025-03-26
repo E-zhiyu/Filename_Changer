@@ -21,7 +21,10 @@ def input_new_rule(config_path):
     try:
         print('规则写入'.center(42,'—'))
         print('以下为所有规则类型')
-        print('【1】交换特定符号前后内容')
+        all_rule_types="""
+【1】交换特定符号前后内容
+"""
+        print(all_rule_types)
         rule_type = int(input('请选择：'))
         if rule_type not in legal_type:
             raise TypeLegalityError(rule_type)

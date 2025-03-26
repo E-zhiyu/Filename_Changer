@@ -17,8 +17,13 @@ def main():
     print_welcome(version, author)
     while True:
         print('操作选择'.center(42, '—'))
-        print('【0】结束该程序 【1】文件重命名 【2】写入规则')
-        option = int(input('请选择操作：'))
+        all_options="""
+【0】结束该程序
+【1】文件重命名
+【2】写入规则
+"""
+        print(all_options)
+        option = int(input('请选择：'))
         if option == 0:
             break
         elif option == 1:
@@ -29,7 +34,7 @@ def main():
             print('请选择有效的操作')
 
     print('程序已退出……')
-    time.sleep(1)
+    time.sleep(0.5)
 
 
 # 功能：文件重命名
