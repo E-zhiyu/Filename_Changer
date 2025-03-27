@@ -52,7 +52,6 @@ def get_directory():
     """
     while True:
         directory = input('请输入文件夹路径\n')
-        logger.info(f'输入路径“{directory}”')
 
         # 去除前后双引号（如果有）
         if directory[0] == '\"':
@@ -60,6 +59,7 @@ def get_directory():
         if directory[-1] == '\"':
             directory = directory[:-1]
         directory = r''.join(list(directory))
+        logger.info(f'输入路径“{directory}”')
 
         # 路径有效性的异常处理
         try:
