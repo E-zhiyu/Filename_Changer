@@ -1,6 +1,7 @@
 # config/rule_manager.py
 import json
 import os
+from FilenameChanger.log.log_recorder import *
 
 """
 规则文件模块：控制所有有关命名规则文件的操作
@@ -14,8 +15,10 @@ def load_config(config_path):
     """
     try:
         with open(config_path, 'r', encoding='utf-8') as f:
+            logger.info('规则配置加载成功')
             return json.load(f)
     except FileNotFoundError:
+        logger.error('规则配置加载失败')
         return None
 
 
@@ -59,3 +62,4 @@ def save_new_rule(new_rule, config_path):
         with open(config_path, 'w', encoding='utf-8') as f:
             json.dump(new_rule, f, ensure_ascii=False, indent=4)
         print('规则写入成功！')
+    logger.info('规则写入成功')

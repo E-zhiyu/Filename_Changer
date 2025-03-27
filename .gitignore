@@ -4,5 +4,6 @@ FilenameChanger/rename_rules/rename_rules.json
 main.spec
 dist
 build
-docs/Bugs.md
+FilenameChanger/docs/Bugs.md
 filenamechanger.egg-info
+FilenameChanger/log/app.log

@@ -24,9 +24,11 @@ def is_hidden_or_is_protected(directory):
             attrs = os.stat(directory).st_file_attributes
             # 检查是否隐藏（0x2）或系统文件（0x4）
             if attrs & (stat.FILE_ATTRIBUTE_HIDDEN | stat.FILE_ATTRIBUTE_SYSTEM):
+                logger.debug(f'排除隐藏文件或系统文件：“{directory}”')
                 return True
-            # 可选：排除只读文件（0x1）
+            # 排除只读文件（0x1）
             if attrs & stat.FILE_ATTRIBUTE_READONLY:
+                logger.debug(f'排除只读文件：{directory}')
                 return True
         except (AttributeError, OSError):
             pass  # 非 Windows 或文件不可访问
@@ -42,9 +44,11 @@ def get_files_in_directory(directory):
         old_name = [f for f in os.listdir(directory) if
                     os.path.isfile(os.path.join(directory, f)) and not is_hidden_or_is_protected(
                         os.path.join(directory, f))]
+        logger.info('文件名获取成功')
         if not old_name:
             raise FileNotFoundError
     except FileNotFoundError:
+        logger.error('文件名获取失败')
         print(f'【错误】“{directory}”为空！')
     else:
         return old_name
@@ -58,13 +62,16 @@ def rename_files(directory, old_name, new_name):
     :param new_name:新文件名
     """
     if old_name == new_name:
+        logger.info(f'【无法拆分】{old_name}')
         print(f'【无法拆分】{old_name}')
     else:
         try:
             os.rename(os.path.join(directory, old_name), os.path.join(directory, new_name))
         except FileNotFoundError:
+            logger.error(f'【错误】文件“{old_name}”不存在！')
             print(f'【错误】文件“{old_name}”不存在！')
         else:
+            logger.info(f'【成功】{old_name} -> {new_name}')
             print(f'【成功】{old_name} -> {new_name}')
 
 
@@ -78,8 +85,8 @@ def generate_new_name(rule, old_names):
     new_names = []
     for i in zipped_names:
         f, b, e = i  # 解包压缩的文件名
-        # 去除前后空格
 
+        # 去除前后空格
         if f[0] == ' ':
             f = f[1:]
         if f[-1] == ' ':
@@ -94,4 +101,5 @@ def generate_new_name(rule, old_names):
             new = f + e  # 若没有第二部分文件名则保持原状
         new_names.append(new)  # 将新名字并入新文件名列表
 
+    logger.info('生成新文件名列表')
     return new_names

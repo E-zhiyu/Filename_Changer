@@ -1,5 +1,6 @@
 # ui/cli.py
 import os
+from FilenameChanger.log.log_recorder import *
 
 """
 此模块负责在命令行窗口与用户交互
@@ -36,8 +37,10 @@ def confirm_to_rename():
     while True:
         option = input('请输入：')
         if option == 'Y' or option == 'y':
+            logger.info('用户确认操作')
             return True
         elif option == 'N':
+            logger.info('用户取消操作')
             return False
         else:
             print('请输入Y或者N！')
@@ -49,6 +52,7 @@ def get_directory():
     """
     while True:
         directory = input('请输入文件夹路径\n')
+        logger.info(f'输入路径“{directory}”')
 
         # 去除前后双引号（如果有）
         if directory[0] == '\"':

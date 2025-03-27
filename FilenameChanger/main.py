@@ -4,6 +4,10 @@ from FilenameChanger.file_operations.file_utils import *
 from FilenameChanger.rename_rules.rule_kind_inputer import *
 import time
 
+from FilenameChanger.log.log_recorder import *
+
+logger = logging.getLogger(__name__)
+
 """
 程序主模块
 """
@@ -13,6 +17,7 @@ config_path = './rename_rules/rename_rules.json'  # 重命名规则文件路径
 
 
 def main():
+    logger.info('程序启动')
     all_options = """
 【0】结束该程序
 【1】文件重命名
@@ -26,12 +31,15 @@ def main():
         if option == 0:
             break
         elif option == 1:
+            logger.info('选择操作：文件重命名')
             Rename()
         elif option == 2:
+            logger.info('选择操作：写入规则')
             input_new_rule(config_path)  # 输入新规则
         else:
             print('请选择有效的操作')
 
+    logger.info('程序已退出')
     print('程序已退出……')
     time.sleep(0.5)
 
@@ -53,6 +61,8 @@ def Rename():
         print('文件重命名记录'.center(42, '—'))
         for old, new in zip(old_names, new_names):
             rename_files(directory, old, new)  # 执行重命名操作
+    print('文件重命名完成！')
+    print('最新日志已存放至log文件夹！')
 
 
 if __name__ == '__main__':
