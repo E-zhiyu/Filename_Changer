@@ -21,21 +21,23 @@ def main():
     all_options = """
 【0】结束该程序
 【1】文件重命名
-【2】写入规则
+【2】规则设置
     """
     print_welcome(version, author)
     while True:
-        print('操作选择'.center(42, '—'))
+        print('主菜单'.center(42, '—'))
         print(all_options)
         option = int(input('请选择：'))
         if option == 0:
             break
         elif option == 1:
             logger.info('选择操作：文件重命名')
-            Rename()
+            print('操作：文件重命名'.center(42, '—'))
+            rename()
         elif option == 2:
-            logger.info('选择操作：写入规则')
-            input_new_rule(config_path)  # 输入新规则
+            print('操作：规则配置'.center(42, '—'))
+            logger.info('选择操作：规则设置')
+            configure_rules()
         else:
             print('请选择有效的操作')
 
@@ -45,10 +47,10 @@ def main():
 
 
 # 功能：文件重命名
-def Rename():
+def rename():
     all_rules = load_config(config_path)  # 加载已保存的规则
     if not all_rules['rules']:  # 若规则为空，则结束本函数
-        print('规则为空，请先写入规则！')
+        print('规则为空，请先前往规则设置写入规则！')
         return
 
     directory = get_directory()  # 获取目标路径
@@ -63,6 +65,30 @@ def Rename():
             rename_files(directory, old, new)  # 执行重命名操作
     print('文件重命名完成！')
     print('最新日志已存放至log文件夹！')
+
+
+# 功能：进行规则设置
+def configure_rules():
+    usable_options = """
+【0】回到上一步
+【1】写入新规则
+【2】查看规则
+【3】删除规则
+"""
+    print(usable_options)
+    option = int(input('请选择：'))
+    if option == 0:
+        logger.info('选择操作：回到上一步')
+        return
+    elif option == 1:
+        logger.info('选择操作：写入新规则')
+        set_new_rule(config_path)
+    elif option == 2:
+        logger.info('选择操作：查看规则')
+        list_rules(config_path)
+    elif option == 3:
+        logger.info('选择操作：删除规则')
+        pass
 
 
 if __name__ == '__main__':

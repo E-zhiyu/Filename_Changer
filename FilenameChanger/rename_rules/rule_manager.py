@@ -11,6 +11,7 @@ from FilenameChanger.log.log_recorder import *
 def load_config(config_path):
     """
     功能：加载配置文件
+    参数 config_path：配置文件路径
     返回：json文件内容
     """
     try:
@@ -28,6 +29,8 @@ def load_config(config_path):
 def analysis_rules(all_rules, old_names):
     """
     功能：解析重命名规则并分割文件名
+    参数 all_rules：规则配置文件根字典
+    参数 ole_names：目标路径中扫描出的文件名
     返回：被分割文件名的前后部分
     """
     selected_index = all_rules['selected_index']  # 获取被选区的规则的索引
@@ -54,8 +57,9 @@ def analysis_rules(all_rules, old_names):
 def save_new_rule(all_rules, new_rule, config_path):
     """
     功能：保存用户输入的规则
-    :param new_rule:新规则列表
-    :param config_path:规则文件路径
+    参数 all_rules：规则配置文件根字典
+    参数 new_rule：新规则列表
+    参数 config_path：规则文件路径
     """
     all_rules['num'] += 1
     all_rules['rules'].append(new_rule)  # 将新规则并入现有的规则
@@ -69,6 +73,7 @@ def save_new_rule(all_rules, new_rule, config_path):
 def init_json(config_path):
     """
     功能：在没有规则文件或者规则文件为空的前提下初始化规则文件
+    参数 config_path：规则配置文件路径
     """
     inited_rules = {'num': 0, 'selected_index': 0, 'rules': []}
     os.makedirs(os.path.dirname(config_path), exist_ok=True)  # 先创建规则文件目录
@@ -80,8 +85,8 @@ def init_json(config_path):
 
 def get_the_function(all_rules):
     """
-    功能：判断规则种类
-    :param all_rules:规则文件的所有内容
+    功能：判断规则种类，获取其功能并返回
+    参数 all_rules：规则配置文件根字典
     返回：关键功能参数
     """
 
@@ -93,3 +98,7 @@ def get_the_function(all_rules):
     if rule_type == 1:
         logger.info('已返回规则类型一的分隔符')
         return all_rules['rules'][selected_index]['split_char']
+
+
+def list_rules(config_path):
+    print('规则列表'.center(42, '—'))

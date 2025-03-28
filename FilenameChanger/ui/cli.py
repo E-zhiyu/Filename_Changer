@@ -10,6 +10,8 @@ from FilenameChanger.log.log_recorder import *
 def print_welcome(version, author):
     """
     功能：打印程序打开时的提示语
+    参数 version：程序版本
+    参数 author：作者昵称
     """
     title = '文件名管理器'
     welcom_mes = f"""
@@ -24,7 +26,7 @@ def print_welcome(version, author):
 def confirm_to_rename():
     """
     功能：提示操作的风险并确认用户操作
-    return:是否进行下一步操作（布尔值）
+    返回：是否进行下一步操作（布尔值）
     """
     warning = """
   【警告】文件重命名可能伴随以下风险
@@ -48,7 +50,7 @@ def confirm_to_rename():
 
 def get_directory():
     """
-    功能：获取目标路径
+    功能：提示用户输入目标路径
     """
     while True:
         directory = input('请输入文件夹路径\n')

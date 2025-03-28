@@ -12,8 +12,8 @@ from FilenameChanger.rename_rules.rule_manager import *
 def is_hidden_or_is_protected(directory):
     """
     功能：获取目标路径下的所有隐藏文件（支持Windows隐藏属性）和受保护（系统文件和只读文件）的文件名
-    :param directory: 目标路径
-    :return: 是否为需要排除的文件文件（布尔值）
+    参数 directory：目标路径
+    返回：是否为需要排除的文件文件（布尔值）
     """
     name = os.path.basename(directory)
     if name.startswith('.'):  # 若文件名以'.'开头则直接判断为隐藏文件
@@ -37,8 +37,9 @@ def is_hidden_or_is_protected(directory):
 
 def get_files_in_directory(directory):
     """
-    :param directory: 目标路径
-    :return: 旧文件名列表
+    功能：扫描目标路径的所有文件名
+    参数 directory：目标路径
+    返回：旧文件名列表
     """
     try:
         old_name = [f for f in os.listdir(directory) if
@@ -57,9 +58,9 @@ def get_files_in_directory(directory):
 def rename_files(directory, old_name, new_name):
     """
     功能：执行重命名操作并显示重命名结果
-    :param directory:目标文件夹
-    :param old_name:旧文件名
-    :param new_name:新文件名
+    参数 directory：目标文件夹
+    参数 old_name：旧文件名
+    参数 new_name：新文件名
     """
     if old_name == new_name:
         logger.info(f'【无法拆分】{old_name}')
@@ -78,6 +79,8 @@ def rename_files(directory, old_name, new_name):
 def generate_new_name(all_rules, old_names):
     """
     功能：根据已加载的规则生成新文件名
+    参数 all_rules：规则配置文件根字典
+    参数 old_names：旧文件名列表
     返回：新文件名列表
     """
     split_char = get_the_function(all_rules)

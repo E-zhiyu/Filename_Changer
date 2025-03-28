@@ -7,10 +7,10 @@ from FilenameChanger.log.log_recorder import *
 """
 
 
-def input_new_rule(config_path):
+def set_new_rule(config_path):
     """
     功能：提示用户输入规则
-    :param config_path: 配置文件路径
+    参数 config_path：配置文件路径
     """
     all_rule_types = """
 【1】交换特定符号前后内容
@@ -28,8 +28,9 @@ def input_new_rule(config_path):
 
 def input_mode_1(config_path):
     """
-    规则种类：拆分特定分隔符前后的文件名并交换
-    :param config_path: 配置文件路径
+    功能：输入规则并保存
+    规则种类一：拆分特定分隔符前后的文件名并交换
+    参数 config_path：配置文件路径
     """
     all_rules = load_config(config_path)  # 获取现有的规则
 
