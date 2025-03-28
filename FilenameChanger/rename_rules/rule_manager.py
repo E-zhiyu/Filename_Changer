@@ -100,5 +100,62 @@ def get_the_function(all_rules):
         return all_rules['rules'][selected_index]['split_char']
 
 
-def list_rules(config_path):
-    print('规则列表'.center(42, '—'))
+def display_rules(config_path, simple=False):
+    """
+    功能：展示所有规则（类型、名称、描述等）
+    参数 config_path：规则配置文件路径
+    """
+    print('规则列表'.center(40, '—'))
+    all_rules = load_config(config_path)  # 加载规则配置文件
+
+    count = 0
+    for a_rule in all_rules['rules']:
+        count += 1
+        if not simple:
+            print(f'规则{count}'.center(42))
+        else:
+            print(f'规则{count}', end='')
+
+        for key, value in a_rule.items():
+            if key == 'type' and simple is False:
+                key = '规则种类'
+            elif key == 'rule_name':
+                if simple is False:
+                    key = '规则名称'
+                else:
+                    key = ''  # 简化模式输出不需要提示这是规则名称
+            elif key == 'desc' and simple is False:
+                key = '规则描述'
+            else:
+                continue  # 若key为其他值则跳过
+            print(key, value, sep='：')
+
+
+def del_rules(config_path):
+    """
+    功能：删除指定的规则
+    参数 config_path：规则配置文件路径
+    """
+    all_rules = load_config(config_path)
+    if all_rules['num'] == 1:
+        logger.error('无法移除最后一个规则')
+        print('无法删除最后一个规则！')
+        return
+    else:
+        while True:
+            display_rules(config_path, simple=True)  # 以简单模式列出所有规则
+            option = int(input('\n需要删除第几个规则？（输入-1取消删除）\n'))
+            if option == -1:
+                logger.info('用户取消删除规则')
+                print('已取消规则删除。')
+                return
+            elif option <= 0 or option > all_rules['num']:
+                print('请在可选范围内输入！')
+            else:
+                logger.info(f'用户删除第{option}个规则')
+                all_rules['num'] -= 1
+                del all_rules['rules'][option - 1]
+                with open(config_path, 'w', encoding='utf-8') as f:
+                    json.dump(all_rules, f, ensure_ascii=False, indent=4)
+                print(f'规则{option}已删除！')
+                return

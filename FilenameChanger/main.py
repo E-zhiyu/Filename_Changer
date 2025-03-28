@@ -85,10 +85,10 @@ def configure_rules():
         set_new_rule(config_path)
     elif option == 2:
         logger.info('选择操作：查看规则')
-        list_rules(config_path)
+        display_rules(config_path)
     elif option == 3:
         logger.info('选择操作：删除规则')
-        pass
+        del_rules(config_path)
 
 
 if __name__ == '__main__':
