@@ -31,13 +31,15 @@ def input_mode_1(config_path):
     规则种类：拆分特定分隔符前后的文件名并交换
     :param config_path: 配置文件路径
     """
+    all_rules = load_config(config_path)  # 获取现有的规则
+
     split_rule = {}  # 创建文件名分割规则字典
     split_rule['type'] = 1
     split_rule['rule_name'] = input('请输入规则名称：')
-    logger.info(f'输入规则名称：{split_rule["rule_name"]}')
+    logger.info(f'输入规则名称：“{split_rule["rule_name"]}”')
     split_rule['desc'] = input('请输入规则描述：')
-    logger.info(f'输入规则描述：{split_rule["desc"]}')
+    logger.info(f'输入规则描述：“{split_rule["desc"]}”')
     split_rule['split_char'] = input('请输入分隔符：')
-    logger.info(f'输入分隔符：{split_rule["split_char"]}')
+    logger.info(f'输入分隔符：“{split_rule["split_char"]}”')
 
-    save_new_rule(split_rule, config_path)  # 保存输入的规则
+    save_new_rule(all_rules, split_rule, config_path)  # 保存输入的规则

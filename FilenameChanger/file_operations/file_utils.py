@@ -44,11 +44,11 @@ def get_files_in_directory(directory):
         old_name = [f for f in os.listdir(directory) if
                     os.path.isfile(os.path.join(directory, f)) and not is_hidden_or_is_protected(
                         os.path.join(directory, f))]
-        logger.info('文件名获取成功')
+        logger.info('文件名列表获取成功')
         if not old_name:
             raise FileNotFoundError
     except FileNotFoundError:
-        logger.error('文件名获取失败')
+        logger.error('目标路径为空，文件名列表获取失败')
         print(f'【错误】“{directory}”为空！')
     else:
         return old_name
@@ -75,13 +75,13 @@ def rename_files(directory, old_name, new_name):
             print(f'【成功】{old_name} -> {new_name}')
 
 
-def generate_new_name(rule, old_names):
+def generate_new_name(all_rules, old_names):
     """
     功能：根据已加载的规则生成新文件名
     返回：新文件名列表
     """
-    split_char = rule['split_char']
-    zipped_names = analysis_rules(rule, old_names)
+    split_char = get_the_function(all_rules)
+    zipped_names = analysis_rules(all_rules, old_names)
     new_names = []
     for i in zipped_names:
         f, b, e = i  # 解包压缩的文件名
@@ -101,5 +101,5 @@ def generate_new_name(rule, old_names):
             new = f + e  # 若没有第二部分文件名则保持原状
         new_names.append(new)  # 将新名字并入新文件名列表
 
-    logger.info('生成新文件名列表')
+    logger.info('已生成新文件名列表')
     return new_names

@@ -46,8 +46,8 @@ def main():
 
 # 功能：文件重命名
 def Rename():
-    rule = load_config(config_path)  # 加载已保存的规则
-    if not rule:  # 若规则为空，则结束本函数
+    all_rules = load_config(config_path)  # 加载已保存的规则
+    if not all_rules['rules']:  # 若规则为空，则结束本函数
         print('规则为空，请先写入规则！')
         return
 
@@ -55,7 +55,7 @@ def Rename():
     old_names = get_files_in_directory(directory)  # old_file_names列表将包含该目录下所有文件的文件名（包含扩展名）
     if not old_names:
         return
-    new_names = generate_new_name(rule, old_names)  # 生成新文件名
+    new_names = generate_new_name(all_rules, old_names)  # 生成新文件名
 
     if confirm_to_rename():  # 用户确认重命名后再执行
         print('文件重命名记录'.center(42, '—'))

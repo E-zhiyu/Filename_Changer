@@ -64,8 +64,10 @@ def get_directory():
         # 路径有效性的异常处理
         try:
             if os.path.isdir(directory):
+                logger.info('路径有效，进行下一步操作')
                 return directory
             else:
                 print(f'“{directory}”不是有效的路径，请重新输入！')
+                logger.info('路径无效，已提示用户重新输入')
         except Exception as e:
             print(f'发生错误{e}，请重新输入！')
