@@ -31,9 +31,9 @@ def confirm_to_rename():
     """
     warning = """
   【警告】文件重命名可能伴随以下风险
-  1.某些应用程序由于路径依赖无法定位重命名后的文件
-  2.批量重命名可能影响该文件夹内的隐藏文件和受保护的文件
-  3.受限于程序的功能，目前重命名操作不可逆！
+  1.某些应用程序由于路径依赖无法定位重命名后的文件。
+  2.如果文件夹内有您不想重命名的文件，它也会被重命名！
+  3.目前重命名操作不可撤销！
     """
     print(warning)
     print('\n确认要重命名吗？（Y/N）')
@@ -138,6 +138,7 @@ def configure_rules(config_path):
 【1】写入新规则
 【2】查看规则
 【3】删除规则
+【4】切换规则
 """
     print(usable_options)
     do_cycle = True  # 控制是否重新要求用户输入
@@ -161,3 +162,6 @@ def configure_rules(config_path):
     elif user_option == 3:
         logger.info('选择操作：删除规则')
         del_rules(config_path)
+    elif user_option == 4:
+        logger.info('选择操作：切换规则')
+        switch_rule(config_path)

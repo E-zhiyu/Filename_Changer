@@ -131,8 +131,9 @@ def display_rules(config_path, simple=False):
                 continue  # 若key为其他值则跳过
             print(key, value, sep='：')
 
-    if simple is False:  # 如果是简单模式则不用暂停
+    if simple is False:  # 以下内容简单模式不显示
         print(f'\n共计{count}个规则。')
+        print(f'当前加载的规则：规则{all_rules["selected_index"] + 1}')
         print('按回车键继续……')
         os.system('pause>nul')
 
@@ -155,7 +156,7 @@ def del_rules(config_path):
                 if option == -1:
                     logger.info('用户取消删除规则')
                     print('已取消规则删除。')
-                    return
+                    return  # 结束函数跳出死循环
                 elif option <= 0 or option > all_rules['num']:
                     raise ValueError
                 else:
@@ -165,6 +166,32 @@ def del_rules(config_path):
                     with open(config_path, 'w', encoding='utf-8') as f:
                         json.dump(all_rules, f, ensure_ascii=False, indent=4)
                     print(f'规则{option}已删除！')
-                    return
+                    return  # 结束函数跳出死循环
             except ValueError:
                 print('请选择一个有效的规则！')
+
+
+def switch_rule(config_path):
+    """
+    功能：切换需要加载的规则
+    参数 config_path：规则配置文件路径
+    """
+    all_rules = load_config(config_path)
+    display_rules(config_path, simple=True)
+    while True:
+        try:
+            user_option = int(input('\n请选择一个规则（输入-1取消操作）：'))
+            if user_option == -1:
+                logger.info('用户取消切换规则')
+                return  # 结束函数跳出死循环
+            elif user_option <= 0 or user_option > all_rules['num']:
+                raise ValueError
+            else:
+                print(f'已切换至规则{user_option}！')
+                logger.info(f'用户切换至规则{user_option}')
+                all_rules['selected_index'] = user_option - 1
+                with open(config_path, 'w', encoding='utf-8') as f:
+                    json.dump(all_rules, f, ensure_ascii=False, indent=4)
+                return  # 结束函数跳出死循环
+        except ValueError:
+            print('请选择一个有效的规则！')
