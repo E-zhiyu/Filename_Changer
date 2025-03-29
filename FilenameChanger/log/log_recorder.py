@@ -1,7 +1,6 @@
 # FilenameChanger/log/log_recorder.py
 import logging
 
-logger = logging.getLogger(__name__)
 """
 日志记录模块
 """
@@ -13,3 +12,5 @@ logging.basicConfig(
     filemode='a',
     encoding='utf-8'
 )
+
+logger = logging.getLogger(__name__)

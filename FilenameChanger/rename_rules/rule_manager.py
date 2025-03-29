@@ -157,10 +157,17 @@ def del_rules(config_path):
                     logger.info('用户取消删除规则')
                     print('已取消规则删除。')
                     return  # 结束函数跳出死循环
-                elif option <= 0 or option > all_rules['num']:
+                elif option <= 0 or option > all_rules['num']:  # 确保输入有效值
                     raise ValueError
                 else:
                     logger.info(f'用户删除第{option}个规则')
+
+                    # 判断删除的规则是否被选中，删除被选中的规则则改为选中第一个规则
+                    if all_rules['selected_index'] == option - 1 and option != 1:  # 当删除第一个规则时仍然默认选中规则1
+                        logger.info(f'第{option}个规则为选中的规则，已更改至删除后的第一个规则')
+                        print(f'第{option}个规则是选中的规则，已更改至第一个规则！')
+                        all_rules['selected_index'] = 0
+
                     all_rules['num'] -= 1
                     del all_rules['rules'][option - 1]
                     with open(config_path, 'w', encoding='utf-8') as f:

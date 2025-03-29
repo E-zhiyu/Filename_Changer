@@ -1,7 +1,7 @@
 # main.py
 import time
 from FilenameChanger.ui.cli import *
-from FilenameChanger import version, author, config_path
+from FilenameChanger import version, author
 
 """
 程序主模块
