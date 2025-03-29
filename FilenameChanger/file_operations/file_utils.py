@@ -86,9 +86,7 @@ def generate_new_name(all_rules, old_names):
     split_char = get_the_function(all_rules)
     zipped_names = analysis_rules(all_rules, old_names)
     new_names = []
-    for i in zipped_names:
-        f, b, e = i  # 解包压缩的文件名
-
+    for f, b, e in zipped_names:
         # 去除前后空格
         if f[0] == ' ':
             f = f[1:]
