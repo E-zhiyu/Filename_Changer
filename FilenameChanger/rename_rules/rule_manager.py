@@ -22,7 +22,7 @@ def load_config(config_path):
         logger.info('未找到配置文件，正在创建并初始化……')
         init_json(config_path)
         with open(config_path, 'r', encoding='utf-8') as f:
-            logger.info('成功读取初始化的规则配置')
+            logger.info('规则配置已初始化并成功读取')
             return json.load(f)
 
 
@@ -104,6 +104,7 @@ def display_rules(config_path, simple=False):
     """
     功能：展示所有规则（类型、名称、描述等）
     参数 config_path：规则配置文件路径
+    参数 simple：是否以简单模式输出规则
     """
     print('规则列表'.center(40, '—'))
     all_rules = load_config(config_path)  # 加载规则配置文件
@@ -123,12 +124,17 @@ def display_rules(config_path, simple=False):
                 if simple is False:
                     key = '规则名称'
                 else:
-                    key = ''  # 简化模式输出不需要提示这是规则名称
+                    key = ''  # 简单模式输出不需要提示这是规则名称
             elif key == 'desc' and simple is False:
                 key = '规则描述'
             else:
                 continue  # 若key为其他值则跳过
             print(key, value, sep='：')
+
+    if simple is False:  # 如果是简单模式则不用暂停
+        print(f'\n共计{count}个规则。')
+        print('按回车键继续……')
+        os.system('pause>nul')
 
 
 def del_rules(config_path):
@@ -142,20 +148,23 @@ def del_rules(config_path):
         print('无法删除最后一个规则！')
         return
     else:
+        display_rules(config_path, simple=True)  # 以简单模式列出所有规则
         while True:
-            display_rules(config_path, simple=True)  # 以简单模式列出所有规则
-            option = int(input('\n需要删除第几个规则？（输入-1取消删除）\n'))
-            if option == -1:
-                logger.info('用户取消删除规则')
-                print('已取消规则删除。')
-                return
-            elif option <= 0 or option > all_rules['num']:
-                print('请在可选范围内输入！')
-            else:
-                logger.info(f'用户删除第{option}个规则')
-                all_rules['num'] -= 1
-                del all_rules['rules'][option - 1]
-                with open(config_path, 'w', encoding='utf-8') as f:
-                    json.dump(all_rules, f, ensure_ascii=False, indent=4)
-                print(f'规则{option}已删除！')
-                return
+            try:
+                option = int(input('\n请选择（输入-1取消操作）：\n'))
+                if option == -1:
+                    logger.info('用户取消删除规则')
+                    print('已取消规则删除。')
+                    return
+                elif option <= 0 or option > all_rules['num']:
+                    raise ValueError
+                else:
+                    logger.info(f'用户删除第{option}个规则')
+                    all_rules['num'] -= 1
+                    del all_rules['rules'][option - 1]
+                    with open(config_path, 'w', encoding='utf-8') as f:
+                        json.dump(all_rules, f, ensure_ascii=False, indent=4)
+                    print(f'规则{option}已删除！')
+                    return
+            except ValueError:
+                print('请选择一个有效的规则！')

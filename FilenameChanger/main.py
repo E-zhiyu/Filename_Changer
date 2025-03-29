@@ -27,7 +27,13 @@ def main():
     while True:
         print('主菜单'.center(42, '—'))
         print(all_options)
-        option = int(input('请选择：'))
+
+        try:
+            option = int(input('请选择：'))
+        except ValueError:  # 防止没有输入内容
+            print('请选择一个操作！')
+            continue
+
         if option == 0:
             break
         elif option == 1:
@@ -76,7 +82,15 @@ def configure_rules():
 【3】删除规则
 """
     print(usable_options)
-    option = int(input('请选择：'))
+    cycle = True
+    while cycle:
+        try:
+            option = int(input('请选择：'))
+            cycle = False
+        except ValueError:  # 防止没有输入操作
+            print('请选择一个操作！')
+            continue
+
     if option == 0:
         logger.info('选择操作：回到上一步')
         return

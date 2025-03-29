@@ -1,4 +1,6 @@
 # FilenameChanger/rename_rules/rule_kind_inputer.py
+from itertools import cycle
+
 from FilenameChanger.rename_rules.rule_manager import *
 from FilenameChanger.log.log_recorder import *
 
@@ -18,7 +20,15 @@ def set_new_rule(config_path):
     print('规则写入'.center(42, '—'))
     print('以下为所有规则类型')
     print(all_rule_types)
-    rule_type = int(input('请选择：'))
+
+    cycle = True
+    while cycle:
+        try:
+            rule_type = int(input('请选择：'))
+            cycle = False
+        except ValueError:  # 防止没有输入
+            print('请选择一个规则类型！')
+
     logger.info(f'用户选择规则类型{rule_type}')
     if rule_type == 1:
         input_mode_1(config_path)
