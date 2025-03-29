@@ -1,6 +1,4 @@
 # FilenameChanger/rename_rules/rule_kind_inputer.py
-from itertools import cycle
-
 from FilenameChanger.rename_rules.rule_manager import *
 from FilenameChanger.log.log_recorder import *
 
@@ -16,6 +14,8 @@ def set_new_rule(config_path):
     """
     all_rule_types = """
 【1】交换特定符号前后内容
+【2】更改文件名中特定字符串（开发中……）
+【3】批量修改文件扩展名（开发中……）
     """
     print('规则写入'.center(42, '—'))
     print('以下为所有规则类型')
@@ -24,7 +24,10 @@ def set_new_rule(config_path):
     cycle = True
     while cycle:
         try:
-            rule_type = int(input('请选择：'))
+            rule_type = int(input('请选择（输入-1取消）：'))
+            if rule_type == -1:
+                logger.info('用户取消写入规则')
+                return
             cycle = False
         except ValueError:  # 防止没有输入
             print('请选择一个规则类型！')
