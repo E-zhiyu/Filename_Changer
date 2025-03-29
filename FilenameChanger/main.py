@@ -1,19 +1,17 @@
 # main.py
-from FilenameChanger.ui.cli import *
+import time
+from FilenameChanger.log.log_recorder import *
 from FilenameChanger.file_operations.file_utils import *
 from FilenameChanger.rename_rules.rule_kind_inputer import *
-import time
-
-from FilenameChanger.log.log_recorder import *
-
-logger = logging.getLogger(__name__)
+from FilenameChanger.ui.cli import *
 
 """
 程序主模块
 """
-version = "1.0.0"
+version = "1.1.0"
 author = 'GitHub@E-zhiyu'
 config_path = './rename_rules/rename_rules.json'  # 重命名规则文件路径
+log_path = './log/app.log'  # 日志文件路径
 
 
 def main():

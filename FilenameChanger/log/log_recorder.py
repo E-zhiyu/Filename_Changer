@@ -1,4 +1,4 @@
-# FinlenameChanger/log/log_recorder.py
+# FilenameChanger/log/log_recorder.py
 import logging
 
 logger = logging.getLogger(__name__)
