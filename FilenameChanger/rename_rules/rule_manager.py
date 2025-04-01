@@ -122,6 +122,10 @@ def del_rules(config_dict):
                         print(f'第{option}个规则是选中的规则，已更改至第一个规则！')
                         config_dict['selected_index'] = 0
 
+                    # 若删除的规则下标小于选中的规则，则将selected_index-1
+                    if option - 1 < config_dict['selected_index']:
+                        config_dict['selected_index'] -= 1
+
                     config_dict['num'] -= 1
                     del config_dict['rules'][option - 1]
                     with open(config_path, 'w', encoding='utf-8') as f:
