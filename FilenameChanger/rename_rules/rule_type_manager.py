@@ -1,0 +1,147 @@
+# FilenameChanger/rename_rules/rule_type_manager.py
+from FilenameChanger.rename_rules.rule_manager import *
+from FilenameChanger.log.log_recorder import *
+
+"""
+根据规则种类采用不同写入和读取方式的模块
+"""
+
+
+def set_new_rule(config_dict):
+    """
+    功能：提示用户输入规则
+    参数 config_dict：配置文件根字典
+    """
+    all_rule_types = """
+【1】交换特定符号前后内容
+【2】批量修改文件扩展名
+【3】更改文件名中特定字符串（开发中……）
+    """
+    print('创建新规则'.center(42, '—'))
+    print('以下为所有规则类型')
+    print(all_rule_types)
+
+    cycle = True
+    while cycle:
+        try:
+            rule_type = int(input('请选择（输入-1取消）：'))
+            if rule_type == -1:
+                logger.info('用户取消写入规则')
+                return
+            cycle = False
+        except ValueError:  # 防止没有输入
+            print('请选择一个规则类型！')
+
+    logger.info(f'用户选择规则类型{rule_type}')
+    if rule_type == 1:
+        input_type_1(config_dict)
+    elif rule_type == 2:
+        input_type_2(config_dict)
+    else:
+        print('【选择错误】你选择了一个不存在的操作！')
+
+
+def input_type_1(config_dict):
+    """
+    功能：输入规则类型一并保存
+    规则类型：拆分特定分隔符前后的文件名并交换
+    参数 config_dict：配置文件根字典
+    """
+    new_rule_dict = {}  # 创建文件名分割规则字典
+    new_rule_dict['type'] = 1
+    new_rule_dict['rule_name'] = input('请输入规则名称：')
+    logger.info(f'输入规则名称：“{new_rule_dict["rule_name"]}”')
+    new_rule_dict['desc'] = input('请输入规则描述：')
+    logger.info(f'输入规则描述：“{new_rule_dict["desc"]}”')
+    new_rule_dict['split_char'] = input('请输入分隔符：')
+    logger.info(f'输入分隔符：“{new_rule_dict["split_char"]}”')
+
+    save_new_rule(config_dict, new_rule_dict)  # 保存输入的规则
+
+
+def use_type_1(config_dict, old_name_list):
+    """
+    功能：应用类型一的规则
+    参数 config_dict：配置文件根字典
+    参数 old_name_list：旧文件名列表
+    返回：生成的新文件名列表
+    """
+    selected_index = config_dict['selected_index']
+    split_char = config_dict['rules'][selected_index]['split_char']
+    name_list = []  # 文件名列表
+    ext_list = []  # 扩展名列表
+    for file in old_name_list:
+        signal_name, signal_ext = os.path.splitext(file)  # 分离文件名和扩展名
+        name_list.append(signal_name)
+        ext_list.append(signal_ext)
+
+    front = []  # 前半部分文件名
+    behind = []  # 后半部分文件名
+    for signal_name in name_list:
+        parts = signal_name.split(split_char, maxsplit=1)  # 将拆分的两个部分存放至列表parts中
+        f = parts[0]
+        b = parts[1] if len(parts) > 1 else ''  # 默认第二部分为空，用于处理无法拆分的文件名
+        front.append(f)
+        behind.append(b)
+    new_name_list = []
+    for f, b, e in zip(front, behind, ext_list):
+        # 去除前后空格
+        if f[0] == ' ':
+            f = f[1:]
+        if f[-1] == ' ':
+            f = f[:-1]
+        if b:
+            if b[0] == ' ':
+                b = b[1:]
+            if b[-1] == ' ':
+                b = b[:-1]
+            new = b + ' ' + split_char + ' ' + f + e  # 将f,b前后调换生成新文件名
+        else:
+            new = f + e  # 若没有第二部分文件名则保持原状
+        new_name_list.append(new)  # 将新名字并入新文件名列表
+
+    return new_name_list
+
+
+def input_type_2(config_dict):
+    """
+    功能：输入规则类型二并保存
+    规则类型：批量更改扩展名
+    参数 config_dict：配置文件根字典
+    """
+    new_rule_dict = {}
+    new_rule_dict['type'] = 2
+
+    new_rule_dict['rule_name'] = input('请输入规则名称：')
+    logger.info(f'输入规则名称：“{new_rule_dict["rule_name"]}”')
+    new_rule_dict['desc'] = input('请输入规则描述：')
+    logger.info(f'输入规则描述：“{new_rule_dict["desc"]}”')
+    new_rule_dict['new_ext'] = input('请输入新的文件扩展名：')
+    if new_rule_dict['new_ext'].startswith('.'):
+        new_rule_dict['new_ext'] = new_rule_dict['new_ext'][1:]  # 去除用户输入的“.”
+    logger.info(f'输入新文件扩展名：“{new_rule_dict["new_ext"]}”')
+
+    save_new_rule(config_dict, new_rule_dict)
+
+
+def use_type_2(config_dict, old_name_list):
+    """
+    功能：应用类型二的规则
+    参数 config_dict：配置文件根字典
+    参数 old_name_list：旧文件名列表
+    返回：生成的新文件名列表
+    """
+    selected_index = config_dict['selected_index']
+    new_ext = config_dict['rules'][selected_index]['new_ext']
+
+    name_list = []  # 文件名列表
+    for file in old_name_list:
+        signal_name = os.path.splitext(file)[0]  # 此规则不需要获取原来的扩展名
+        name_list.append(signal_name)
+
+    new_name_list = []
+    for signal_name in name_list:
+        new_name = signal_name + '.' + new_ext
+        new_name_list.append(new_name)
+
+    return new_name_list

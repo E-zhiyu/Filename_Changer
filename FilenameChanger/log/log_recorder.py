@@ -7,7 +7,7 @@ import logging
 
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(filename)s[line:%(lineno)d] - %(levelname)s: %(message)s',
+    format='%(asctime)s - [%(filename)s/%(levelname)s] : %(message)s',
     filename='./log/app.log',
     filemode='a',
     encoding='utf-8'

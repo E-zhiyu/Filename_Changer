@@ -3,6 +3,7 @@ import platform  # 判断系统类型
 import stat  # 判断文件属性
 
 from FilenameChanger.rename_rules.rule_manager import *
+from FilenameChanger.rename_rules.rule_type_manager import *
 
 """
 功能：实现对文件的操作
@@ -57,14 +58,14 @@ def get_files_in_directory(directory):
 
 def rename_files(directory, old_name, new_name):
     """
-    功能：执行重命名操作并显示重命名结果
+    功能：为单个文件重命名并显示结果
     参数 directory：目标文件夹
-    参数 old_name：旧文件名
-    参数 new_name：新文件名
+    参数 old_name：单个旧文件名
+    参数 new_name：单个新文件名
     """
     if old_name == new_name:
-        logger.info(f'【无法拆分】{old_name}')
-        print(f'【无法拆分】{old_name}')
+        logger.info(f'【未更改】{old_name}')
+        print(f'【未更改】{old_name}')
     else:
         try:
             os.rename(os.path.join(directory, old_name), os.path.join(directory, new_name))
@@ -76,31 +77,19 @@ def rename_files(directory, old_name, new_name):
             print(f'【成功】{old_name} -> {new_name}')
 
 
-def generate_new_name(all_rules, old_names):
+def get_new_name_list(config_dict, old_name_list):
     """
     功能：根据已加载的规则生成新文件名
-    参数 all_rules：规则配置文件根字典
-    参数 old_names：旧文件名列表
+    参数 config_dict：规则配置文件根字典
+    参数 old_name_list：旧文件名列表
     返回：新文件名列表
     """
-    split_char = get_the_function(all_rules)
-    zipped_names = analysis_rules(all_rules, old_names)
-    new_names = []
-    for f, b, e in zipped_names:
-        # 去除前后空格
-        if f[0] == ' ':
-            f = f[1:]
-        if f[-1] == ' ':
-            f = f[:-1]
-        if b:
-            if b[0] == ' ':
-                b = b[1:]
-            if b[-1] == ' ':
-                b = b[:-1]
-            new = b + ' ' + split_char + ' ' + f + e  # 将f,b前后调换生成新文件名
-        else:
-            new = f + e  # 若没有第二部分文件名则保持原状
-        new_names.append(new)  # 将新名字并入新文件名列表
+    selected=config_dict['selected_index']
+
+    if config_dict['rules'][selected]['type'] == 1:
+        new_name_list = use_type_1(config_dict, old_name_list)
+    if config_dict['rules'][selected]['type'] == 2:
+        new_name_list = use_type_2(config_dict, old_name_list)
 
     logger.info('已生成新文件名列表')
-    return new_names
+    return new_name_list

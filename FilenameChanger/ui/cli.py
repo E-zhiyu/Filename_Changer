@@ -1,7 +1,6 @@
 # ui/cli.py
 from FilenameChanger.file_operations.file_utils import *
-from FilenameChanger.rename_rules.rule_kind_inputer import *
-from FilenameChanger import config_path
+from FilenameChanger.rename_rules.rule_type_manager import *
 
 """
 此模块负责在命令行窗口与用户交互
@@ -97,45 +96,46 @@ def print_main_menu():
         elif option == 1:
             logger.info('选择操作：文件重命名')
             print('操作：文件重命名'.center(42, '—'))
-            rename(config_path)
+            rename()
         elif option == 2:
             print('操作：规则配置'.center(42, '—'))
             logger.info('选择操作：规则设置')
-            configure_rules(config_path)
+            configure_rules()
         else:
             print('请选择有效的操作')
 
 
-def rename(config_path):
+def rename():
     """
     功能：实现“文件重命名”操作
     """
-    all_rules = load_config(config_path)  # 加载已保存的规则
-    if not all_rules['rules']:  # 若规则为空，则结束本函数
+    config_dict = load_config()  # 加载已保存的规则
+    if not config_dict['rules']:  # 若规则为空，则结束本函数
         print('规则为空，请先前往规则设置写入规则！')
         return
 
     directory = get_directory()  # 获取目标路径
-    old_names = get_files_in_directory(directory)  # old_file_names列表将包含该目录下所有文件的文件名（包含扩展名）
-    if not old_names:
+    old_name_list = get_files_in_directory(directory)  # old_file_names列表将包含该目录下所有文件的文件名（包含扩展名）
+    if not old_name_list:
         return
-    new_names = generate_new_name(all_rules, old_names)  # 生成新文件名
+    new_name_list = get_new_name_list(config_dict, old_name_list)  # 生成新文件名
 
     if confirm_to_rename():  # 用户确认重命名后再执行
         print('文件重命名记录'.center(42, '—'))
-        for old, new in zip(old_names, new_names):
+        for old, new in zip(old_name_list, new_name_list):
             rename_files(directory, old, new)  # 执行重命名操作
+
     print('文件重命名完成！')
     print('操作已记录在日志文件中！')
 
 
-def configure_rules(config_path):
+def configure_rules():
     """
     功能：实现“规则设置”操作
     """
     usable_options = """
-【0】回到上一步
-【1】写入新规则
+【0】回到主菜单
+【1】创建新规则
 【2】查看规则
 【3】删除规则
 【4】切换规则
@@ -150,18 +150,19 @@ def configure_rules(config_path):
             print('请选择一个操作！')
             continue
 
+    config_dict = load_config()
     if user_option == 0:
-        logger.info('选择操作：回到上一步')
+        logger.info('选择操作：回到主菜单')
         return
     elif user_option == 1:
-        logger.info('选择操作：写入新规则')
-        set_new_rule(config_path)
+        logger.info('选择操作：创建新规则')
+        set_new_rule(config_dict)
     elif user_option == 2:
         logger.info('选择操作：查看规则')
-        display_rules(config_path)
+        display_rules(config_dict)
     elif user_option == 3:
         logger.info('选择操作：删除规则')
-        del_rules(config_path)
+        del_rules(config_dict)
     elif user_option == 4:
         logger.info('选择操作：切换规则')
-        switch_rule(config_path)
+        switch_rule(config_dict)
