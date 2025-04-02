@@ -27,7 +27,8 @@ def print_main_menu():
     all_options = """
 【0】结束该程序
 【1】文件重命名
-【2】规则设置
+【2】撤销上一次重命名操作
+【3】规则设置
         """
     while True:
         print('主菜单'.center(42, '—'))
@@ -46,6 +47,8 @@ def print_main_menu():
             print('操作：文件重命名'.center(42, '—'))
             rename()
         elif option == 2:
+            cancel_last_operation()
+        elif option == 3:
             print('操作：规则配置'.center(42, '—'))
             logger.info('选择操作：规则设置')
             configure_rules()

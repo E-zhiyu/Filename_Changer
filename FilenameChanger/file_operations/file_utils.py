@@ -95,3 +95,10 @@ def get_new_name_list(config_dict, old_name_list):
 
     logger.info('已生成新文件名列表')
     return new_name_list
+
+
+def cancel_last_operation():
+    """
+    功能：撤销上一次重命名操作
+    """
+    pass
