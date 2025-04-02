@@ -1,5 +1,4 @@
 .venv/
-tests/
 FilenameChanger/rename_rules/rename_rules.json
 main.spec
 dist

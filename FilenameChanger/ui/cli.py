@@ -23,6 +23,36 @@ def print_welcome(version, author):
     print(welcom_mes)
 
 
+def print_main_menu():
+    all_options = """
+【0】结束该程序
+【1】文件重命名
+【2】规则设置
+        """
+    while True:
+        print('主菜单'.center(42, '—'))
+        print(all_options)
+
+        try:
+            option = int(input('请选择：'))
+        except ValueError:  # 防止没有输入内容
+            print('请选择一个操作！')
+            continue
+
+        if option == 0:
+            break
+        elif option == 1:
+            logger.info('选择操作：文件重命名')
+            print('操作：文件重命名'.center(42, '—'))
+            rename()
+        elif option == 2:
+            print('操作：规则配置'.center(42, '—'))
+            logger.info('选择操作：规则设置')
+            configure_rules()
+        else:
+            print('请选择有效的操作')
+
+
 def confirm_to_rename():
     """
     功能：提示操作的风险并确认用户操作
@@ -54,6 +84,9 @@ def get_directory():
     """
     while True:
         directory = input('请输入文件夹路径\n')
+        if not directory:
+            print('路径不能为空！')
+            continue
 
         # 去除前后双引号（如果有）
         if directory[0] == '\"':
@@ -73,36 +106,6 @@ def get_directory():
                 logger.info('路径无效，已提示用户重新输入')
         except Exception as e:
             print(f'发生错误{e}，请重新输入！')
-
-
-def print_main_menu():
-    all_options = """
-【0】结束该程序
-【1】文件重命名
-【2】规则设置
-        """
-    while True:
-        print('主菜单'.center(42, '—'))
-        print(all_options)
-
-        try:
-            option = int(input('请选择：'))
-        except ValueError:  # 防止没有输入内容
-            print('请选择一个操作！')
-            continue
-
-        if option == 0:
-            break
-        elif option == 1:
-            logger.info('选择操作：文件重命名')
-            print('操作：文件重命名'.center(42, '—'))
-            rename()
-        elif option == 2:
-            print('操作：规则配置'.center(42, '—'))
-            logger.info('选择操作：规则设置')
-            configure_rules()
-        else:
-            print('请选择有效的操作')
 
 
 def rename():

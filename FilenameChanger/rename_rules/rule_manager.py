@@ -1,6 +1,8 @@
 # rename_rules/rule_manager.py
 import json
 import os
+import time
+
 from FilenameChanger.log.log_recorder import *
 from FilenameChanger import config_path
 
@@ -101,6 +103,7 @@ def del_rules(config_dict):
     if config_dict['num'] == 1:
         logger.error('无法移除最后一个规则')
         print('无法删除最后一个规则！')
+        time.sleep(0.5)
         return
     else:
         display_rules(config_dict, simple=True)  # 以简单模式列出所有规则
@@ -110,6 +113,7 @@ def del_rules(config_dict):
                 if option == -1:
                     logger.info('用户取消删除规则')
                     print('已取消规则删除。')
+                    time.sleep(0.5)
                     return  # 结束函数跳出死循环
                 elif option <= 0 or option > config_dict['num']:  # 确保输入有效值
                     raise ValueError
@@ -131,6 +135,7 @@ def del_rules(config_dict):
                     with open(config_path, 'w', encoding='utf-8') as f:
                         json.dump(config_dict, f, ensure_ascii=False, indent=4)
                     print(f'规则{option}已删除！')
+                    time.sleep(0.5)
                     return  # 结束函数跳出死循环
             except ValueError:
                 print('请选择一个有效的规则！')
@@ -147,6 +152,7 @@ def switch_rule(config_dict):
             user_option = int(input('\n请选择一个规则（输入-1取消操作）：'))
             if user_option == -1:
                 logger.info('用户取消切换规则')
+                time.sleep(0.5)
                 return  # 结束函数跳出死循环
             elif user_option <= 0 or user_option > config_dict['num']:
                 raise ValueError
@@ -157,6 +163,7 @@ def switch_rule(config_dict):
                 # 将更改写入配置文件
                 with open(config_path, 'w', encoding='utf-8') as f:
                     json.dump(config_dict, f, ensure_ascii=False, indent=4)
+                time.sleep(0.5)
                 return  # 结束函数跳出死循环
         except ValueError:
             print('请选择一个有效的规则！')

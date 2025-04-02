@@ -9,7 +9,7 @@ from FilenameChanger.rename_rules.rule_type_manager import *
 """
 
 
-def is_hidden_or_is_protected(directory):
+def hidden_or_protected(directory):
     """
     功能：获取目标路径下的所有隐藏文件（支持Windows隐藏属性）和受保护（系统文件和只读文件）的文件名
     参数 directory：目标路径
@@ -43,7 +43,7 @@ def get_files_in_directory(directory):
     """
     try:
         old_name = [f for f in os.listdir(directory) if
-                    os.path.isfile(os.path.join(directory, f)) and not is_hidden_or_is_protected(
+                    os.path.isfile(os.path.join(directory, f)) and not hidden_or_protected(
                         os.path.join(directory, f))]
         logger.info('文件名列表获取成功')
         if not old_name:
