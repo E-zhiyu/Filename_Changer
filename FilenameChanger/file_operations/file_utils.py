@@ -2,7 +2,6 @@
 import platform  # 判断系统类型
 import stat  # 判断文件属性
 
-from FilenameChanger.rename_rules.rule_manager import *
 from FilenameChanger.rename_rules.rule_type_manager import *
 
 """
@@ -84,12 +83,15 @@ def get_new_name_list(config_dict, old_name_list):
     参数 old_name_list：旧文件名列表
     返回：新文件名列表
     """
-    selected=config_dict['selected_index']
+    selected = config_dict['selected_index']
+    rule_type = config_dict['rules'][selected]['type']
 
-    if config_dict['rules'][selected]['type'] == 1:
+    if rule_type == 1:
         new_name_list = use_type_1(config_dict, old_name_list)
-    if config_dict['rules'][selected]['type'] == 2:
+    elif rule_type == 2:
         new_name_list = use_type_2(config_dict, old_name_list)
+    elif rule_type == 3:
+        new_name_list = use_type_3(config_dict, old_name_list)
 
     logger.info('已生成新文件名列表')
     return new_name_list

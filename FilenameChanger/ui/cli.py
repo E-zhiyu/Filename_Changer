@@ -9,7 +9,7 @@ from FilenameChanger.rename_rules.rule_type_manager import *
 
 def print_welcome(version, author):
     """
-    功能：打印程序打开时的提示语
+    功能：打印程序启动时的提示语
     参数 version：程序版本
     参数 author：作者昵称
     """

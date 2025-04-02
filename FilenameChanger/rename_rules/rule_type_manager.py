@@ -15,7 +15,7 @@ def set_new_rule(config_dict):
     all_rule_types = """
 【1】交换特定符号前后内容
 【2】批量修改文件扩展名
-【3】更改文件名中特定字符串（开发中……）
+【3】更改文件名中特定字符串
     """
     print('创建新规则'.center(42, '—'))
     print('以下为所有规则类型')
@@ -25,10 +25,10 @@ def set_new_rule(config_dict):
     while cycle:
         try:
             rule_type = int(input('请选择（输入-1取消）：'))
+            cycle = False  # 用户输入后更改循环条件跳出循环
             if rule_type == -1:
                 logger.info('用户取消写入规则')
                 return
-            cycle = False
         except ValueError:  # 防止没有输入
             print('请选择一个规则类型！')
 
@@ -37,6 +37,8 @@ def set_new_rule(config_dict):
         input_type_1(config_dict)
     elif rule_type == 2:
         input_type_2(config_dict)
+    elif rule_type == 3:
+        input_type_3(config_dict)
     else:
         print('【选择错误】你选择了一个不存在的操作！')
 
@@ -49,10 +51,12 @@ def input_type_1(config_dict):
     """
     new_rule_dict = {}  # 创建文件名分割规则字典
     new_rule_dict['type'] = 1
+
     new_rule_dict['rule_name'] = input('请输入规则名称：')
     logger.info(f'输入规则名称：“{new_rule_dict["rule_name"]}”')
     new_rule_dict['desc'] = input('请输入规则描述：')
     logger.info(f'输入规则描述：“{new_rule_dict["desc"]}”')
+
     new_rule_dict['split_char'] = input('请输入分隔符：')
     logger.info(f'输入分隔符：“{new_rule_dict["split_char"]}”')
 
@@ -116,6 +120,7 @@ def input_type_2(config_dict):
     logger.info(f'输入规则名称：“{new_rule_dict["rule_name"]}”')
     new_rule_dict['desc'] = input('请输入规则描述：')
     logger.info(f'输入规则描述：“{new_rule_dict["desc"]}”')
+
     new_rule_dict['new_ext'] = input('请输入新的文件扩展名：')
     if new_rule_dict['new_ext'].startswith('.'):
         new_rule_dict['new_ext'] = new_rule_dict['new_ext'][1:]  # 去除用户输入的“.”
@@ -134,7 +139,7 @@ def use_type_2(config_dict, old_name_list):
     selected_index = config_dict['selected_index']
     new_ext = config_dict['rules'][selected_index]['new_ext']
 
-    name_list = []  # 文件名列表
+    name_list = []  # 文件名（排除扩展名）列表
     for file in old_name_list:
         signal_name = os.path.splitext(file)[0]  # 此规则不需要获取原来的扩展名
         name_list.append(signal_name)
@@ -142,6 +147,58 @@ def use_type_2(config_dict, old_name_list):
     new_name_list = []
     for signal_name in name_list:
         new_name = signal_name + '.' + new_ext
+        new_name_list.append(new_name)
+
+    return new_name_list
+
+
+def input_type_3(config_dict):
+    """
+    功能：输入规则类型三并保存
+    规则类型：修改特定字符串
+    参数 config_dict：配置文件根字典
+    """
+    new_rule_dict = {}
+    new_rule_dict['type'] = 3
+
+    new_rule_dict['rule_name'] = input('请输入规则名称：')
+    logger.info(f'输入规则名称：“{new_rule_dict["rule_name"]}”')
+    new_rule_dict['desc'] = input('请输入规则描述：')
+    logger.info(f'输入规则描述：“{new_rule_dict["desc"]}”')
+
+    new_rule_dict['target_str'] = input('请输入需要修改的字符串：')
+    logger.info(f'输入目标字符串：“{new_rule_dict["target_str"]}”')
+    new_rule_dict['new_str'] = input('请输入修改后的字符串：')
+    logger.info(f'输入新字符串：“{new_rule_dict["new_str"]}”')
+
+    save_new_rule(config_dict, new_rule_dict)
+
+
+def use_type_3(config_dict, old_name_list):
+    """
+    功能：应用类型二的规则
+    参数 config_dict：配置文件根字典
+    参数 old_name_list：旧文件名列表
+    返回：生成的新文件名列表
+    """
+    selected_index = config_dict['selected_index']
+    target_str = config_dict['rules'][selected_index]['target_str']  # 待替换的字符串
+    new_str = config_dict['rules'][selected_index]['new_str']  # 新字符串
+
+    old_file_name_list = []  # 文件名（排除扩展名）列表
+    old_file_ext_list = []  # 文件扩展名列表
+    for file in old_name_list:
+        name, ext = os.path.splitext(file)
+        old_file_name_list.append(name)
+        old_file_ext_list.append(ext)
+
+    new_name_list = []
+    for file_name, ext in zip(old_file_name_list, old_file_ext_list):
+        try:
+            f, b = file_name.split(target_str, 2)
+            new_name = f + new_str + b + ext
+        except ValueError:  # 处理无法拆分的情况
+            new_name = file_name + ext
         new_name_list.append(new_name)
 
     return new_name_list

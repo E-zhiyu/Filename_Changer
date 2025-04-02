@@ -7,3 +7,5 @@ build
 FilenameChanger/docs/Bugs.md
 filenamechanger.egg-info
 FilenameChanger/log/app.log
+FilenameChanger/test.py
+待修复的BUG.txt
