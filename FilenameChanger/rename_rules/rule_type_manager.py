@@ -1,6 +1,7 @@
 # FilenameChanger/rename_rules/rule_type_manager.py
 from FilenameChanger.rename_rules.rule_manager import *
 from FilenameChanger.log.log_recorder import *
+import time
 
 """
 根据规则种类采用不同写入和读取方式的模块
@@ -40,7 +41,9 @@ def set_new_rule(config_dict):
     elif rule_type == 3:
         input_type_3(config_dict)
     else:
-        print('【选择错误】你选择了一个不存在的操作！')
+        print('【选择错误】你选择了一个不存在的操作！即将返回主菜单……')
+
+    time.sleep(0.5)
 
 
 def input_type_1(config_dict):
