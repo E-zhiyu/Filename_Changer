@@ -106,7 +106,7 @@ def cancel_last_operation():
     try:
         with open(history_file_path, 'r', encoding='utf-8') as f:
             logger.info('成功读取已保存的历史记录')
-            history_dict = json.load(f)
+            history_list = json.load(f)
     except FileNotFoundError:
         logger.error('历史记录文件不存在或被移除')
         print('历史记录文件不存在或已被移除！\n即将返回主菜单……')
@@ -114,15 +114,14 @@ def cancel_last_operation():
         return
 
     # 判断历史记录是否为空
-    if history_dict['max_index'] == -1:
+    if not history_list:
         logger.error('历史记录为空，无法撤销重命名')
         print('历史记录为空！\n即将返回主菜单……')
         time.sleep(0.5)
         return
 
     # 加载上一次的重命名记录
-    last_history_index = history_dict['max_index']
-    last_history_dict = history_dict['history'][last_history_index]
+    last_history_dict = history_list.pop()
     old_name_list = last_history_dict['old_name_list']  # 加载旧文件名列表
     new_name_list = last_history_dict['new_name_list']  # 加载新文件名列表
     directory = last_history_dict['directory']  # 加载目标文件夹路径
@@ -132,20 +131,18 @@ def cancel_last_operation():
         logger.error('无法撤销：旧文件夹路径无效')
         print('无法撤销：旧文件夹不存在或已被移除！\n即将返回主菜单……')
         time.sleep(0.5)
-        return
+        return  # 若历史记录中的文件夹不存在，则不会执行下面的文件写入操作，无需担心历史记录被删除
 
     # 删除最近一条重命名记录
-    del history_dict['history'][last_history_index]
-    history_dict['max_index'] -= 1
-    if not os.path.isdir(history_file_path):  # 防止历史记录文件夹被移除
+    if not os.path.isdir(os.path.dirname(history_file_path)):  # 防止历史记录文件夹被移除
         os.mkdir(os.path.dirname(history_file_path))
     with open(history_file_path, 'w', encoding='utf-8') as f:
-        json.dump(history_dict, f, ensure_ascii=False, indent=4)
+        json.dump(history_list, f, ensure_ascii=False, indent=4)
 
     # 撤销上一次重命名
     print('撤销上一次重命名'.center(42, '—'))
     for old, new in zip(old_name_list, new_name_list):
-        rename_files(directory, new, old)
+        rename_files(directory, new, old)  # 把新旧文件名反过来
 
 
 def record_history(old_name_list, new_name_list, directory):
@@ -163,18 +160,23 @@ def record_history(old_name_list, new_name_list, directory):
     try:
         with open(history_file_path, 'r', encoding='utf-8') as f:
             logger.info('成功读取已保存的历史记录')
-            history_dict = json.load(f)
+            history_list = json.load(f)
     except FileNotFoundError:
         with open(history_file_path, 'w', encoding='utf-8') as f:
             logger.info('历史记录文件不存在，正在初始化……')
-            history_dict = {'max_index': -1, 'history': []}
-            json.dump(history_dict, f, ensure_ascii=False, indent=4)
+            history_list = []
+            json.dump(history_list, f, ensure_ascii=False, indent=4)
             logger.info('历史记录文件初始化成功')
 
-    # 将新历史记录合并至根字典
-    new_record_dict = {'directory': directory, 'old_name_list': old_name_list, 'new_name_list': new_name_list}
-    history_dict['history'].append(new_record_dict)
-    history_dict['max_index'] = len(history_dict['history']) - 1
+    # 将新历史记录合并至根列表
+    new_record_dict = {'directory': directory, 'old_name_list': [], 'new_name_list': []}
+    for old, new in zip(old_name_list, new_name_list):
+        if old != new:  # 只保存进行更改的文件名
+            new_record_dict['old_name_list'].append(old)
+            new_record_dict['new_name_list'].append(new)
+    history_list.append(new_record_dict)
+
+    # 保存根列表到json文件
     with open(history_file_path, 'w', encoding='utf-8') as f:
-        json.dump(history_dict, f, ensure_ascii=False, indent=4)
+        json.dump(history_list, f, ensure_ascii=False, indent=4)
         logger.info('已保存一条新的历史记录')
