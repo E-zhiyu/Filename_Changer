@@ -8,3 +8,4 @@ filenamechanger.egg-info
 FilenameChanger/log/app.log
 FilenameChanger/test.py
 待修复的BUG.txt
+FilenameChanger/rename_history

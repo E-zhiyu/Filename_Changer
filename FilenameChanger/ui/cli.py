@@ -1,4 +1,5 @@
 # ui/cli.py
+
 from FilenameChanger.file_operations.file_utils import *
 from FilenameChanger.rename_rules.rule_type_manager import *
 
@@ -38,6 +39,7 @@ def print_main_menu():
             option = int(input('请选择：'))
         except ValueError:  # 防止没有输入内容
             print('请选择一个操作！')
+            time.sleep(0.5)
             continue
 
         if option == 0:
@@ -65,7 +67,6 @@ def confirm_to_rename():
   【警告】文件重命名可能伴随以下风险
   1.某些应用程序由于路径依赖无法定位重命名后的文件。
   2.如果文件夹内有您不想重命名的文件，它也会被重命名！
-  3.目前重命名操作不可撤销！
     """
     print(warning)
     print('\n确认要重命名吗？（Y/N）')
@@ -127,6 +128,11 @@ def rename():
     new_name_list = get_new_name_list(config_dict, old_name_list)  # 生成新文件名
 
     if confirm_to_rename():  # 用户确认重命名后再执行
+
+        # 记录本次重命名操作，便于后续恢复
+        if old_name_list != new_name_list:
+            record_history(old_name_list, new_name_list, directory)
+
         print('文件重命名记录'.center(42, '—'))
         for old, new in zip(old_name_list, new_name_list):
             rename_files(directory, old, new)  # 执行重命名操作

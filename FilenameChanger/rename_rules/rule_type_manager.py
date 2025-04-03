@@ -1,7 +1,8 @@
 # FilenameChanger/rename_rules/rule_type_manager.py
-from FilenameChanger.rename_rules.rule_manager import *
-from FilenameChanger.log.log_recorder import *
 import time
+
+from FilenameChanger.log.log_recorder import *
+from FilenameChanger.rename_rules.rule_manager import *
 
 """
 根据规则种类采用不同写入和读取方式的模块
@@ -29,6 +30,8 @@ def set_new_rule(config_dict):
             cycle = False  # 用户输入后更改循环条件跳出循环
             if rule_type == -1:
                 logger.info('用户取消写入规则')
+                print('已取消，正在返回主菜单……')
+                time.sleep(0.5)
                 return
         except ValueError:  # 防止没有输入
             print('请选择一个规则类型！')
