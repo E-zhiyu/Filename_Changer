@@ -2,6 +2,7 @@
 import platform  # 判断系统类型
 import stat  # 判断文件属性
 
+from FilenameChanger import history_file_path
 from FilenameChanger.rename_rules.rule_type_manager import *
 
 """
@@ -55,25 +56,25 @@ def get_files_in_directory(directory):
         return old_name
 
 
-def rename_files(directory, old_name, new_name):
+def rename_files(directory, origin_name, new_name):
     """
     功能：为单个文件重命名并显示结果
     参数 directory：目标文件夹
-    参数 old_name：单个旧文件名
+    参数 origin_name：单个原文件名
     参数 new_name：单个新文件名
     """
-    if old_name == new_name:
-        logger.info(f'【未更改】{old_name}')
-        print(f'【未更改】{old_name}')
+    if origin_name == new_name:
+        logger.info(f'【未更改】{origin_name}')
+        print(f'【未更改】{origin_name}')
     else:
         try:
-            os.rename(os.path.join(directory, old_name), os.path.join(directory, new_name))
+            os.rename(os.path.join(directory, origin_name), os.path.join(directory, new_name))
         except FileNotFoundError:
-            logger.error(f'【错误】文件“{old_name}”不存在！')
-            print(f'【错误】文件“{old_name}”不存在！')
+            logger.error(f'【错误】文件“{origin_name}”不存在！')
+            print(f'【错误】文件“{origin_name}”不存在！')
         else:
-            logger.info(f'【成功】{old_name} -> {new_name}')
-            print(f'【成功】{old_name} -> {new_name}')
+            logger.info(f'【成功】{origin_name} -> {new_name}')
+            print(f'【成功】{origin_name} -> {new_name}')
 
 
 def get_new_name_list(config_dict, old_name_list):
@@ -95,3 +96,89 @@ def get_new_name_list(config_dict, old_name_list):
 
     logger.info('已生成新文件名列表')
     return new_name_list
+
+
+def cancel_last_operation():
+    """
+    功能：撤销上一次重命名操作
+    """
+    # 加载已保存的历史记录
+    try:
+        with open(history_file_path, 'r', encoding='utf-8') as f:
+            logger.info('成功读取已保存的历史记录')
+            history_list = json.load(f)
+    except FileNotFoundError:
+        logger.error('历史记录文件不存在或被移除')
+        print('历史记录文件不存在或已被移除！\n即将返回主菜单……')
+        time.sleep(0.5)
+        return
+
+    # 判断历史记录是否为空
+    if not history_list:
+        logger.error('历史记录为空，无法撤销重命名')
+        print('历史记录为空！\n即将返回主菜单……')
+        time.sleep(0.5)
+        return
+
+    # 加载上一次的重命名记录
+    last_history_dict = history_list.pop()
+    old_name_list = last_history_dict['old_name_list']  # 加载旧文件名列表
+    new_name_list = last_history_dict['new_name_list']  # 加载新文件名列表
+    directory = last_history_dict['directory']  # 加载目标文件夹路径
+
+    # 判断旧文件夹路径是否可用
+    if not os.path.isdir(directory):
+        logger.error('无法撤销：旧文件夹路径无效')
+        print('无法撤销：旧文件夹不存在或已被移除！\n即将返回主菜单……')
+        time.sleep(0.5)
+        return  # 若历史记录中的文件夹不存在，则不会执行下面的文件写入操作，无需担心历史记录被删除
+
+    # 删除最近一条重命名记录
+    if not os.path.isdir(os.path.dirname(history_file_path)):  # 防止历史记录文件夹被移除
+        os.mkdir(os.path.dirname(history_file_path))
+    with open(history_file_path, 'w', encoding='utf-8') as f:
+        json.dump(history_list, f, ensure_ascii=False, indent=4)
+
+    # 撤销上一次重命名
+    print('撤销上一次重命名'.center(42, '—'))
+    for old, new in zip(old_name_list, new_name_list):
+        rename_files(directory, new, old)  # 把新旧文件名反过来
+
+    time.sleep(0.5)
+
+
+def record_history(old_name_list, new_name_list, directory):
+    """
+    功能：记录重命名历史记录
+    参数 old_name_list：旧文件名列表
+    参数 new_name_list：新文件名列表
+    参数 directory：目标文件夹路径
+    """
+    # 创建历史记录文件夹
+    if not os.path.isdir(os.path.dirname(history_file_path)):
+        os.mkdir(os.path.dirname(history_file_path))
+
+    # 读取现有历史记录
+    try:
+        with open(history_file_path, 'r', encoding='utf-8') as f:
+            logger.info('成功读取已保存的历史记录')
+            history_list = json.load(f)
+    except FileNotFoundError:
+        with open(history_file_path, 'w', encoding='utf-8') as f:
+            logger.info('历史记录文件不存在，正在初始化……')
+            history_list = []
+            json.dump(history_list, f, ensure_ascii=False, indent=4)
+            logger.info('历史记录文件初始化成功')
+
+    # 将新历史记录合并至根列表
+    new_record_dict = {'directory': directory, 'old_name_list': [], 'new_name_list': []}
+    for old, new in zip(old_name_list, new_name_list):
+        if old != new:  # 只保存进行更改的文件名
+            new_record_dict['old_name_list'].append(old)
+            new_record_dict['new_name_list'].append(new)
+    history_list.append(new_record_dict)
+
+    # 保存根列表到json文件
+    with open(history_file_path, 'w', encoding='utf-8') as f:
+        json.dump(history_list, f, ensure_ascii=False, indent=4)
+        logger.info('已保存一条新的历史记录')

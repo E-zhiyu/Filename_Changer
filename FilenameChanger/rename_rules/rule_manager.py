@@ -3,8 +3,8 @@ import json
 import os
 import time
 
-from FilenameChanger.log.log_recorder import *
 from FilenameChanger import config_path
+from FilenameChanger.log.log_recorder import *
 
 """
 规则文件模块：控制所有有关命名规则文件的操作
@@ -112,7 +112,7 @@ def del_rules(config_dict):
                 option = int(input('\n请选择（输入-1取消操作）：\n'))
                 if option == -1:
                     logger.info('用户取消删除规则')
-                    print('已取消规则删除。')
+                    print('已取消，正在返回主菜单……')
                     time.sleep(0.5)
                     return  # 结束函数跳出死循环
                 elif option <= 0 or option > config_dict['num']:  # 确保输入有效值
@@ -151,7 +151,7 @@ def switch_rule(config_dict):
         try:
             user_option = int(input('\n请选择一个规则（输入-1取消操作）：'))
             if user_option == -1:
-                logger.info('用户取消切换规则')
+                logger.info('已取消，正在返回主菜单……')
                 time.sleep(0.5)
                 return  # 结束函数跳出死循环
             elif user_option <= 0 or user_option > config_dict['num']:

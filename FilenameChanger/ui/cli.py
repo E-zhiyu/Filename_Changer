@@ -1,4 +1,5 @@
 # ui/cli.py
+
 from FilenameChanger.file_operations.file_utils import *
 from FilenameChanger.rename_rules.rule_type_manager import *
 
@@ -13,11 +14,11 @@ def print_welcome(version, author):
     参数 version：程序版本
     参数 author：作者昵称
     """
-    title = '文件名管理器'
+    title = '文件名更名器'
     welcom_mes = f"""
   版本：{version}
   作者：{author}
-  欢迎使用本程序！本程序能够帮助您更加便捷地管理文件名。
+  欢迎使用本程序！本程序能够帮助您更加便捷地更改文件名。
     """
     print(title.center(42, '—'))
     print(welcom_mes)
@@ -27,7 +28,8 @@ def print_main_menu():
     all_options = """
 【0】结束该程序
 【1】文件重命名
-【2】规则设置
+【2】撤销上一次重命名操作
+【3】规则设置
         """
     while True:
         print('主菜单'.center(42, '—'))
@@ -37,6 +39,7 @@ def print_main_menu():
             option = int(input('请选择：'))
         except ValueError:  # 防止没有输入内容
             print('请选择一个操作！')
+            time.sleep(0.5)
             continue
 
         if option == 0:
@@ -46,6 +49,10 @@ def print_main_menu():
             print('操作：文件重命名'.center(42, '—'))
             rename()
         elif option == 2:
+            logger.info('选择操作：撤销重命名')
+            if confirm_your_operation(with_warning=False):
+                cancel_last_operation()
+        elif option == 3:
             print('操作：规则配置'.center(42, '—'))
             logger.info('选择操作：规则设置')
             configure_rules()
@@ -53,7 +60,7 @@ def print_main_menu():
             print('请选择有效的操作')
 
 
-def confirm_to_rename():
+def confirm_your_operation(with_warning=True):
     """
     功能：提示操作的风险并确认用户操作
     返回：是否进行下一步操作（布尔值）
@@ -62,16 +69,17 @@ def confirm_to_rename():
   【警告】文件重命名可能伴随以下风险
   1.某些应用程序由于路径依赖无法定位重命名后的文件。
   2.如果文件夹内有您不想重命名的文件，它也会被重命名！
-  3.目前重命名操作不可撤销！
     """
-    print(warning)
-    print('\n确认要重命名吗？（Y/N）')
+    if with_warning:
+        print(warning)
+
+    print('\n确认进行下一步操作吗？（Y/N）')
     while True:
         option = input('请输入：')
         if option == 'Y' or option == 'y':
             logger.info('用户确认操作')
             return True
-        elif option == 'N':
+        elif option == 'N' or option == 'n':
             logger.info('用户取消操作')
             return False
         else:
@@ -88,12 +96,8 @@ def get_directory():
             print('路径不能为空！')
             continue
 
-        # 去除前后双引号（如果有）
-        if directory[0] == '\"':
-            directory = directory[1:]
-        if directory[-1] == '\"':
-            directory = directory[:-1]
-        directory = r''.join(list(directory))
+        # 去除前后双引号
+        directory=directory.strip('"')
         logger.info(f'输入路径“{directory}”')
 
         # 路径有效性的异常处理
@@ -123,13 +127,19 @@ def rename():
         return
     new_name_list = get_new_name_list(config_dict, old_name_list)  # 生成新文件名
 
-    if confirm_to_rename():  # 用户确认重命名后再执行
+    if confirm_your_operation():  # 用户确认重命名后再执行
+
+        # 记录本次重命名操作，便于后续恢复
+        if old_name_list != new_name_list:
+            record_history(old_name_list, new_name_list, directory)
+
         print('文件重命名记录'.center(42, '—'))
         for old, new in zip(old_name_list, new_name_list):
             rename_files(directory, old, new)  # 执行重命名操作
 
     print('文件重命名完成！')
     print('操作已记录在日志文件中！')
+    time.sleep(0.5)
 
 
 def configure_rules():
