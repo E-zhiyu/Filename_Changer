@@ -144,6 +144,8 @@ def cancel_last_operation():
     for old, new in zip(old_name_list, new_name_list):
         rename_files(directory, new, old)  # 把新旧文件名反过来
 
+    time.sleep(0.5)
+
 
 def record_history(old_name_list, new_name_list, directory):
     """

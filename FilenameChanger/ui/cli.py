@@ -139,6 +139,7 @@ def rename():
 
     print('文件重命名完成！')
     print('操作已记录在日志文件中！')
+    time.sleep(0.5)
 
 
 def configure_rules():
