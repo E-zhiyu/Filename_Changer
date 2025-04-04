@@ -77,7 +77,7 @@ def display_rules(config_dict, simple=False):
         for key, value in a_rule.items():
             if key == 'type' and simple is False:
                 key = '规则种类'
-            elif key == 'rule_name':
+            elif key == 'name':
                 if simple is False:
                     key = '规则名称'
                 else:

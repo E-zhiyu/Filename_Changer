@@ -93,6 +93,8 @@ def get_new_name_list(config_dict, old_name_list):
         new_name_list = use_type_2(config_dict, old_name_list)
     elif rule_type == 3:
         new_name_list = use_type_3(config_dict, old_name_list)
+    elif rule_type == 4:
+        new_name_list = use_type_4(config_dict, old_name_list)
 
     logger.info('已生成新文件名列表')
     return new_name_list

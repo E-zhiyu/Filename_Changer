@@ -128,7 +128,6 @@ def rename():
     new_name_list = get_new_name_list(config_dict, old_name_list)  # 生成新文件名
 
     if confirm_your_operation():  # 用户确认重命名后再执行
-
         # 记录本次重命名操作，便于后续恢复
         if old_name_list != new_name_list:
             record_history(old_name_list, new_name_list, directory)

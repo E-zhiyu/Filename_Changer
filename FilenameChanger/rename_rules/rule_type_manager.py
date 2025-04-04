@@ -1,7 +1,5 @@
 # FilenameChanger/rename_rules/rule_type_manager.py
 import time
-
-from FilenameChanger.log.log_recorder import *
 from FilenameChanger.rename_rules.rule_manager import *
 
 """
@@ -18,6 +16,7 @@ def set_new_rule(config_dict):
 【1】交换特定符号前后内容
 【2】批量修改文件扩展名
 【3】更改文件名中特定字符串（每个文件仅修改一处）
+【4】文件名增加或删除当前日期（开发中……）
     """
     print('创建新规则'.center(42, '—'))
     print('以下为所有规则类型')
@@ -43,6 +42,8 @@ def set_new_rule(config_dict):
         input_type_2(config_dict)
     elif rule_type == 3:
         input_type_3(config_dict)
+    elif rule_type == 4:
+        input_type_4(config_dict)
     else:
         print('【选择错误】你选择了一个不存在的操作！即将返回主菜单……')
 
@@ -58,8 +59,8 @@ def input_type_1(config_dict):
     new_rule_dict = {}  # 创建文件名分割规则字典
     new_rule_dict['type'] = 1
 
-    new_rule_dict['rule_name'] = input('请输入规则名称：')
-    logger.info(f'输入规则名称：“{new_rule_dict["rule_name"]}”')
+    new_rule_dict['name'] = input('请输入规则名称：')
+    logger.info(f'输入规则名称：“{new_rule_dict["name"]}”')
     new_rule_dict['desc'] = input('请输入规则描述：')
     logger.info(f'输入规则描述：“{new_rule_dict["desc"]}”')
 
@@ -122,8 +123,8 @@ def input_type_2(config_dict):
     new_rule_dict = {}
     new_rule_dict['type'] = 2
 
-    new_rule_dict['rule_name'] = input('请输入规则名称：')
-    logger.info(f'输入规则名称：“{new_rule_dict["rule_name"]}”')
+    new_rule_dict['name'] = input('请输入规则名称：')
+    logger.info(f'输入规则名称：“{new_rule_dict["name"]}”')
     new_rule_dict['desc'] = input('请输入规则描述：')
     logger.info(f'输入规则描述：“{new_rule_dict["desc"]}”')
 
@@ -167,8 +168,8 @@ def input_type_3(config_dict):
     new_rule_dict = {}
     new_rule_dict['type'] = 3
 
-    new_rule_dict['rule_name'] = input('请输入规则名称：')
-    logger.info(f'输入规则名称：“{new_rule_dict["rule_name"]}”')
+    new_rule_dict['name'] = input('请输入规则名称：')
+    logger.info(f'输入规则名称：“{new_rule_dict["name"]}”')
     new_rule_dict['desc'] = input('请输入规则描述：')
     logger.info(f'输入规则描述：“{new_rule_dict["desc"]}”')
 
@@ -208,3 +209,48 @@ def use_type_3(config_dict, old_name_list):
         new_name_list.append(new_name)
 
     return new_name_list
+
+
+def input_type_4(config_dict):
+    """
+    功能：输入规则类型四并保存
+    规则类型：增加或移除文件名中的日期
+    参数 config_dict：配置文件根字典
+    """
+    new_rule_dict = {}
+    new_rule_dict['type'] = 4
+
+    new_rule_dict['name'] = input('请输入规则名称：')
+    logger.info(f'输入规则名称：“{new_rule_dict["name"]}”')
+    new_rule_dict['desc'] = input('请输入规则描述：')
+    logger.info(f'输入规则描述：“{new_rule_dict["desc"]}”')
+
+    position = ''
+    prompt = """
+【1】文件名头部
+【2】文件名尾部
+    """
+    print('请选择日期在文件名中的位置：')
+    print(prompt)
+    while position == '':
+        try:
+            user_option = int(input())
+            if user_option == 1:
+                position = 'head'
+            elif user_option == 2:
+                position = 'tail'
+            else:
+                print('请选择一个有效值！')
+        except ValueError:
+            print('该选项为必填选项，请不要跳过输入！')
+    logger.info(f'输入日期在文件名中的位置：“{position}”')
+    new_rule_dict['position'] = position
+
+    new_rule_dict['split_char'] = input('请输入年月日分隔符：')
+    logger.info(f'输入年月日分隔符：“{new_rule_dict["split_char"]}”')
+
+    save_new_rule(config_dict, new_rule_dict)
+
+
+def use_type_4(config_dict, old_name_list):
+    pass
