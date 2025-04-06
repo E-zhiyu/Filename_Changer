@@ -97,7 +97,7 @@ def get_directory():
             continue
 
         # 去除前后双引号
-        directory=directory.strip('"')
+        directory = directory.strip('"')
         logger.info(f'输入路径“{directory}”')
 
         # 路径有效性的异常处理
@@ -122,12 +122,12 @@ def rename():
         return
 
     directory = get_directory()  # 获取目标路径
-    old_name_list = get_files_in_directory(directory)  # old_file_names列表将包含该目录下所有文件的文件名（包含扩展名）
-    if not old_name_list:
-        return
-    new_name_list = get_new_name_list(config_dict, old_name_list)  # 生成新文件名
 
     if confirm_your_operation():  # 用户确认重命名后再执行
+        old_name_list = get_files_in_directory(directory)  # old_file_names列表将包含该目录下所有文件的文件名（包含扩展名）
+        if not old_name_list:
+            return
+        new_name_list = get_new_name_list(config_dict, old_name_list)  # 生成新文件名
         # 记录本次重命名操作，便于后续恢复
         if old_name_list != new_name_list:
             record_history(old_name_list, new_name_list, directory)
