@@ -18,13 +18,13 @@ def load_config():
     """
     try:
         with open(config_path, 'r', encoding='utf-8') as f:
-            logger.info('加载规则配置')
+            logging.info('加载规则配置')
             return json.load(f)
     except FileNotFoundError:
-        logger.info('未找到配置文件，正在创建并初始化……')
+        logging.info('未找到配置文件，正在创建并初始化……')
         init_json()
         with open(config_path, 'r', encoding='utf-8') as f:
-            logger.info('规则配置已初始化并成功加载')
+            logging.info('规则配置已初始化并成功加载')
             return json.load(f)
 
 
@@ -41,7 +41,7 @@ def save_new_rule(config_dict, new_rule):
     with open(config_path, 'w', encoding='utf-8') as f:
         json.dump(config_dict, f, ensure_ascii=False, indent=4)
     print('新规则已成功保存！')
-    logger.info('新规则保存成功')
+    logging.info('新规则保存成功')
 
 
 def init_json():
@@ -54,7 +54,7 @@ def init_json():
     with open(config_path, 'w', encoding='utf-8') as f:
         json.dump(inited_rules, f, ensure_ascii=False, indent=4)
 
-    logger.info('规则文件初始化成功')
+    logging.info('规则文件初始化成功')
 
 
 def display_rules(config_dict, simple=False):
@@ -77,7 +77,7 @@ def display_rules(config_dict, simple=False):
         for key, value in a_rule.items():
             if key == 'type' and simple is False:
                 key = '规则种类'
-            elif key == 'rule_name':
+            elif key == 'name':
                 if simple is False:
                     key = '规则名称'
                 else:
@@ -101,7 +101,7 @@ def del_rules(config_dict):
     参数 config_dict：规则配置文件根字典
     """
     if config_dict['num'] == 1:
-        logger.error('无法移除最后一个规则')
+        logging.error('无法移除最后一个规则')
         print('无法删除最后一个规则！')
         time.sleep(0.5)
         return
@@ -111,18 +111,18 @@ def del_rules(config_dict):
             try:
                 option = int(input('\n请选择（输入-1取消操作）：\n'))
                 if option == -1:
-                    logger.info('用户取消删除规则')
+                    logging.info('用户取消删除规则')
                     print('已取消，正在返回主菜单……')
                     time.sleep(0.5)
                     return  # 结束函数跳出死循环
                 elif option <= 0 or option > config_dict['num']:  # 确保输入有效值
                     raise ValueError
                 else:
-                    logger.info(f'用户删除第{option}个规则')
+                    logging.info(f'用户删除第{option}个规则')
 
                     # 判断删除的规则是否被选中，删除被选中的规则则改为选中第一个规则
                     if config_dict['selected_index'] == option - 1 and option != 1:  # 当删除第一个规则时仍然默认选中规则1
-                        logger.info(f'第{option}个规则为选中的规则，已更改至删除后的第一个规则')
+                        logging.info(f'第{option}个规则为选中的规则，已更改至删除后的第一个规则')
                         print(f'第{option}个规则是选中的规则，已更改至第一个规则！')
                         config_dict['selected_index'] = 0
 
@@ -151,14 +151,14 @@ def switch_rule(config_dict):
         try:
             user_option = int(input('\n请选择一个规则（输入-1取消操作）：'))
             if user_option == -1:
-                logger.info('已取消，正在返回主菜单……')
+                logging.info('已取消，正在返回主菜单……')
                 time.sleep(0.5)
                 return  # 结束函数跳出死循环
             elif user_option <= 0 or user_option > config_dict['num']:
                 raise ValueError
             else:
                 print(f'已切换至规则{user_option}！')
-                logger.info(f'用户切换至规则{user_option}')
+                logging.info(f'用户切换至规则{user_option}')
                 config_dict['selected_index'] = user_option - 1
                 # 将更改写入配置文件
                 with open(config_path, 'w', encoding='utf-8') as f:
