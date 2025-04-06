@@ -5,7 +5,7 @@ dist
 build
 FilenameChanger/docs/Bugs.md
 filenamechanger.egg-info
-FilenameChanger/log/app.log
+FilenameChanger/logs
 FilenameChanger/test.py
 待修复的BUG.txt
 FilenameChanger/rename_history

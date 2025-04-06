@@ -30,14 +30,14 @@ def set_new_rule(config_dict):
             rule_type = int(input('请选择（输入-1取消）：'))
             cycle = False  # 用户输入后更改循环条件跳出循环
             if rule_type == -1:
-                logger.info('用户取消写入规则')
+                logging.info('用户取消写入规则')
                 print('已取消，正在返回主菜单……')
                 time.sleep(0.5)
                 return
         except ValueError:  # 防止没有输入
             print('请选择一个规则类型！')
 
-    logger.info(f'用户选择规则类型{rule_type}')
+    logging.info(f'用户选择规则类型{rule_type}')
     if rule_type == 1:
         input_type_1(config_dict)
     elif rule_type == 2:
@@ -62,9 +62,9 @@ def input_type_1(config_dict):
     new_rule_dict['type'] = 1
 
     new_rule_dict['name'] = input('请输入规则名称：')
-    logger.info(f'输入规则名称：“{new_rule_dict["name"]}”')
+    logging.info(f'输入规则名称：“{new_rule_dict["name"]}”')
     new_rule_dict['desc'] = input('请输入规则描述：')
-    logger.info(f'输入规则描述：“{new_rule_dict["desc"]}”')
+    logging.info(f'输入规则描述：“{new_rule_dict["desc"]}”')
 
     do_cycle = True
     while do_cycle:
@@ -73,7 +73,7 @@ def input_type_1(config_dict):
             print(f'文件名不能包含{illegal_char}！')
         else:
             do_cycle = False
-    logger.info(f'输入分隔符：“{new_rule_dict["split_char"]}”')
+    logging.info(f'输入分隔符：“{new_rule_dict["split_char"]}”')
 
     save_new_rule(config_dict, new_rule_dict)  # 保存输入的规则
 
@@ -129,9 +129,9 @@ def input_type_2(config_dict):
     new_rule_dict['type'] = 2
 
     new_rule_dict['name'] = input('请输入规则名称：')
-    logger.info(f'输入规则名称：“{new_rule_dict["name"]}”')
+    logging.info(f'输入规则名称：“{new_rule_dict["name"]}”')
     new_rule_dict['desc'] = input('请输入规则描述：')
-    logger.info(f'输入规则描述：“{new_rule_dict["desc"]}”')
+    logging.info(f'输入规则描述：“{new_rule_dict["desc"]}”')
 
     do_cycle = True
     while do_cycle:
@@ -145,7 +145,7 @@ def input_type_2(config_dict):
                 break
         else:  # 循环正常结束则跳出while循环
             do_cycle = False
-    logger.info(f'输入新文件扩展名：“{new_rule_dict["new_ext"]}”')
+    logging.info(f'输入新文件扩展名：“{new_rule_dict["new_ext"]}”')
 
     save_new_rule(config_dict, new_rule_dict)
 
@@ -183,9 +183,9 @@ def input_type_3(config_dict):
     new_rule_dict['type'] = 3
 
     new_rule_dict['name'] = input('请输入规则名称：')
-    logger.info(f'输入规则名称：“{new_rule_dict["name"]}”')
+    logging.info(f'输入规则名称：“{new_rule_dict["name"]}”')
     new_rule_dict['desc'] = input('请输入规则描述：')
-    logger.info(f'输入规则描述：“{new_rule_dict["desc"]}”')
+    logging.info(f'输入规则描述：“{new_rule_dict["desc"]}”')
 
     do_cycle = True
     while do_cycle:
@@ -196,7 +196,7 @@ def input_type_3(config_dict):
                 break
         else:
             do_cycle = False
-    logger.info(f'输入目标字符串：“{new_rule_dict["target_str"]}”')
+    logging.info(f'输入目标字符串：“{new_rule_dict["target_str"]}”')
 
     do_cycle = True
     while do_cycle:
@@ -207,7 +207,7 @@ def input_type_3(config_dict):
                 break
         else:
             do_cycle = False
-    logger.info(f'输入新字符串：“{new_rule_dict["new_str"]}”')
+    logging.info(f'输入新字符串：“{new_rule_dict["new_str"]}”')
 
     save_new_rule(config_dict, new_rule_dict)
 
@@ -252,9 +252,9 @@ def input_type_4(config_dict):
     new_rule_dict['type'] = 4
 
     new_rule_dict['name'] = input('请输入规则名称：')
-    logger.info(f'输入规则名称：“{new_rule_dict["name"]}”')
+    logging.info(f'输入规则名称：“{new_rule_dict["name"]}”')
     new_rule_dict['desc'] = input('请输入规则描述：')
-    logger.info(f'输入规则描述：“{new_rule_dict["desc"]}”')
+    logging.info(f'输入规则描述：“{new_rule_dict["desc"]}”')
 
     position = ''
     prompt = """
@@ -274,7 +274,7 @@ def input_type_4(config_dict):
                 print('请选择一个有效值！')
         except ValueError:
             print('该选项为必填选项，请不要跳过输入！')
-    logger.info(f'输入日期在文件名中的位置：“{position}”')
+    logging.info(f'输入日期在文件名中的位置：“{position}”')
     new_rule_dict['position'] = position
 
     do_cycle = True
@@ -284,7 +284,7 @@ def input_type_4(config_dict):
             print(f'文件名不能包含{illegal_char}！')
         else:
             do_cycle = False
-    logger.info(f'输入年月日分隔符：“{new_rule_dict["split_char"]}”')
+    logging.info(f'输入年月日分隔符：“{new_rule_dict["split_char"]}”')
 
     save_new_rule(config_dict, new_rule_dict)
 

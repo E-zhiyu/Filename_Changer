@@ -45,16 +45,16 @@ def print_main_menu():
         if option == 0:
             break
         elif option == 1:
-            logger.info('选择操作：文件重命名')
+            logging.info('选择操作：文件重命名')
             print('操作：文件重命名'.center(42, '—'))
             rename()
         elif option == 2:
-            logger.info('选择操作：撤销重命名')
+            logging.info('选择操作：撤销重命名')
             if confirm_your_operation(with_warning=False):
                 cancel_last_operation()
         elif option == 3:
             print('操作：规则配置'.center(42, '—'))
-            logger.info('选择操作：规则设置')
+            logging.info('选择操作：规则设置')
             configure_rules()
         else:
             print('请选择有效的操作')
@@ -77,10 +77,10 @@ def confirm_your_operation(with_warning=True):
     while True:
         option = input('请输入：')
         if option == 'Y' or option == 'y':
-            logger.info('用户确认操作')
+            logging.info('用户确认操作')
             return True
         elif option == 'N' or option == 'n':
-            logger.info('用户取消操作')
+            logging.info('用户取消操作')
             return False
         else:
             print('请输入Y或者N！')
@@ -98,16 +98,16 @@ def get_directory():
 
         # 去除前后双引号
         directory = directory.strip('"')
-        logger.info(f'输入路径“{directory}”')
+        logging.info(f'输入路径“{directory}”')
 
         # 路径有效性的异常处理
         try:
             if os.path.isdir(directory):
-                logger.info('路径有效，进行下一步操作')
+                logging.info('路径有效，进行下一步操作')
                 return directory
             else:
                 print(f'“{directory}”不是有效的路径，请重新输入！')
-                logger.info('路径无效，已提示用户重新输入')
+                logging.info('路径无效，已提示用户重新输入')
         except Exception as e:
             print(f'发生错误{e}，请重新输入！')
 
@@ -164,17 +164,17 @@ def configure_rules():
 
     config_dict = load_config()
     if user_option == 0:
-        logger.info('选择操作：回到主菜单')
+        logging.info('选择操作：回到主菜单')
         return
     elif user_option == 1:
-        logger.info('选择操作：创建新规则')
+        logging.info('选择操作：创建新规则')
         set_new_rule(config_dict)
     elif user_option == 2:
-        logger.info('选择操作：查看规则')
+        logging.info('选择操作：查看规则')
         display_rules(config_dict)
     elif user_option == 3:
-        logger.info('选择操作：删除规则')
+        logging.info('选择操作：删除规则')
         del_rules(config_dict)
     elif user_option == 4:
-        logger.info('选择操作：切换规则')
+        logging.info('选择操作：切换规则')
         switch_rule(config_dict)

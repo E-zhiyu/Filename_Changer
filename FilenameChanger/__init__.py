@@ -1,12 +1,6 @@
-import os.path
+# python_version = '3.13'
 
-python_version = '3.13'
-
-version = "1.3.0"
+version = "1.4.0"
 author = 'GitHub@E-zhiyu'
 config_path = './rename_rules/rename_rules.json'  # 重命名规则文件路径
 history_file_path = './rename_history/rename_history.json'
-
-# 程序运行创建日志文件夹
-if not os.path.isdir('./log'):
-    os.mkdir('./log')
