@@ -1,6 +1,7 @@
 # FilenameChanger/rename_rules/rule_type_manager.py
+import re
+
 from FilenameChanger.rename_rules.rule_manager import *
-from file_operations.file_utils import has_date_time
 from FilenameChanger.rename_rules import illegal_char
 
 """
@@ -107,16 +108,9 @@ def use_type_1(config_dict, old_name_list):
         behind.append(b)
     new_name_list = []
     for f, b, e in zip(front, behind, ext_list):
-        # 去除前后空格
-        if f[0] == ' ':
-            f = f[1:]
-        if f[-1] == ' ':
-            f = f[:-1]
+        f.strip()  # 去除前后空格
         if b:
-            if b[0] == ' ':
-                b = b[1:]
-            if b[-1] == ' ':
-                b = b[:-1]
+            b.strip()  # 去除前后空格
             new = b + ' ' + split_char + ' ' + f + e  # 将f,b前后调换生成新文件名
         else:
             new = f + e  # 若没有第二部分文件名则保持原状
@@ -286,7 +280,7 @@ def input_type_4(config_dict):
     do_cycle = True
     while do_cycle:
         new_rule_dict['split_char'] = input('请输入年月日分隔符：')
-        if new_rule_dict['split_char'] in illegal_char:
+        if new_rule_dict['split_char'] in illegal_char:  # 检测输入的分隔符是否合法
             print(f'文件名不能包含{illegal_char}！')
         else:
             do_cycle = False
@@ -306,20 +300,41 @@ def use_type_4(config_dict, old_name_list):
     split_char = config_dict['rules'][selected_index]['split_char']
     position = config_dict['rules'][selected_index]['position']
     local_date = time.strftime(f'%Y{split_char}%m{split_char}%d', time.localtime(time.time()))
-
     new_name_list = []
+
+    """遍历文件名列表，循环对单个文件名进行操作"""
     for old_name in old_name_list:
         try:  # 处理没有扩展名的文件
             file_name, ext = os.path.splitext(old_name)
         except ValueError:
             ext = ''
 
-        """判断文件名是否含有日期"""
-        with_date = has_date_time(file_name)
+        """判断是否含有日期"""
+        date_type_re = (
+            '\d{4}-\d{1,2}-\d{1,2}',
+            '\d{8}',
+            '\d{4}_\d{1,2}_\d{1,2}',
+            '\d{4} \d{1,2} \d{1,2}',
+            '\d{4}年\d{1,2}月\d{1,2}日'
+        )
+        for date in date_type_re:
+            if re.match(date, file_name):
+                date_type = date  # 保存匹配到的日期样式
+                with_date = True
+                break
+        else:
+            with_date = False
 
-        """添加日期操作"""
-        if position == 'head':
-            new_name = local_date + file_name + ext
-        elif position == 'tail':
-            new_name = file_name + local_date + ext
-        new_name_list.append(new_name)
+        if with_date:
+            """删除日期操作"""
+            new_name = re.sub(date_type, '', file_name) + ext
+            new_name_list.append(new_name)
+        else:
+            """添加日期操作"""
+            if position == 'head':
+                new_name = local_date + file_name + ext
+            elif position == 'tail':
+                new_name = file_name + local_date + ext
+            new_name_list.append(new_name)
+
+    return new_name_list
