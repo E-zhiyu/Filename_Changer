@@ -184,3 +184,10 @@ def record_history(old_name_list, new_name_list, directory):
     with open(history_file_path, 'w', encoding='utf-8') as f:
         json.dump(history_list, f, ensure_ascii=False, indent=4)
         logger.info('已保存一条新的历史记录')
+
+
+def has_date_time(file_name):
+    # 正则表达式匹配文件名中的日期
+    date_type_re = (
+
+    )

@@ -1,6 +1,7 @@
 # FilenameChanger/rename_rules/rule_type_manager.py
-import time
 from FilenameChanger.rename_rules.rule_manager import *
+from file_operations.file_utils import has_date_time
+from FilenameChanger.rename_rules import illegal_char
 
 """
 根据规则种类采用不同写入和读取方式的模块
@@ -64,7 +65,13 @@ def input_type_1(config_dict):
     new_rule_dict['desc'] = input('请输入规则描述：')
     logger.info(f'输入规则描述：“{new_rule_dict["desc"]}”')
 
-    new_rule_dict['split_char'] = input('请输入分隔符：')
+    do_cycle = True
+    while do_cycle:
+        new_rule_dict['split_char'] = input('请输入分隔符：')
+        if new_rule_dict['split_char'] in illegal_char:
+            print(f'文件名不能包含{illegal_char}！')
+        else:
+            do_cycle = False
     logger.info(f'输入分隔符：“{new_rule_dict["split_char"]}”')
 
     save_new_rule(config_dict, new_rule_dict)  # 保存输入的规则
@@ -82,7 +89,11 @@ def use_type_1(config_dict, old_name_list):
     name_list = []  # 文件名列表
     ext_list = []  # 扩展名列表
     for file in old_name_list:
-        signal_name, signal_ext = os.path.splitext(file)  # 分离文件名和扩展名
+        try:  # 处理没有扩展名的文件
+            signal_name, signal_ext = os.path.splitext(file)  # 分离文件名和扩展名
+        except ValueError:
+            signal_ext = ''
+
         name_list.append(signal_name)
         ext_list.append(signal_ext)
 
@@ -128,9 +139,18 @@ def input_type_2(config_dict):
     new_rule_dict['desc'] = input('请输入规则描述：')
     logger.info(f'输入规则描述：“{new_rule_dict["desc"]}”')
 
-    new_rule_dict['new_ext'] = input('请输入新的文件扩展名：')
-    if new_rule_dict['new_ext'].startswith('.'):
-        new_rule_dict['new_ext'] = new_rule_dict['new_ext'][1:]  # 去除用户输入的“.”
+    do_cycle = True
+    while do_cycle:
+        new_rule_dict['new_ext'] = input('请输入新的文件扩展名：')
+        if new_rule_dict['new_ext'].startswith('.'):
+            new_rule_dict['new_ext'] = new_rule_dict['new_ext'][1:]  # 去除用户输入的“.”
+        """检测是否含有非法字符"""
+        for char in illegal_char:
+            if char in new_rule_dict['new_ext']:
+                print(f'文件名不能包含{illegal_char}')
+                break
+        else:  # 循环正常结束则跳出while循环
+            do_cycle = False
     logger.info(f'输入新文件扩展名：“{new_rule_dict["new_ext"]}”')
 
     save_new_rule(config_dict, new_rule_dict)
@@ -173,9 +193,26 @@ def input_type_3(config_dict):
     new_rule_dict['desc'] = input('请输入规则描述：')
     logger.info(f'输入规则描述：“{new_rule_dict["desc"]}”')
 
-    new_rule_dict['target_str'] = input('请输入需要修改的字符串：')
+    do_cycle = True
+    while do_cycle:
+        new_rule_dict['target_str'] = input('请输入需要修改的字符串：')
+        for char in illegal_char:
+            if char in new_rule_dict['target_str']:
+                print(f'文件名不能含有{illegal_char}！')
+                break
+        else:
+            do_cycle = False
     logger.info(f'输入目标字符串：“{new_rule_dict["target_str"]}”')
-    new_rule_dict['new_str'] = input('请输入修改后的字符串：')
+
+    do_cycle = True
+    while do_cycle:
+        new_rule_dict['new_str'] = input('请输入修改后的字符串：')
+        for char in illegal_char:
+            if char in new_rule_dict['new_str']:
+                print(f'文件名不能含有{illegal_char}！')
+                break
+        else:
+            do_cycle = False
     logger.info(f'输入新字符串：“{new_rule_dict["new_str"]}”')
 
     save_new_rule(config_dict, new_rule_dict)
@@ -183,7 +220,7 @@ def input_type_3(config_dict):
 
 def use_type_3(config_dict, old_name_list):
     """
-    功能：应用类型二的规则
+    功能：应用类型三的规则
     参数 config_dict：配置文件根字典
     参数 old_name_list：旧文件名列表
     返回：生成的新文件名列表
@@ -246,11 +283,43 @@ def input_type_4(config_dict):
     logger.info(f'输入日期在文件名中的位置：“{position}”')
     new_rule_dict['position'] = position
 
-    new_rule_dict['split_char'] = input('请输入年月日分隔符：')
+    do_cycle = True
+    while do_cycle:
+        new_rule_dict['split_char'] = input('请输入年月日分隔符：')
+        if new_rule_dict['split_char'] in illegal_char:
+            print(f'文件名不能包含{illegal_char}！')
+        else:
+            do_cycle = False
     logger.info(f'输入年月日分隔符：“{new_rule_dict["split_char"]}”')
 
     save_new_rule(config_dict, new_rule_dict)
 
 
 def use_type_4(config_dict, old_name_list):
-    pass
+    """
+    功能：应用类型四的规则
+    参数 config_dict：配置文件根字典
+    参数 old_name_list：旧文件名列表
+    返回：生成的新文件名列表
+    """
+    selected_index = config_dict['selected_index']
+    split_char = config_dict['rules'][selected_index]['split_char']
+    position = config_dict['rules'][selected_index]['position']
+    local_date = time.strftime(f'%Y{split_char}%m{split_char}%d', time.localtime(time.time()))
+
+    new_name_list = []
+    for old_name in old_name_list:
+        try:  # 处理没有扩展名的文件
+            file_name, ext = os.path.splitext(old_name)
+        except ValueError:
+            ext = ''
+
+        """判断文件名是否含有日期"""
+        with_date = has_date_time(file_name)
+
+        """添加日期操作"""
+        if position == 'head':
+            new_name = local_date + file_name + ext
+        elif position == 'tail':
+            new_name = file_name + local_date + ext
+        new_name_list.append(new_name)
