@@ -26,11 +26,11 @@ def hidden_or_protected(directory):
             attrs = os.stat(directory).st_file_attributes
             # 检查是否隐藏（0x2）或系统文件（0x4）
             if attrs & (stat.FILE_ATTRIBUTE_HIDDEN | stat.FILE_ATTRIBUTE_SYSTEM):
-                logger.debug(f'排除隐藏文件或系统文件：“{directory}”')
+                logging.debug(f'排除隐藏文件或系统文件：“{directory}”')
                 return True
             # 排除只读文件（0x1）
             if attrs & stat.FILE_ATTRIBUTE_READONLY:
-                logger.debug(f'排除只读文件：{directory}')
+                logging.debug(f'排除只读文件：{directory}')
                 return True
         except (AttributeError, OSError):
             pass  # 非 Windows 或文件不可访问
@@ -47,11 +47,11 @@ def get_files_in_directory(directory):
         old_name = [f for f in os.listdir(directory) if
                     os.path.isfile(os.path.join(directory, f)) and not hidden_or_protected(
                         os.path.join(directory, f))]
-        logger.info('文件名列表获取成功')
+        logging.info('文件名列表获取成功')
         if not old_name:
             raise FileNotFoundError
     except FileNotFoundError:
-        logger.error('目标路径为空，文件名列表获取失败')
+        logging.error('目标路径为空，文件名列表获取失败')
         print(f'【错误】“{directory}”为空！')
     else:
         return old_name
@@ -65,16 +65,16 @@ def rename_files(directory, origin_name, new_name):
     参数 new_name：单个新文件名
     """
     if origin_name == new_name:
-        logger.info(f'【未更改】{origin_name}')
+        logging.info(f'【未更改】{origin_name}')
         print(f'【未更改】{origin_name}')
     else:
         try:
             os.rename(os.path.join(directory, origin_name), os.path.join(directory, new_name))
         except FileNotFoundError:
-            logger.error(f'【错误】文件“{origin_name}”不存在！')
+            logging.error(f'【错误】文件“{origin_name}”不存在！')
             print(f'【错误】文件“{origin_name}”不存在！')
         else:
-            logger.info(f'【成功】{origin_name} -> {new_name}')
+            logging.info(f'【成功】{origin_name} -> {new_name}')
             print(f'【成功】{origin_name} -> {new_name}')
 
 
@@ -97,7 +97,7 @@ def get_new_name_list(config_dict, old_name_list):
     elif rule_type == 4:
         new_name_list = use_type_4(config_dict, old_name_list)
 
-    logger.info('已生成新文件名列表')
+    logging.info('已生成新文件名列表')
     return new_name_list
 
 
@@ -108,17 +108,17 @@ def cancel_last_operation():
     # 加载已保存的历史记录
     try:
         with open(history_file_path, 'r', encoding='utf-8') as f:
-            logger.info('成功读取已保存的历史记录')
+            logging.info('成功读取已保存的历史记录')
             history_list = json.load(f)
     except FileNotFoundError:
-        logger.error('历史记录文件不存在或被移除')
+        logging.error('历史记录文件不存在或被移除')
         print('历史记录文件不存在或已被移除！\n即将返回主菜单……')
         time.sleep(0.5)
         return
 
     # 判断历史记录是否为空
     if not history_list:
-        logger.error('历史记录为空，无法撤销重命名')
+        logging.error('历史记录为空，无法撤销重命名')
         print('历史记录为空！\n即将返回主菜单……')
         time.sleep(0.5)
         return
@@ -131,7 +131,7 @@ def cancel_last_operation():
 
     # 判断旧文件夹路径是否可用
     if not os.path.isdir(directory):
-        logger.error('无法撤销：旧文件夹路径无效')
+        logging.error('无法撤销：旧文件夹路径无效')
         print('无法撤销：旧文件夹不存在或已被移除！\n即将返回主菜单……')
         time.sleep(0.5)
         return  # 若历史记录中的文件夹不存在，则不会执行下面的文件写入操作，无需担心历史记录被删除
@@ -164,14 +164,14 @@ def record_history(old_name_list, new_name_list, directory):
     # 读取现有历史记录
     try:
         with open(history_file_path, 'r', encoding='utf-8') as f:
-            logger.info('成功读取已保存的历史记录')
+            logging.info('成功读取已保存的历史记录')
             history_list = json.load(f)
     except FileNotFoundError:
         with open(history_file_path, 'w', encoding='utf-8') as f:
-            logger.info('历史记录文件不存在，正在初始化……')
+            logging.info('历史记录文件不存在，正在初始化……')
             history_list = []
             json.dump(history_list, f, ensure_ascii=False, indent=4)
-            logger.info('历史记录文件初始化成功')
+            logging.info('历史记录文件初始化成功')
 
     # 将新历史记录合并至根列表
     new_record_dict = {'directory': directory, 'old_name_list': [], 'new_name_list': []}
@@ -184,4 +184,4 @@ def record_history(old_name_list, new_name_list, directory):
     # 保存根列表到json文件
     with open(history_file_path, 'w', encoding='utf-8') as f:
         json.dump(history_list, f, ensure_ascii=False, indent=4)
-        logger.info('已保存一条新的历史记录')
+        logging.info('已保存一条新的历史记录')
