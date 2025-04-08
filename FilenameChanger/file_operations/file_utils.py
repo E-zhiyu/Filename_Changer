@@ -144,6 +144,7 @@ def cancel_last_operation():
 
     # 撤销上一次重命名
     print('撤销上一次重命名'.center(42, '—'))
+    logging.info('开始撤销重命名……')
     for old, new in zip(old_name_list, new_name_list):
         rename_files(directory, new, old)  # 把新旧文件名反过来
 
