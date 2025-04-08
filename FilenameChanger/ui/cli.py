@@ -117,6 +117,9 @@ def rename():
     功能：实现“文件重命名”操作
     """
     config_dict = load_config()  # 加载已保存的规则
+    logging.info(
+        f'当前活跃的规则为“规则{config_dict['selected_index'] + 1}”，'
+        f'规则种类：{config_dict['rules'][config_dict['selected_index']]['type']}')
     if not config_dict['rules']:  # 若规则为空，则结束本函数
         print('规则为空，请先前往规则设置写入规则！')
         return
@@ -133,6 +136,7 @@ def rename():
             record_history(old_name_list, new_name_list, directory)
 
         print('文件重命名记录'.center(42, '—'))
+        logging.info('开始文件重命名……')
         for old, new in zip(old_name_list, new_name_list):
             rename_files(directory, old, new)  # 执行重命名操作
 
@@ -163,6 +167,9 @@ def configure_rules():
             continue
 
     config_dict = load_config()
+    logging.info(
+        f'当前活跃的规则为“规则{config_dict['selected_index'] + 1}”，'
+        f'规则种类：{config_dict['rules'][config_dict['selected_index']]['type']}')
     if user_option == 0:
         logging.info('选择操作：回到主菜单')
         return

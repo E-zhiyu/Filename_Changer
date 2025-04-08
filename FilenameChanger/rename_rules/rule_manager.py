@@ -18,7 +18,7 @@ def load_config():
     """
     try:
         with open(config_path, 'r', encoding='utf-8') as f:
-            logging.info('加载规则配置')
+            logging.info('加载规则配置……')
             return json.load(f)
     except FileNotFoundError:
         logging.info('未找到配置文件，正在创建并初始化……')

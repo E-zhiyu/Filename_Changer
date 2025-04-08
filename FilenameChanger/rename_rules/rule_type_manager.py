@@ -1,4 +1,5 @@
 # FilenameChanger/rename_rules/rule_type_manager.py
+import logging
 import re
 
 from FilenameChanger.rename_rules.rule_manager import *
@@ -310,31 +311,37 @@ def use_type_4(config_dict, old_name_list):
             ext = ''
 
         """判断是否含有日期"""
+        logging.info('判断文件名是否含有日期')
         date_type_re = (
-            '\d{4}-\d{1,2}-\d{1,2}',
-            '\d{8}',
-            '\d{4}_\d{1,2}_\d{1,2}',
-            '\d{4} \d{1,2} \d{1,2}',
-            '\d{4}年\d{1,2}月\d{1,2}日'
+            r'\d{4}-\d{1,2}-\d{1,2}',
+            r'\d{8}',
+            r'\d{4}_\d{1,2}_\d{1,2}',
+            r'\d{4} \d{1,2} \d{1,2}',
+            r'\d{4}年\d{1,2}月\d{1,2}日'
         )
         for date in date_type_re:
             if re.match(date, file_name):
                 date_type = date  # 保存匹配到的日期样式
+                logging.info(f'文件名含有日期，格式为“{date_type}”')
                 with_date = True
                 break
         else:
+            logging.info('文件名不含日期')
             with_date = False
 
         if with_date:
             """删除日期操作"""
             new_name = re.sub(date_type, '', file_name) + ext
+            logging.info('已删除文件名中的日期')
             new_name_list.append(new_name)
         else:
             """添加日期操作"""
             if position == 'head':
                 new_name = local_date + file_name + ext
+                logging.info('已将当前日期添加至文件名头部')
             elif position == 'tail':
                 new_name = file_name + local_date + ext
+                logging.info('已将当前日期添加至文件名尾部')
             new_name_list.append(new_name)
 
     return new_name_list

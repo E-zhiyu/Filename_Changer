@@ -29,7 +29,7 @@ class DailyFileHandler(logging.FileHandler):
         return os.path.join(self.log_dir, f'{today}.log')
 
 def setup_logger():
-    formatter = logging.Formatter('%(asctime)s - [%(filename)s/%(levelname)s] : %(message)s')
+    formatter = logging.Formatter('%(asctime)s - [%(filename)s-%(lineno)d/%(levelname)s] : %(message)s')
     handler = DailyFileHandler(log_dir)
     handler.setFormatter(formatter)
 
