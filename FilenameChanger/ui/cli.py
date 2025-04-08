@@ -14,7 +14,7 @@ def print_welcome(version, author):
     参数 version：程序版本
     参数 author：作者昵称
     """
-    title = '文件名更名器'
+    title = '文件更名器'
     welcom_mes = f"""
   版本：{version}
   作者：{author}
