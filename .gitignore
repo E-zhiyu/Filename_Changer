@@ -7,5 +7,6 @@ FilenameChanger/docs/Bugs.md
 filenamechanger.egg-info
 FilenameChanger/logs
 FilenameChanger/test.py
-待修复的BUG.txt
 FilenameChanger/rename_history
+PyQt-Fluent-Widgets-PyQt6
+FilenameChanger\ui\Fluent-Widgets-GUI\app\download
