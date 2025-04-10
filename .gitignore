@@ -3,10 +3,8 @@ FilenameChanger/rename_rules/rename_rules.json
 main.spec
 dist
 build
-FilenameChanger/docs/Bugs.md
 filenamechanger.egg-info
 FilenameChanger/logs
 FilenameChanger/test.py
 FilenameChanger/rename_history
-PyQt-Fluent-Widgets-PyQt6
-FilenameChanger\ui\Fluent-Widgets-GUI\app\download
+PyQt_Fluent_Widgets_PyQt6/

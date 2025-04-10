@@ -1,6 +1,6 @@
 # main.py
 from FilenameChanger import version, author
-from FilenameChanger.ui.cli import *
+from FilenameChanger.cli.cli import *
 
 
 """
