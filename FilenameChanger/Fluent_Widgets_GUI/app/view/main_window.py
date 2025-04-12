@@ -20,8 +20,8 @@ class MainWindow(FluentWindow):
         self.themeListener = SystemThemeListener(self)
 
         # 实例化不同的子界面
-        self.homeInterface = HomeInterface('主页', self)
-        self.musicInterface = HomeInterface('这是规则列表', self)
+        self.homeInterface = HomeInterface('文件更名器', self)
+        self.ruleListInterface = HomeInterface('这是规则列表', self)
         self.infoInterface = HomeInterface('这是应用详情界面', self)
         self.settingInterface = HomeInterface('这是设置界面', self)
 
@@ -40,7 +40,7 @@ class MainWindow(FluentWindow):
         """初始化导航栏"""
         # 创建导航栏选项
         self.addSubInterface(self.homeInterface, FIF.HOME, '主页')
-        self.addSubInterface(self.musicInterface, FIF.LAYOUT, '规则列表')
+        self.addSubInterface(self.ruleListInterface, FIF.LAYOUT, '规则列表')
 
         # 添加导航栏底部按钮
         self.navigationInterface.addWidget(
