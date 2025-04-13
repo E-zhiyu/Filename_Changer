@@ -7,5 +7,4 @@ filenamechanger.egg-info
 FilenameChanger/logs
 FilenameChanger/test.py
 FilenameChanger/rename_history
-PyQt_Fluent_Widgets_PyQt6/
 app/

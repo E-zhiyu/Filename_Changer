@@ -178,9 +178,9 @@ def record_history(old_name_list, new_name_list, directory):
         if old != new:  # 只保存进行更改的文件名
             new_record_dict['old_name_list'].append(old)
             new_record_dict['new_name_list'].append(new)
-    history_list.append(new_record_dict)
-
-    # 保存根列表到json文件
-    with open(history_file_path, 'w', encoding='utf-8') as f:
-        json.dump(history_list, f, ensure_ascii=False, indent=4)
-        logging.info('已保存一条新的历史记录')
+    if new_record_dict['new_name_list']:  # 只有当新文件名列表不为空的时候才合并到现存历史记录中
+        history_list.append(new_record_dict)
+        # 保存修改后的根列表到json文件
+        with open(history_file_path, 'w', encoding='utf-8') as f:
+            json.dump(history_list, f, ensure_ascii=False, indent=4)
+            logging.info('已保存一条新的历史记录')

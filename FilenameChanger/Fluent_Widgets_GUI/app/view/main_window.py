@@ -38,19 +38,9 @@ class MainWindow(FluentWindow):
         # 创建导航栏选项
         self.addSubInterface(self.homeInterface, FIF.HOME, '主页')
 
-        """# 添加导航栏底部按钮
-        self.navigationInterface.addWidget(
-            routeKey='avatar',
-            widget=NavigationAvatarWidget('zhiyiYo', './app/resource/shoko.png'),
-            onClick=self.showMessageBox,
-            position=NavigationItemPosition.BOTTOM,
-        )"""
-
+        # 添加导航栏底部按钮
         """self.addSubInterface(self.settingInterface, FIF.SETTING, '设置', NavigationItemPosition.BOTTOM)  # 添加导航栏设置按钮
         self.addSubInterface(self.infoInterface, FIF.INFO, '关于', NavigationItemPosition.BOTTOM)  # 添加应用详情界面"""
-
-        # NOTE: enable acrylic effect
-        # self.navigationInterface.setAcrylicEnabled(True)
 
     def initWindow(self):
         """初始化窗口"""
@@ -63,19 +53,3 @@ class MainWindow(FluentWindow):
         w, h = desktop.width(), desktop.height()
         self.move(w // 2 - self.width() // 2, h // 2 - self.height() // 2)
         self.show()
-
-        # 设置允许导航面板展开的最小窗口宽度
-        # self.navigationInterface.setMinimumExpandWidth(900)
-        # self.navigationInterface.expand(useAni=False)
-
-    def showMessageBox(self):
-        w = MessageBox(
-            '支持作者🥰',
-            '个人开发不易，如果这个项目帮助到了您，可以考虑请作者喝一瓶快乐水🥤。您的支持就是作者开发和维护项目的动力🚀',
-            self
-        )
-        w.yesButton.setText('来啦老弟')
-        w.cancelButton.setText('下次一定')
-
-        if w.exec():
-            QDesktopServices.openUrl(QUrl("https://afdian.net/a/zhiyiYo"))

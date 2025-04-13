@@ -50,40 +50,13 @@ def print_main_menu():
             rename()
         elif option == 2:
             logging.info('选择操作：撤销重命名')
-            if confirm_your_operation(with_warning=False):
-                cancel_rename_operation()
+            cancel_rename_operation()
         elif option == 3:
             print('操作：规则配置'.center(42, '—'))
             logging.info('选择操作：规则设置')
             configure_rules()
         else:
             print('请选择有效的操作')
-
-
-def confirm_your_operation(with_warning=True):
-    """
-    功能：提示操作的风险并确认用户操作
-    返回：是否进行下一步操作（布尔值）
-    """
-    warning = """
-  【警告】文件重命名可能伴随以下风险
-  1.某些应用程序由于路径依赖无法定位重命名后的文件。
-  2.如果文件夹内有您不想重命名的文件，它也会被重命名！
-    """
-    if with_warning:
-        print(warning)
-
-    print('\n确认进行下一步操作吗？（Y/N）')
-    while True:
-        option = input('请输入：')
-        if option == 'Y' or option == 'y':
-            logging.info('用户确认操作')
-            return True
-        elif option == 'N' or option == 'n':
-            logging.info('用户取消操作')
-            return False
-        else:
-            print('请输入Y或者N！')
 
 
 def is_directory_usable(directory):

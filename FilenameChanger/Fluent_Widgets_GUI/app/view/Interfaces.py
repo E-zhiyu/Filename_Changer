@@ -2,7 +2,8 @@ from PyQt6.QtWidgets import QApplication, QFrame, QVBoxLayout, QSizePolicy, QHBo
 from PyQt6.QtCore import Qt, QUrl, QSize
 from pyexpat.errors import messages
 
-from Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, LineEdit, FluentIcon, PrimaryPushButton, Dialog)
+from Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, LineEdit, FluentIcon, PrimaryPushButton, Dialog,
+                                               MessageBox)
 from cli.cli import is_directory_usable, rename
 from file_operations.file_utils import cancel_rename_operation
 
@@ -51,7 +52,27 @@ class HomeInterface(QFrame):
         self.achieve_functions()
 
     def achieve_functions(self):
-        """实现控件功能"""
+        """实现各个控件的功能"""
+
+        def confirm_operation(with_warning=True):
+            """弹出确认操作的提示框"""
+            warning = """\
+            【警告】你所执行的操作可能伴随以下风险
+            - 重命名后有的软件可能因为路径依赖无法定位到该文件。
+            - 如果文件夹内有您不想重命名的文件，它也会被重命名！
+            """
+            if with_warning:
+                message = f"{warning}{'\n确认进行操作吗？'}"
+            else:
+                message = '确认进行操作吗？'
+            confirm_window = MessageBox('操作确认', content=message, parent=self)
+            confirm_window.show()
+            confirm_window.yesButton.setText('确认')
+            confirm_window.cancelButton.setText('取消')
+            if confirm_window.exec():
+                return 1
+            else:
+                return 0
 
         def get_directory():
             # 文本框功能实现
@@ -74,49 +95,51 @@ class HomeInterface(QFrame):
 
         # 重命名按钮功能实现
         def rename_button_function():
-            targetDirectory = self.folderLineEdit.text()
-            targetDirectory = targetDirectory.strip('\"')
-            flag = rename(targetDirectory)
-            # 显示一个消息提示框
-            if flag == 1:
-                message = '文件重命名完成！'
-                title = '成功'
-            elif flag == 0:
-                message = '文件夹为空！'
-                title = '失败'
-            elif flag == -1:
-                message = '规则列表为空！请先写入规则！'
-                title = '失败'
-            dialog = Dialog(title, message, self)
-            dialog.cancelButton.hide()
-            dialog.buttonLayout.insertStretch(1)
-            dialog.yesButton.setText("确认")
-            dialog.show()
-            dialog.exec()
+            if confirm_operation():  # 弹出消息框确认操作
+                targetDirectory = self.folderLineEdit.text()
+                targetDirectory = targetDirectory.strip('\"')
+                flag = rename(targetDirectory)
+                # 显示一个消息提示框
+                if flag == 1:
+                    message = '文件重命名完成！'
+                    title = '成功'
+                elif flag == 0:
+                    message = '文件夹为空！'
+                    title = '失败'
+                elif flag == -1:
+                    message = '规则列表为空！请先写入规则！'
+                    title = '失败'
+                message_window = MessageBox(title=title, content=message, parent=self)
+                message_window.cancelButton.hide()
+                message_window.buttonLayout.insertStretch(1)
+                message_window.yesButton.setText("确认")
+                message_window.show()
+                message_window.exec()
 
         self.renameButton.pressed.connect(rename_button_function)
 
         # 撤销重命名按钮功能实现
         def cancel_button_function():
-            flag = cancel_rename_operation()
+            if confirm_operation():  # 弹出消息框确认操作
+                flag = cancel_rename_operation()
 
-            if flag == 1:
-                message = '撤销重命名成功！'
-                title='成功'
-            elif flag == 0:
-                message = '历史记录为空，无法撤销重命名！'
-                title = '失败'
-            elif flag == -1:
-                message = '历史记录文件不存在或已被删除！'
-                title = '失败'
-            elif flag == -2:
-                message = '上次重命名的文件夹不存在或已被移除！'
-                title = '失败'
-            dialog = Dialog(title, message, self)
-            dialog.cancelButton.hide()
-            dialog.buttonLayout.insertStretch(1)
-            dialog.yesButton.setText("确认")
-            dialog.show()
-            dialog.exec()
+                if flag == 1:
+                    message = '撤销重命名成功！'
+                    title = '成功'
+                elif flag == 0:
+                    message = '历史记录为空，无法撤销重命名！'
+                    title = '失败'
+                elif flag == -1:
+                    message = '历史记录文件不存在或已被删除！'
+                    title = '失败'
+                elif flag == -2:
+                    message = '上次重命名的文件夹不存在或已被移除！'
+                    title = '失败'
+                message_window = MessageBox(title=title, content=message, parent=self)
+                message_window.cancelButton.hide()
+                message_window.buttonLayout.insertStretch(1)
+                message_window.yesButton.setText("确认")
+                message_window.show()
+                message_window.exec()
 
         self.cancelButton.pressed.connect(cancel_button_function)

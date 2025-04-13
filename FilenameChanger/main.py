@@ -1,5 +1,4 @@
 # main.py
-from FilenameChanger import version, author
 from FilenameChanger.cli.cli import *
 from Fluent_Widgets_GUI.PyQt6_Fluent_GUI import *
 
