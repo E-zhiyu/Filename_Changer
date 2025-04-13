@@ -24,6 +24,8 @@ class HomeInterface(QFrame):
         self.lineEditLayout = QVBoxLayout(self)  # 设置文本框布局器（垂直）
         self.buttonHBoxLayout = QHBoxLayout(self)  # 设置按钮布局器（水平）
 
+        self.setObjectName('HomeInterface')  # 设置全局唯一对象名
+
         """设置控件属性"""
         setFont(self.label, 40)
         self.folderLineEdit.setFixedWidth(300)
@@ -47,9 +49,8 @@ class HomeInterface(QFrame):
         self.buttonHBoxLayout.addWidget(self.cancelButton, 1)
         self.mainVBoxLayout.addLayout(self.lineEditLayout, 1)  # 将文本框布局器添加至主布局器
         self.mainVBoxLayout.addLayout(self.buttonHBoxLayout, 1)  # 将按钮布局器加入主布局器
-        self.setObjectName(text.replace(' ', '-'))
 
-        self.achieve_functions()
+        self.achieve_functions()  # 调用控件功能函数
 
     def achieve_functions(self):
         """实现各个控件的功能"""
@@ -143,3 +144,24 @@ class HomeInterface(QFrame):
                 message_window.exec()
 
         self.cancelButton.pressed.connect(cancel_button_function)
+
+
+class RuleListInterface(QFrame):
+    """定义规则列表界面布局"""
+
+    def __init__(self, text: str, parent=None):
+        super().__init__(parent=parent)
+        """实例化各种控件"""
+        self.label = SubtitleLabel(text, self)
+        self.mainVBoxLayout = QVBoxLayout(self)
+
+        self.setObjectName('RuleListInterface')
+
+        """设置控件属性"""
+        setFont(self.label, 40)
+
+        """设置控件位置"""
+        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        """将控件添加至布局器"""
+        self.mainVBoxLayout.addWidget(self.label, 1, Qt.AlignmentFlag.AlignTop)

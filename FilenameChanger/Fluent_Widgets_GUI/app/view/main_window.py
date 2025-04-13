@@ -21,6 +21,7 @@ class MainWindow(FluentWindow):
 
         # 实例化不同的子界面
         self.homeInterface = HomeInterface('文件更名器', self)
+        self.ruleListInterface = RuleListInterface('规则列表', self)
 
         self.initNavigation()
 
@@ -37,6 +38,7 @@ class MainWindow(FluentWindow):
         """初始化导航栏"""
         # 创建导航栏选项
         self.addSubInterface(self.homeInterface, FIF.HOME, '主页')
+        self.addSubInterface(self.ruleListInterface, FIF.LAYOUT, '规则列表')
 
         # 添加导航栏底部按钮
         """self.addSubInterface(self.settingInterface, FIF.SETTING, '设置', NavigationItemPosition.BOTTOM)  # 添加导航栏设置按钮
