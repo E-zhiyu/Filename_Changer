@@ -3,7 +3,8 @@ from PyQt6.QtCore import Qt, QUrl, QSize
 from pyexpat.errors import messages
 
 from Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, LineEdit, FluentIcon, PrimaryPushButton, Dialog)
-from cli.cli import isDirectoryUsable, rename
+from cli.cli import is_directory_usable, rename
+from file_operations.file_utils import cancel_rename_operation
 
 
 class HomeInterface(QFrame):
@@ -57,7 +58,7 @@ class HomeInterface(QFrame):
             self.folderLineEdit.setFocus()
 
             targetDirectory = self.folderLineEdit.text()
-            targetDirectory, flag = isDirectoryUsable(targetDirectory)
+            targetDirectory, flag = is_directory_usable(targetDirectory)
             if flag:
                 self.renameButton.setEnabled(True)
                 self.warnLabel.setStyleSheet("""QLabel{color: rgb(72, 180, 72);
@@ -79,11 +80,14 @@ class HomeInterface(QFrame):
             # 显示一个消息提示框
             if flag == 1:
                 message = '文件重命名完成！'
+                title = '成功'
             elif flag == 0:
                 message = '文件夹为空！'
+                title = '失败'
             elif flag == -1:
                 message = '规则列表为空！请先写入规则！'
-            dialog = Dialog('重命名状态提示', message, self)
+                title = '失败'
+            dialog = Dialog(title, message, self)
             dialog.cancelButton.hide()
             dialog.buttonLayout.insertStretch(1)
             dialog.yesButton.setText("确认")
@@ -91,3 +95,28 @@ class HomeInterface(QFrame):
             dialog.exec()
 
         self.renameButton.pressed.connect(rename_button_function)
+
+        # 撤销重命名按钮功能实现
+        def cancel_button_function():
+            flag = cancel_rename_operation()
+
+            if flag == 1:
+                message = '撤销重命名成功！'
+                title='成功'
+            elif flag == 0:
+                message = '历史记录为空，无法撤销重命名！'
+                title = '失败'
+            elif flag == -1:
+                message = '历史记录文件不存在或已被删除！'
+                title = '失败'
+            elif flag == -2:
+                message = '上次重命名的文件夹不存在或已被移除！'
+                title = '失败'
+            dialog = Dialog(title, message, self)
+            dialog.cancelButton.hide()
+            dialog.buttonLayout.insertStretch(1)
+            dialog.yesButton.setText("确认")
+            dialog.show()
+            dialog.exec()
+
+        self.cancelButton.pressed.connect(cancel_button_function)

@@ -102,7 +102,7 @@ def get_new_name_list(config_dict, old_name_list):
     return new_name_list
 
 
-def cancel_last_operation():
+def cancel_rename_operation():
     """
     功能：撤销上一次重命名操作
     """
@@ -114,15 +114,13 @@ def cancel_last_operation():
     except FileNotFoundError:
         logging.error('历史记录文件不存在或被移除')
         print('历史记录文件不存在或已被移除！\n即将返回主菜单……')
-        time.sleep(0.5)
-        return
+        return -1
 
     # 判断历史记录是否为空
     if not history_list:
         logging.error('历史记录为空，无法撤销重命名')
         print('历史记录为空！\n即将返回主菜单……')
-        time.sleep(0.5)
-        return
+        return 0
 
     # 加载上一次的重命名记录
     last_history_dict = history_list.pop()
@@ -134,8 +132,7 @@ def cancel_last_operation():
     if not os.path.isdir(directory):
         logging.error('无法撤销：旧文件夹路径无效')
         print('无法撤销：旧文件夹不存在或已被移除！\n即将返回主菜单……')
-        time.sleep(0.5)
-        return  # 若历史记录中的文件夹不存在，则不会执行下面的文件写入操作，无需担心历史记录被删除
+        return -2  # 若历史记录中的文件夹不存在，则不会执行下面的文件写入操作，无需担心历史记录被删除
 
     # 删除最近一条重命名记录
     if not os.path.isdir(os.path.dirname(history_file_path)):  # 防止历史记录文件夹被移除
@@ -149,7 +146,7 @@ def cancel_last_operation():
     for old, new in zip(old_name_list, new_name_list):
         rename_files(directory, new, old)  # 把新旧文件名反过来
 
-    time.sleep(0.5)
+    return 1
 
 
 def record_history(old_name_list, new_name_list, directory):

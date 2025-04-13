@@ -51,7 +51,7 @@ def print_main_menu():
         elif option == 2:
             logging.info('选择操作：撤销重命名')
             if confirm_your_operation(with_warning=False):
-                cancel_last_operation()
+                cancel_rename_operation()
         elif option == 3:
             print('操作：规则配置'.center(42, '—'))
             logging.info('选择操作：规则设置')
@@ -86,7 +86,7 @@ def confirm_your_operation(with_warning=True):
             print('请输入Y或者N！')
 
 
-def isDirectoryUsable(directory):
+def is_directory_usable(directory):
     """
     功能：判断文件夹路径是否有效
     """
