@@ -1,8 +1,9 @@
 from PyQt6.QtWidgets import QApplication, QFrame, QVBoxLayout, QSizePolicy, QHBoxLayout
 from PyQt6.QtCore import Qt, QUrl, QSize
+from pyexpat.errors import messages
 
-from Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, LineEdit, FluentIcon, PrimaryPushButton)
-from cli.cli import isDirectoryUsable
+from Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, LineEdit, FluentIcon, PrimaryPushButton, Dialog)
+from cli.cli import isDirectoryUsable, rename
 
 
 class HomeInterface(QFrame):
@@ -46,11 +47,15 @@ class HomeInterface(QFrame):
         self.mainVBoxLayout.addLayout(self.buttonHBoxLayout, 1)  # 将按钮布局器加入主布局器
         self.setObjectName(text.replace(' ', '-'))
 
-        """实现控件功能"""
-        # 文本框功能实现
-        self.folderLineEdit.setFocus()
+        self.achieve_functions()
 
-        def updateDirectory():
+    def achieve_functions(self):
+        """实现控件功能"""
+
+        def get_directory():
+            # 文本框功能实现
+            self.folderLineEdit.setFocus()
+
             targetDirectory = self.folderLineEdit.text()
             targetDirectory, flag = isDirectoryUsable(targetDirectory)
             if flag:
@@ -64,6 +69,25 @@ class HomeInterface(QFrame):
                                                 text-shadow: 2px 2px 4px black;}""")
                 self.warnLabel.setText('这不是一个有效的文件夹！')
 
-        self.folderLineEdit.textChanged.connect(updateDirectory)
+        self.folderLineEdit.textChanged.connect(get_directory)
 
         # 重命名按钮功能实现
+        def rename_button_function():
+            targetDirectory = self.folderLineEdit.text()
+            targetDirectory = targetDirectory.strip('\"')
+            flag = rename(targetDirectory)
+            # 显示一个消息提示框
+            if flag == 1:
+                message = '文件重命名完成！'
+            elif flag == 0:
+                message = '文件夹为空！'
+            elif flag == -1:
+                message = '规则列表为空！请先写入规则！'
+            dialog = Dialog('重命名状态提示', message, self)
+            dialog.cancelButton.hide()
+            dialog.buttonLayout.insertStretch(1)
+            dialog.yesButton.setText("确认")
+            dialog.show()
+            dialog.exec()
+
+        self.renameButton.pressed.connect(rename_button_function)

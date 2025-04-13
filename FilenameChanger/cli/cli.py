@@ -107,37 +107,35 @@ def isDirectoryUsable(directory):
         return directory, 0
 
 
-def rename():
+def rename(directory):
     """
     功能：实现“文件重命名”操作
     """
-    config_dict = load_config()  # 加载已保存的规则
+    config_dict = load_config()  # 重命名时加载已保存的规则
     logging.info(
         f'当前活跃的规则为“规则{config_dict['selected_index'] + 1}”，'
         f'规则种类：{config_dict['rules'][config_dict['selected_index']]['type']}')
     if not config_dict['rules']:  # 若规则为空，则结束本函数
         print('规则为空，请先前往规则设置写入规则！')
-        return
+        return -1
 
-    directory = isDirectoryUsable()  # 获取目标路径
+    old_name_list = get_files_in_directory(directory)  # old_file_names列表将包含该目录下所有文件的文件名（包含扩展名）
+    if not old_name_list:
+        return 0
+    new_name_list = get_new_name_list(config_dict, old_name_list)  # 生成新文件名
 
-    if confirm_your_operation():  # 用户确认重命名后再执行
-        old_name_list = get_files_in_directory(directory)  # old_file_names列表将包含该目录下所有文件的文件名（包含扩展名）
-        if not old_name_list:
-            return
-        new_name_list = get_new_name_list(config_dict, old_name_list)  # 生成新文件名
-        # 记录本次重命名操作，便于后续恢复
-        if old_name_list != new_name_list:
-            record_history(old_name_list, new_name_list, directory)
+    # 记录重命名操作（仅已修改的文件名）
+    if old_name_list != new_name_list:
+        record_history(old_name_list, new_name_list, directory)
 
-        print('文件重命名记录'.center(42, '—'))
-        logging.info('开始文件重命名……')
-        for old, new in zip(old_name_list, new_name_list):
-            rename_files(directory, old, new)  # 执行重命名操作
+    print('文件重命名记录'.center(42, '—'))
+    logging.info('开始文件重命名……')
+    for old, new in zip(old_name_list, new_name_list):
+        rename_files(directory, old, new)  # 执行重命名操作
 
     print('文件重命名完成！')
     print('操作已记录在日志文件中！')
-    time.sleep(0.5)
+    return 1
 
 
 def configure_rules():
@@ -161,7 +159,7 @@ def configure_rules():
             print('请选择一个操作！')
             continue
 
-    config_dict = load_config()
+    config_dict = load_config()  # 设置规则时加载现存规则
     logging.info(
         f'当前活跃的规则为“规则{config_dict['selected_index'] + 1}”，'
         f'规则种类：{config_dict['rules'][config_dict['selected_index']]['type']}')

@@ -91,20 +91,20 @@ def use_type_1(config_dict, old_name_list):
     """
     selected_index = config_dict['selected_index']
     split_char = config_dict['rules'][selected_index]['split_char']
-    old_name_list = []  # 文件名列表
+    old_filename_list = []  # 文件名列表
     old_ext_list = []  # 扩展名列表
     for file in old_name_list:
-        try:  # 处理没有扩展名的文件
+        try:
             signal_name, signal_ext = os.path.splitext(file)  # 分离文件名和扩展名
         except ValueError:
             signal_ext = ''  # 处理没有扩展名的文件
 
-        old_name_list.append(signal_name)
+        old_filename_list.append(signal_name)
         old_ext_list.append(signal_ext)
 
     front = []  # 前半部分文件名
     behind = []  # 后半部分文件名
-    for signal_name in old_name_list:
+    for signal_name in old_filename_list:
         parts = signal_name.split(split_char, maxsplit=1)  # 将拆分的两个部分存放至列表parts中
         f = parts[0]
         b = parts[1] if len(parts) > 1 else ''  # 默认第二部分为空，用于处理无法拆分的文件名
@@ -112,9 +112,9 @@ def use_type_1(config_dict, old_name_list):
         behind.append(b)
     new_name_list = []
     for f, b, e in zip(front, behind, old_ext_list):
-        f.strip()  # 去除前后空格
+        f = f.strip()  # 去除前后空格
         if b:
-            b.strip()  # 去除前后空格
+            b = b.strip()  # 去除前后空格
             new = f'{b} {split_char} {f}{e}'  # 将f,b前后调换生成新文件名
         else:
             new = f'{f}{e}'  # 若没有第二部分文件名则保持原状

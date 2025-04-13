@@ -53,6 +53,7 @@ def get_files_in_directory(directory):
     except FileNotFoundError:
         logging.error('目标路径为空，文件名列表获取失败')
         print(f'【错误】“{directory}”为空！')
+        return None
     else:
         return old_name
 
