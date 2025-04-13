@@ -7,8 +7,8 @@ from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import QApplication
 from qfluentwidgets import FluentTranslator, CheckBox
 
-from app.common.config import cfg
-from app.view.main_window import MainWindow
+from Fluent_Widgets_GUI.app.common.config import cfg
+from Fluent_Widgets_GUI.app.view.main_window import MainWindow
 
 # 启用DPI比例
 if cfg.get(cfg.dpiScale) != "Auto":

@@ -86,30 +86,25 @@ def confirm_your_operation(with_warning=True):
             print('请输入Y或者N！')
 
 
-def get_directory():
+def isDirectoryUsable(directory):
     """
-    功能：提示用户输入目标路径
+    功能：判断文件夹路径是否有效
     """
-    while True:
-        directory = input('请输入文件夹路径\n')
-        if not directory:
-            print('路径不能为空！')
-            continue
+    # 去除前后双引号
+    directory = directory.strip('"')
+    logging.info(f'输入路径“{directory}”')
 
-        # 去除前后双引号
-        directory = directory.strip('"')
-        logging.info(f'输入路径“{directory}”')
-
-        # 路径有效性的异常处理
-        try:
-            if os.path.isdir(directory):
-                logging.info('路径有效，进行下一步操作')
-                return directory
-            else:
-                print(f'“{directory}”不是有效的路径，请重新输入！')
-                logging.info('路径无效，已提示用户重新输入')
-        except Exception as e:
-            print(f'发生错误{e}，请重新输入！')
+    # 路径有效性的异常处理
+    try:
+        if os.path.isdir(directory):
+            logging.info('路径有效，进行下一步操作')
+            return directory, 1
+        else:
+            logging.warning('路径无效，已提示用户重新输入')
+            return directory, 0
+    except Exception as e:
+        logging.error('【错误】输入路径时发生未知错误！')
+        return directory, 0
 
 
 def rename():
@@ -124,7 +119,7 @@ def rename():
         print('规则为空，请先前往规则设置写入规则！')
         return
 
-    directory = get_directory()  # 获取目标路径
+    directory = isDirectoryUsable()  # 获取目标路径
 
     if confirm_your_operation():  # 用户确认重命名后再执行
         old_name_list = get_files_in_directory(directory)  # old_file_names列表将包含该目录下所有文件的文件名（包含扩展名）

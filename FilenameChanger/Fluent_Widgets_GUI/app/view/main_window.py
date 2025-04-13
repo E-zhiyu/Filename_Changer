@@ -21,9 +21,6 @@ class MainWindow(FluentWindow):
 
         # 实例化不同的子界面
         self.homeInterface = HomeInterface('文件更名器', self)
-        self.ruleListInterface = HomeInterface('这是规则列表', self)
-        self.infoInterface = HomeInterface('这是应用详情界面', self)
-        self.settingInterface = HomeInterface('这是设置界面', self)
 
         self.initNavigation()
 
@@ -40,18 +37,17 @@ class MainWindow(FluentWindow):
         """初始化导航栏"""
         # 创建导航栏选项
         self.addSubInterface(self.homeInterface, FIF.HOME, '主页')
-        self.addSubInterface(self.ruleListInterface, FIF.LAYOUT, '规则列表')
 
-        # 添加导航栏底部按钮
+        """# 添加导航栏底部按钮
         self.navigationInterface.addWidget(
             routeKey='avatar',
             widget=NavigationAvatarWidget('zhiyiYo', './app/resource/shoko.png'),
             onClick=self.showMessageBox,
             position=NavigationItemPosition.BOTTOM,
-        )
+        )"""
 
-        self.addSubInterface(self.settingInterface, FIF.SETTING, '设置', NavigationItemPosition.BOTTOM)  # 添加导航栏设置按钮
-        self.addSubInterface(self.infoInterface, FIF.INFO, '关于', NavigationItemPosition.BOTTOM)  # 添加应用详情界面
+        """self.addSubInterface(self.settingInterface, FIF.SETTING, '设置', NavigationItemPosition.BOTTOM)  # 添加导航栏设置按钮
+        self.addSubInterface(self.infoInterface, FIF.INFO, '关于', NavigationItemPosition.BOTTOM)  # 添加应用详情界面"""
 
         # NOTE: enable acrylic effect
         # self.navigationInterface.setAcrylicEnabled(True)
