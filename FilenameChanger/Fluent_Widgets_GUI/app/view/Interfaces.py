@@ -1,9 +1,9 @@
-from PyQt6.QtWidgets import QApplication, QFrame, QVBoxLayout, QSizePolicy, QHBoxLayout
+from PyQt6.QtWidgets import QApplication, QFrame, QVBoxLayout, QSizePolicy, QHBoxLayout, QWidget
 from PyQt6.QtCore import Qt, QUrl, QSize
 from pyexpat.errors import messages
 
 from Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, LineEdit, FluentIcon, PrimaryPushButton, Dialog,
-                                               MessageBox)
+                                               MessageBox, PushButton, ToolButton)
 from cli.cli import is_directory_usable, rename
 from file_operations.file_utils import cancel_rename_operation
 
@@ -14,41 +14,55 @@ class HomeInterface(QFrame):
     def __init__(self, text: str, parent=None):
         super().__init__(parent=parent)
         """实例化界面中的控件"""
-        self.label = SubtitleLabel(text, self)
-        self.warnLabel = SubtitleLabel(self)  # 提示用户是否输入正确的路径
-        self.folderLineEdit = LineEdit(self)
-        self.folderLineEdit.setPlaceholderText('请选择一个文件夹')
+        self.mainWidget = QWidget()  # 创建一个总容器存放所有控件，使得调整窗口大小的时候各控件不会相互分离
+        self.label = SubtitleLabel(text, self.mainWidget)
+        self.warnLabel = SubtitleLabel(self.mainWidget)  # 提示用户是否输入正确的路径
+        self.folderLineEdit = LineEdit(self.mainWidget)
+        self.folderSelectButton = ToolButton(FluentIcon.FOLDER)
         self.renameButton = PrimaryPushButton(FluentIcon.PENCIL_INK, '文件重命名')
         self.cancelButton = PrimaryPushButton(FluentIcon.CANCEL, '撤销重命名')
-        self.mainVBoxLayout = QVBoxLayout(self)  # 设置垂直布局器
-        self.lineEditLayout = QVBoxLayout(self)  # 设置文本框布局器（垂直）
-        self.buttonHBoxLayout = QHBoxLayout(self)  # 设置按钮布局器（水平）
+
+        """实例化布局器"""
+        self.mainLayout = QVBoxLayout()  # 界面主布局器，只存放一个总容器控件
+        self.widgetVLayout = QVBoxLayout(self.mainWidget)  # 总容器内的垂直布局器
+        self.folderSelectLayout = QHBoxLayout()  # 文件夹选择布局器（水平）
+        self.lineEditLayout = QVBoxLayout()  # 文本框布局器（垂直）
+        self.buttonHBoxLayout = QHBoxLayout()  # 按钮布局器（水平）
 
         self.setObjectName('HomeInterface')  # 设置全局唯一对象名
 
         """设置控件属性"""
+        self.setLayout(self.mainLayout)  # 设置界面主布局器
         setFont(self.label, 40)
         self.folderLineEdit.setFixedWidth(300)
         self.folderLineEdit.setClearButtonEnabled(True)
+        self.folderLineEdit.setPlaceholderText('请选择一个文件夹')
+        self.folderSelectButton.setFixedHeight(34)
         self.renameButton.setFixedWidth(200)
         self.renameButton.setEnabled(False)  # 先将其禁用防止未输入路径就重命名
         self.cancelButton.setFixedWidth(200)
 
-        """设置布局器中控件的间隔"""
-        self.mainVBoxLayout.setSpacing(0)
-        self.buttonHBoxLayout.setContentsMargins(0, 0, 0, 0)
-
-        """设置控件位置"""
+        """设置控件对齐方式"""
+        self.mainLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
+        """设置布局器中的空隔"""
+        self.widgetVLayout.setSpacing(20)
+        self.widgetVLayout.setContentsMargins(0, 180, 0, 200)
+        self.folderSelectLayout.setContentsMargins(100, 10, 150, 10)
+        self.buttonHBoxLayout.setContentsMargins(100, 0, 100, 0)
+
         """将控件添加至布局器"""
-        self.mainVBoxLayout.addWidget(self.label, 1)
-        self.lineEditLayout.addWidget(self.folderLineEdit, 1, Qt.AlignmentFlag.AlignCenter)
+        self.widgetVLayout.addWidget(self.label, 1)
+        self.widgetVLayout.addLayout(self.lineEditLayout, 1)
+        self.widgetVLayout.addLayout(self.buttonHBoxLayout, 1)
+        self.folderSelectLayout.addWidget(self.folderLineEdit, 1, Qt.AlignmentFlag.AlignCenter)
+        self.folderSelectLayout.addWidget(self.folderSelectButton, 0, Qt.AlignmentFlag.AlignCenter)
+        self.lineEditLayout.addLayout(self.folderSelectLayout, 1)
         self.lineEditLayout.addWidget(self.warnLabel, 1, Qt.AlignmentFlag.AlignCenter)
-        self.buttonHBoxLayout.addWidget(self.renameButton, 1)
-        self.buttonHBoxLayout.addWidget(self.cancelButton, 1)
-        self.mainVBoxLayout.addLayout(self.lineEditLayout, 1)  # 将文本框布局器添加至主布局器
-        self.mainVBoxLayout.addLayout(self.buttonHBoxLayout, 1)  # 将按钮布局器加入主布局器
+        self.buttonHBoxLayout.addWidget(self.renameButton, 0)
+        self.buttonHBoxLayout.addWidget(self.cancelButton, 0)
+        self.mainLayout.addWidget(self.mainWidget, 1,Qt.AlignmentFlag.AlignCenter)
 
         self.achieve_functions()  # 调用控件功能函数
 
