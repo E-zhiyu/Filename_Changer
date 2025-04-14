@@ -63,21 +63,24 @@ def is_directory_usable(directory):
     """
     功能：判断文件夹路径是否有效
     """
-    # 去除前后双引号
-    directory = directory.strip('"')
-    logging.info(f'输入路径“{directory}”')
+    if directory:
+        # 去除前后双引号
+        directory = directory.strip('"')
+        logging.info(f'输入路径“{directory}”')
 
-    # 路径有效性的异常处理
-    try:
-        if os.path.isdir(directory):
-            logging.info('路径有效，进行下一步操作')
-            return directory, 1
-        else:
-            logging.warning('路径无效，已提示用户重新输入')
+        # 路径有效性的异常处理
+        try:
+            if os.path.isdir(directory):
+                logging.info('路径有效，进行下一步操作')
+                return directory, 1
+            else:
+                logging.warning('路径无效，已提示用户重新输入')
+                return directory, 0
+        except Exception as e:
+            logging.error('【错误】输入路径时发生未知错误！')
             return directory, 0
-    except Exception as e:
-        logging.error('【错误】输入路径时发生未知错误！')
-        return directory, 0
+    else:
+        return None, -1
 
 
 def rename(directory):

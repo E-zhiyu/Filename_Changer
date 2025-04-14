@@ -62,7 +62,7 @@ class HomeInterface(QFrame):
         self.lineEditLayout.addWidget(self.warnLabel, 1, Qt.AlignmentFlag.AlignCenter)
         self.buttonHBoxLayout.addWidget(self.renameButton, 0)
         self.buttonHBoxLayout.addWidget(self.cancelButton, 0)
-        self.mainLayout.addWidget(self.mainWidget, 1,Qt.AlignmentFlag.AlignCenter)
+        self.mainLayout.addWidget(self.mainWidget, 1, Qt.AlignmentFlag.AlignCenter)
 
         self.achieve_functions()  # 调用控件功能函数
 
@@ -72,8 +72,8 @@ class HomeInterface(QFrame):
         def confirm_operation(with_warning=True):
             """弹出确认操作的提示框"""
             warning = """\
-            【警告】你所执行的操作可能伴随以下风险
-            - 重命名后有的软件可能因为路径依赖无法定位到该文件。
+            【警告】您正在批量修改文件名，可能伴随以下风险：
+            - 重命名后某些软件会因为路径依赖而无法定位到该文件。
             - 如果文件夹内有您不想重命名的文件，它也会被重命名！
             """
             if with_warning:
@@ -95,16 +95,19 @@ class HomeInterface(QFrame):
 
             targetDirectory = self.folderLineEdit.text()
             targetDirectory, flag = is_directory_usable(targetDirectory)
-            if flag:
+            if flag == 1:
                 self.renameButton.setEnabled(True)
                 self.warnLabel.setStyleSheet("""QLabel{color: rgb(72, 180, 72);
                                               text-shadow: 2px 2px 4px black;}""")
                 self.warnLabel.setText('文件夹路径有效！')
-            else:
+            elif flag == 0:
                 self.renameButton.setEnabled(False)
                 self.warnLabel.setStyleSheet("""QLabel{color: rgb(255, 100, 100);
                                                 text-shadow: 2px 2px 4px black;}""")
                 self.warnLabel.setText('这不是一个有效的文件夹！')
+            elif flag == -1:
+                self.renameButton.setEnabled(False)
+                self.warnLabel.clear()
 
         self.folderLineEdit.textChanged.connect(get_directory)
 
