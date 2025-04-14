@@ -49,7 +49,7 @@ class HomeInterface(QFrame):
         """设置布局器中的空隔"""
         self.widgetVLayout.setSpacing(20)
         self.widgetVLayout.setContentsMargins(0, 180, 0, 200)
-        self.folderSelectLayout.setContentsMargins(100, 10, 150, 10)
+        self.folderSelectLayout.setContentsMargins(160, 10, 160, 0)
         self.buttonHBoxLayout.setContentsMargins(100, 0, 100, 0)
 
         """将控件添加至布局器"""
@@ -57,7 +57,7 @@ class HomeInterface(QFrame):
         self.widgetVLayout.addLayout(self.lineEditLayout, 1)
         self.widgetVLayout.addLayout(self.buttonHBoxLayout, 1)
         self.folderSelectLayout.addWidget(self.folderLineEdit, 1, Qt.AlignmentFlag.AlignCenter)
-        self.folderSelectLayout.addWidget(self.folderSelectButton, 0, Qt.AlignmentFlag.AlignCenter)
+        self.folderSelectLayout.addWidget(self.folderSelectButton, 1, Qt.AlignmentFlag.AlignCenter)
         self.lineEditLayout.addLayout(self.folderSelectLayout, 1)
         self.lineEditLayout.addWidget(self.warnLabel, 1, Qt.AlignmentFlag.AlignCenter)
         self.buttonHBoxLayout.addWidget(self.renameButton, 0)

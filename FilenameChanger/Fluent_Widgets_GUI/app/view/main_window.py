@@ -46,7 +46,7 @@ class MainWindow(FluentWindow):
 
     def initWindow(self):
         """初始化窗口"""
-        self.resize(900, 700)
+        self.resize(1100, 750)
         self.setMinimumWidth(760)
         self.setWindowIcon(QIcon(':/qfluentwidgets/images/logo.png'))
         self.setWindowTitle(f'FilenameChanger-v{version}')
