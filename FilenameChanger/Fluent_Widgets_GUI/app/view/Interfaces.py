@@ -1,9 +1,8 @@
-from PyQt6.QtWidgets import QApplication, QFrame, QVBoxLayout, QSizePolicy, QHBoxLayout, QWidget
+from PyQt6.QtWidgets import QApplication, QFrame, QVBoxLayout, QSizePolicy, QHBoxLayout, QWidget, QFileDialog
 from PyQt6.QtCore import Qt, QUrl, QSize
-from pyexpat.errors import messages
 
 from Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, LineEdit, FluentIcon, PrimaryPushButton, Dialog,
-                                               MessageBox, PushButton, ToolButton)
+                                               MessageBox, ToolButton)
 from cli.cli import is_directory_usable, rename
 from file_operations.file_utils import cancel_rename_operation
 
@@ -134,7 +133,7 @@ class HomeInterface(QFrame):
                 message_window.show()
                 message_window.exec()
 
-        self.renameButton.pressed.connect(rename_button_function)
+        self.renameButton.clicked.connect(rename_button_function)
 
         # 撤销重命名按钮功能实现
         def cancel_button_function():
@@ -160,7 +159,20 @@ class HomeInterface(QFrame):
                 message_window.show()
                 message_window.exec()
 
-        self.cancelButton.pressed.connect(cancel_button_function)
+        self.cancelButton.clicked.connect(cancel_button_function)
+
+        # 文件夹浏览按钮功能实现
+        def open_folder_dialog():
+            folder_path = QFileDialog.getExistingDirectory(
+                self,
+                '选择文件夹',
+                '',
+                QFileDialog.Option.ShowDirsOnly
+            )
+            if folder_path:
+                self.folderLineEdit.setText(folder_path)
+
+        self.folderSelectButton.clicked.connect(open_folder_dialog)
 
 
 class RuleListInterface(QFrame):
