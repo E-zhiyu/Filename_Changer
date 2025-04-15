@@ -1,7 +1,7 @@
-from PyQt6.QtWidgets import QApplication, QFrame, QVBoxLayout, QSizePolicy, QHBoxLayout, QWidget, QFileDialog
-from PyQt6.QtCore import Qt, QUrl, QSize
+from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QFileDialog
+from PyQt6.QtCore import Qt
 
-from Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, LineEdit, FluentIcon, PrimaryPushButton, Dialog,
+from Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, LineEdit, FluentIcon, PrimaryPushButton,
                                                MessageBox, ToolButton)
 from cli.cli import is_directory_usable, rename
 from file_operations.file_utils import cancel_rename_operation
@@ -13,17 +13,17 @@ class HomeInterface(QFrame):
     def __init__(self, text: str, parent=None):
         super().__init__(parent=parent)
         """实例化界面中的控件"""
-        self.mainWidget = QWidget()  # 创建一个总容器存放所有控件，使得调整窗口大小的时候各控件不会相互分离
-        self.label = SubtitleLabel(text, self.mainWidget)
-        self.warnLabel = SubtitleLabel(self.mainWidget)  # 提示用户是否输入正确的路径
-        self.folderLineEdit = LineEdit(self.mainWidget)
-        self.folderSelectButton = ToolButton(FluentIcon.FOLDER)
-        self.renameButton = PrimaryPushButton(FluentIcon.PENCIL_INK, '文件重命名')
-        self.cancelButton = PrimaryPushButton(FluentIcon.CANCEL, '撤销重命名')
+        self.totalWidget = QWidget()  # 创建一个总容器存放所有控件，使得调整窗口大小的时候各控件不会相互分离
+        self.label = SubtitleLabel(text, self.totalWidget)
+        self.warnLabel = SubtitleLabel(self.totalWidget)  # 提示用户是否输入正确的路径
+        self.folderLineEdit = LineEdit(self.totalWidget)
+        self.folderSelectBtn = ToolButton(FluentIcon.FOLDER)
+        self.renameBtn = PrimaryPushButton(FluentIcon.PENCIL_INK, '文件重命名')
+        self.cancelOperationBtn = PrimaryPushButton(FluentIcon.CANCEL, '撤销重命名')
 
         """实例化布局器"""
-        self.mainLayout = QVBoxLayout()  # 界面主布局器，只存放一个总容器控件
-        self.widgetVLayout = QVBoxLayout(self.mainWidget)  # 总容器内的垂直布局器
+        self.totalLayout = QVBoxLayout()  # 界面总布局器，只存放一个总容器控件
+        self.widgetVLayout = QVBoxLayout(self.totalWidget)  # 总容器内的垂直布局器
         self.folderSelectLayout = QHBoxLayout()  # 文件夹选择布局器（水平）
         self.lineEditLayout = QVBoxLayout()  # 文本框布局器（垂直）
         self.buttonHBoxLayout = QHBoxLayout()  # 按钮布局器（水平）
@@ -31,18 +31,18 @@ class HomeInterface(QFrame):
         self.setObjectName('HomeInterface')  # 设置全局唯一对象名
 
         """设置控件属性"""
-        self.setLayout(self.mainLayout)  # 设置界面主布局器
+        self.setLayout(self.totalLayout)  # 设置界面主布局器
         setFont(self.label, 40)
         self.folderLineEdit.setFixedWidth(300)
         self.folderLineEdit.setClearButtonEnabled(True)
         self.folderLineEdit.setPlaceholderText('请选择一个文件夹')
-        self.folderSelectButton.setFixedHeight(34)
-        self.renameButton.setFixedWidth(200)
-        self.renameButton.setEnabled(False)  # 先将其禁用防止未输入路径就重命名
-        self.cancelButton.setFixedWidth(200)
+        self.folderSelectBtn.setFixedHeight(34)
+        self.renameBtn.setFixedWidth(200)
+        self.renameBtn.setEnabled(False)  # 先将其禁用防止未输入路径就重命名
+        self.cancelOperationBtn.setFixedWidth(200)
 
         """设置控件对齐方式"""
-        self.mainLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.totalLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         """设置布局器中的空隔"""
@@ -56,12 +56,12 @@ class HomeInterface(QFrame):
         self.widgetVLayout.addLayout(self.lineEditLayout, 1)
         self.widgetVLayout.addLayout(self.buttonHBoxLayout, 1)
         self.folderSelectLayout.addWidget(self.folderLineEdit, 1, Qt.AlignmentFlag.AlignCenter)
-        self.folderSelectLayout.addWidget(self.folderSelectButton, 1, Qt.AlignmentFlag.AlignCenter)
+        self.folderSelectLayout.addWidget(self.folderSelectBtn, 1, Qt.AlignmentFlag.AlignCenter)
         self.lineEditLayout.addLayout(self.folderSelectLayout, 1)
         self.lineEditLayout.addWidget(self.warnLabel, 1, Qt.AlignmentFlag.AlignCenter)
-        self.buttonHBoxLayout.addWidget(self.renameButton, 0)
-        self.buttonHBoxLayout.addWidget(self.cancelButton, 0)
-        self.mainLayout.addWidget(self.mainWidget, 1, Qt.AlignmentFlag.AlignCenter)
+        self.buttonHBoxLayout.addWidget(self.renameBtn, 0)
+        self.buttonHBoxLayout.addWidget(self.cancelOperationBtn, 0)
+        self.totalLayout.addWidget(self.totalWidget, 1, Qt.AlignmentFlag.AlignCenter)
 
         self.achieve_functions()  # 调用控件功能函数
 
@@ -73,7 +73,7 @@ class HomeInterface(QFrame):
             warning = """\
             【警告】您正在批量修改文件名，可能伴随以下风险：
             - 重命名后某些软件会因为路径依赖而无法定位到该文件。
-            - 如果文件夹内有您不想重命名的文件，它也会被重命名！
+            - 如果文件夹内有您不想重命名的文件，它们也会被重命名！
             """
             if with_warning:
                 message = f"{warning}{'\n确认进行操作吗？'}"
@@ -95,17 +95,17 @@ class HomeInterface(QFrame):
             targetDirectory = self.folderLineEdit.text()
             targetDirectory, flag = is_directory_usable(targetDirectory)
             if flag == 1:
-                self.renameButton.setEnabled(True)
+                self.renameBtn.setEnabled(True)
                 self.warnLabel.setStyleSheet("""QLabel{color: rgb(72, 180, 72);
                                               text-shadow: 2px 2px 4px black;}""")
                 self.warnLabel.setText('文件夹路径有效！')
             elif flag == 0:
-                self.renameButton.setEnabled(False)
+                self.renameBtn.setEnabled(False)
                 self.warnLabel.setStyleSheet("""QLabel{color: rgb(255, 100, 100);
                                                 text-shadow: 2px 2px 4px black;}""")
                 self.warnLabel.setText('这不是一个有效的文件夹！')
             elif flag == -1:
-                self.renameButton.setEnabled(False)
+                self.renameBtn.setEnabled(False)
                 self.warnLabel.clear()
 
         self.folderLineEdit.textChanged.connect(get_directory)
@@ -133,7 +133,7 @@ class HomeInterface(QFrame):
                 message_window.show()
                 message_window.exec()
 
-        self.renameButton.clicked.connect(rename_button_function)
+        self.renameBtn.clicked.connect(rename_button_function)
 
         # 撤销重命名按钮功能实现
         def cancel_button_function():
@@ -159,7 +159,7 @@ class HomeInterface(QFrame):
                 message_window.show()
                 message_window.exec()
 
-        self.cancelButton.clicked.connect(cancel_button_function)
+        self.cancelOperationBtn.clicked.connect(cancel_button_function)
 
         # 文件夹浏览按钮功能实现
         def open_folder_dialog():
@@ -172,25 +172,4 @@ class HomeInterface(QFrame):
             if folder_path:
                 self.folderLineEdit.setText(folder_path)
 
-        self.folderSelectButton.clicked.connect(open_folder_dialog)
-
-
-class RuleListInterface(QFrame):
-    """定义规则列表界面布局"""
-
-    def __init__(self, text: str, parent=None):
-        super().__init__(parent=parent)
-        """实例化各种控件"""
-        self.label = SubtitleLabel(text, self)
-        self.mainVBoxLayout = QVBoxLayout(self)
-
-        self.setObjectName('RuleListInterface')
-
-        """设置控件属性"""
-        setFont(self.label, 40)
-
-        """设置控件位置"""
-        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        """将控件添加至布局器"""
-        self.mainVBoxLayout.addWidget(self.label, 1, Qt.AlignmentFlag.AlignTop)
+        self.folderSelectBtn.clicked.connect(open_folder_dialog)

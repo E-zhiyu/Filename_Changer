@@ -1,12 +1,16 @@
 # coding:utf-8
+
 from FilenameChanger import version
 
+from PyQt6.QtWidgets import QApplication
 from PyQt6.QtGui import QIcon, QDesktopServices
+
 from Fluent_Widgets_GUI.qfluentwidgets import FluentIcon as FIF
 from Fluent_Widgets_GUI.qfluentwidgets import (NavigationItemPosition, MessageBox, FluentWindow,
                                                NavigationAvatarWidget, SystemThemeListener)
 
-from Fluent_Widgets_GUI.app.view.Interfaces import *
+from Fluent_Widgets_GUI.app.view.home_interface import HomeInterface
+from Fluent_Widgets_GUI.app.view.rule_list_interface import RuleListInterface
 
 
 class MainWindow(FluentWindow):

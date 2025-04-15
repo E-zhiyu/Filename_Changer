@@ -26,7 +26,3 @@ def run_with_gui():
     w.show()
 
     app.exec()
-
-
-if __name__ == '__main__':
-    run_with_gui()
