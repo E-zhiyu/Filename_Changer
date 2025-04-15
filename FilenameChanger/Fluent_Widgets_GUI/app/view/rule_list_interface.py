@@ -20,9 +20,9 @@ class RuleListInterface(QFrame):
         self.addBtn = PushButton(FluentIcon.ADD, '添加规则')
         self.selectRuleBtn = PushButton(FluentIcon.CHECKBOX, '选中规则')
         self.searchLineEdit = SearchLineEdit()
-        self.ruleView = QWidget(self.totalWidget)  # 额外新建一个容器存放规则展示区域
+        self.ruleViewArea = QFrame(self.totalWidget)  # 额外新建一个容器存放规则展示区域
         self.ruleScrollArea = SmoothScrollArea()
-        self.ruleScrollWidget = QWidget(self.ruleScrollArea)
+        self.ruleScrollWidget = QWidget(self.ruleViewArea)
 
         self.ruleCards = []
         self.currentIndex = -1
@@ -47,7 +47,8 @@ class RuleListInterface(QFrame):
         self.widgetVLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.btnLayout.setSpacing(4)
         self.btnLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        self.ruleCardLayout.setSpacing(10)
+        self.ruleCardLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.ruleCardLayout.setSpacing(7)
 
         """将控件添加至布局器"""
         self.totalVBoxLayout.addWidget(self.totalWidget)
@@ -58,9 +59,9 @@ class RuleListInterface(QFrame):
         self.btnLayout.addWidget(self.selectRuleBtn, 0)
 
         """初始化规则卡片展示区域"""
-        self.__initRuleList()
+        self.__initRuleViewArea()
 
-    def __initRuleList(self):
+    def __initRuleViewArea(self):
         self.ruleScrollArea.setWidget(self.ruleScrollWidget)
         self.ruleScrollArea.setWidgetResizable(True)
         self.ruleScrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)  # 水平滚动条永远不显示

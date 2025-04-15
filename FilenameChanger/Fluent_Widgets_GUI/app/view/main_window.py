@@ -5,7 +5,7 @@ from FilenameChanger import version
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtGui import QIcon, QDesktopServices
 
-from Fluent_Widgets_GUI.qfluentwidgets import FluentIcon as FIF
+from Fluent_Widgets_GUI.qfluentwidgets import FluentIcon as FIF, setTheme, Theme
 from Fluent_Widgets_GUI.qfluentwidgets import (NavigationItemPosition, MessageBox, FluentWindow,
                                                NavigationAvatarWidget, SystemThemeListener)
 
@@ -20,23 +20,14 @@ class MainWindow(FluentWindow):
         super().__init__()
         self.initWindow()
 
-        # 创建系统主题监听器
-        self.themeListener = SystemThemeListener(self)
+        # 设置界面亮暗主题
+        setTheme(Theme.AUTO)
 
         # 实例化不同的子界面
         self.homeInterface = HomeInterface('文件更名器', self)
         self.ruleListInterface = RuleListInterface('规则列表', self)
 
         self.initNavigation()
-
-        # 启动主题监听器
-        self.themeListener.start()
-
-    def closeEvent(self, event):
-        """停止系统主题监听器进程"""
-        self.themeListener.terminate()
-        self.themeListener.deleteLater()
-        super().closeEvent(event)
 
     def initNavigation(self):
         """初始化导航栏"""
