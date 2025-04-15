@@ -69,15 +69,14 @@ class RuleListInterface(QFrame):
         self.widgetVLayout.addWidget(self.ruleScrollArea)
 
         rule_dict = load_config()
-        rule_num = rule_dict['num']
-        selected_index = rule_dict['selected_index']
         rule_list = rule_dict['rules']
 
         for rule in rule_list:
             type = rule['type']
             name = rule['name']
             desc = rule['desc']
-            self.ruleCards.append(RuleCard(type, name, desc))  # 将规则以卡片的形式添加至列表
+            keyFunctionDict = {k: v for k, v in rule.items() if k not in ['type', 'desc']}
+            self.ruleCards.append(RuleCard(type, name, desc, keyFunctionDict))  # 将规则以卡片的形式添加至列表
 
         for cards in self.ruleCards:
             self.ruleCardLayout.addWidget(cards, 0)
@@ -86,13 +85,13 @@ class RuleListInterface(QFrame):
 class RuleCard(CardWidget):
     """定义规则卡片"""
 
-    def __init__(self, type, name, content, parent=None):
+    def __init__(self, type, name, desc, keyFunctionDict, parent=None):
         super().__init__(parent)
         """定义规则属性"""
         self.type = type
         """定义各种控件"""
         self.titleLabel = SubtitleLabel(name, self)
-        self.contentLabel = SubtitleLabel(content, self)
+        self.contentLabel = SubtitleLabel(desc, self)
         self.moreBtn = TransparentToolButton(FluentIcon.MORE)
 
         """定义布局器"""
@@ -105,6 +104,8 @@ class RuleCard(CardWidget):
 
         """设置控件属性"""
         self.setFixedHeight(73)  # 设置卡片高度
+        setFont(self.titleLabel, 25)
+        setFont(self.contentLabel, 16)
         self.moreBtn.setFixedSize(32, 32)
 
         """将控件添加至布局器"""
@@ -112,3 +113,15 @@ class RuleCard(CardWidget):
         self.mainHLayout.addWidget(self.moreBtn)
         self.labelLayout.addWidget(self.titleLabel)
         self.labelLayout.addWidget(self.contentLabel)
+
+
+class RuleInfoPanel(QWidget):
+    """规则详情面板"""
+
+    def __init__(self, name, desc, type, function, parent=None):
+        super().__init__(parent)
+
+        """实例化各控件"""
+        self.nameLabel = SubtitleLabel(name)
+        self.descLabel = SubtitleLabel(desc)
+        self.typeLabel = SubtitleLabel(type)
