@@ -3,7 +3,7 @@ from PyQt6.QtCore import Qt
 
 from Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, LineEdit, FluentIcon, PrimaryPushButton,
                                                MessageBox, ToolButton)
-from cli.cli import is_directory_usable, rename
+from file_operations.file_utils import is_directory_usable, rename
 from file_operations.file_utils import cancel_rename_operation
 
 
@@ -19,7 +19,7 @@ class HomeInterface(QFrame):
         self.folderLineEdit = LineEdit(self.totalWidget)
         self.folderSelectBtn = ToolButton(FluentIcon.FOLDER)
         self.renameBtn = PrimaryPushButton(FluentIcon.PENCIL_INK, '文件重命名')
-        self.cancelOperationBtn = PrimaryPushButton(FluentIcon.CANCEL, '撤销重命名')
+        self.cancelOperationBtn = PrimaryPushButton(FluentIcon.HISTORY, '撤销重命名')
 
         """实例化布局器"""
         self.totalLayout = QVBoxLayout()  # 界面总布局器，只存放一个总容器控件
