@@ -57,44 +57,6 @@ def init_json():
     logging.info('规则文件初始化成功')
 
 
-def display_rules(config_dict, simple=False):
-    """
-    功能：展示所有规则（类型、名称、描述等）
-    参数 config_dict：规则配置文件根字典
-    参数 simple：是否以简单模式输出规则
-    """
-    print('规则列表'.center(40, '—'))
-
-    count = 0
-    for a_rule in config_dict['rules']:
-        count += 1
-        # 打印标题
-        if not simple:
-            print(f'规则{count}'.center(42))
-        else:
-            print(f'规则{count}', end='')
-
-        for key, value in a_rule.items():
-            if key == 'type' and simple is False:
-                key = '规则种类'
-            elif key == 'name':
-                if simple is False:
-                    key = '规则名称'
-                else:
-                    key = ''  # 简单模式输出不需要提示这是规则名称
-            elif key == 'desc' and simple is False:
-                key = '规则描述'
-            else:
-                continue  # 若key为其他值则跳过
-            print(key, value, sep='：')
-
-    if simple is False:  # 以下内容简单模式不显示
-        print(f'\n共计{count}个规则。')
-        print(f'当前加载的规则：规则{config_dict["selected_index"] + 1}')
-        print('按回车键继续……')
-        os.system('pause>nul')
-
-
 def del_rules(config_dict):
     """
     功能：删除指定的规则
@@ -106,7 +68,6 @@ def del_rules(config_dict):
         time.sleep(0.5)
         return
     else:
-        display_rules(config_dict, simple=True)  # 以简单模式列出所有规则
         while True:
             try:
                 option = int(input('\n请选择（输入-1取消操作）：\n'))
@@ -141,29 +102,13 @@ def del_rules(config_dict):
                 print('请选择一个有效的规则！')
 
 
-def switch_rule(config_dict):
+def switch_rule(config_dict, index):
     """
     功能：切换需要加载的规则
     参数 config_dict：规则配置文件根字典
     """
-    display_rules(config_dict, simple=True)
-    while True:
-        try:
-            user_option = int(input('\n请选择一个规则（输入-1取消操作）：'))
-            if user_option == -1:
-                logging.info('已取消，正在返回主菜单……')
-                time.sleep(0.5)
-                return  # 结束函数跳出死循环
-            elif user_option <= 0 or user_option > config_dict['num']:
-                raise ValueError
-            else:
-                print(f'已切换至规则{user_option}！')
-                logging.info(f'用户切换至规则{user_option}')
-                config_dict['selected_index'] = user_option - 1
-                # 将更改写入配置文件
-                with open(config_path, 'w', encoding='utf-8') as f:
-                    json.dump(config_dict, f, ensure_ascii=False, indent=4)
-                time.sleep(0.5)
-                return  # 结束函数跳出死循环
-        except ValueError:
-            print('请选择一个有效的规则！')
+    logging.info(f'用户切换至规则{index}')
+    config_dict['selected_index'] = index
+    # 将更改写入配置文件
+    with open(config_path, 'w', encoding='utf-8') as f:
+        json.dump(config_dict, f, ensure_ascii=False, indent=4)

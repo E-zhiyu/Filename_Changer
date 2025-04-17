@@ -2,13 +2,11 @@
 import os
 import sys
 
-from PyQt6.QtCore import Qt, QTranslator
-from PyQt6.QtGui import QFont
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QApplication
-from qfluentwidgets import FluentTranslator, CheckBox
 
-from Fluent_Widgets_GUI.app.common.config import cfg
-from Fluent_Widgets_GUI.app.view.main_window import MainWindow
+from FilenameChanger.Fluent_Widgets_GUI.app.common.config import cfg
+from FilenameChanger.Fluent_Widgets_GUI.app.view.main_window import MainWindow
 
 # 启用DPI比例
 if cfg.get(cfg.dpiScale) != "Auto":

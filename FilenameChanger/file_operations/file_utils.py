@@ -26,7 +26,7 @@ def is_directory_usable(directory):
                 logging.info('路径有效，进行下一步操作')
                 return directory, 1
             else:
-                logging.warning('路径无效，已提示用户重新输入')
+                logging.warning('路径无效')
                 return directory, 0
         except Exception as e:
             logging.error('【错误】输入路径时发生未知错误！')

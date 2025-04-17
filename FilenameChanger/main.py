@@ -1,6 +1,6 @@
 # main.py
-from log.log_recorder import *
-from Fluent_Widgets_GUI.PyQt6_Fluent_GUI import *
+from FilenameChanger.log.log_recorder import *
+from FilenameChanger.Fluent_Widgets_GUI.PyQt6_Fluent_GUI import *
 
 """
 程序主模块

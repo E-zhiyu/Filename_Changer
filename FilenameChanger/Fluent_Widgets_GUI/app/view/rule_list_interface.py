@@ -8,7 +8,7 @@ from Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, PushButto
 from ..common.config import cfg
 from ..common.style_sheet import StyleSheet
 
-from rename_rules.rule_manager import load_config
+from rename_rules.rule_manager import load_config, switch_rule
 
 
 class RuleCard(CardWidget):
@@ -78,10 +78,7 @@ class RuleCard(CardWidget):
         if not isSelected:
             self.setStyleSheet("background-color: transparent;")
         else:
-            self.setStyleSheet(f'background-color: #0078D7;')
-
-        self.setProperty('isSelected', isSelected)
-        self.setStyle(QApplication.style())
+            self.setStyleSheet(f'background-color: #0078d4;')
 
 
 class RuleListInterface(QFrame):
@@ -91,11 +88,13 @@ class RuleListInterface(QFrame):
         super().__init__(parent=parent)
         self.setObjectName('RuleListInterface')
 
+        self.rule_dict = load_config()  # 加载规则
+
         """实例化各种控件"""
         self.totalWidget = QWidget(self)  # 总容器
         self.label = SubtitleLabel(text, self)
         self.addBtn = PushButton(FluentIcon.ADD, '添加规则')
-        self.selectRuleBtn = PushButton(FluentIcon.COMPLETED, '激活规则')
+        self.activateRuleBtn = PushButton(FluentIcon.COMPLETED, '激活规则')
         self.searchLineEdit = SearchLineEdit()
         self.ruleViewArea = QFrame(self.totalWidget)  # 额外新建一个容器作为规则展示区域
         self.ruleScrollArea = SmoothScrollArea()
@@ -112,7 +111,7 @@ class RuleListInterface(QFrame):
         """设置控件属性"""
         setFont(self.label, 30)
         self.addBtn.setFixedWidth(120)
-        self.selectRuleBtn.setFixedWidth(120)
+        self.activateRuleBtn.setFixedWidth(120)
         self.searchLineEdit.setFixedWidth(300)
         self.searchLineEdit.setPlaceholderText('搜索规则名称')
 
@@ -132,12 +131,15 @@ class RuleListInterface(QFrame):
         self.widgetVLayout.addLayout(self.btnLayout, 0)
         self.widgetVLayout.addWidget(self.searchLineEdit, 0)
         self.btnLayout.addWidget(self.addBtn, 0)
-        self.btnLayout.addWidget(self.selectRuleBtn, 0)
+        self.btnLayout.addWidget(self.activateRuleBtn, 0)
 
         """初始化规则卡片展示区域"""
         self.ruleCardList = []
         self.currentIndex = -1  # 鼠标选中的卡片的下标
         self.initRuleViewArea()
+
+        """实现控件功能"""
+        self.achieve_functions()
 
     def initRuleViewArea(self):
         """初始化规则卡片显示区域"""
@@ -148,9 +150,12 @@ class RuleListInterface(QFrame):
         self.widgetVLayout.addWidget(self.ruleViewArea)
         self.ruleViewLayout.addWidget(self.ruleScrollArea)
 
-        rule_dict = load_config()
-        rule_list = rule_dict['rules']
-        selected_index = rule_dict['selected_index']
+        self.addRuleCard()  # 将规则卡片列表中的卡片添加到界面中
+
+    def addRuleCard(self):
+        """将规则卡片列表中的卡片添加到界面中"""
+        rule_list = self.rule_dict['rules']
+        selected_index = self.rule_dict['selected_index']
 
         index = 0
         for rule in rule_list:  # 将所有规则卡片添加至卡片列表，便于其他函数调用
@@ -161,10 +166,6 @@ class RuleListInterface(QFrame):
             self.ruleCardList.append(RuleCard(index, rule, activated))  # 将规则以卡片的形式添加至列表
             index += 1
 
-        self.addRuleCard()  # 将规则卡片列表中的卡片添加到界面中
-
-    def addRuleCard(self):
-        """将规则卡片列表中的卡片添加到界面中"""
         for card in self.ruleCardList:
             self.ruleCardLayout.addWidget(card, 0)
             card.clicked.connect(lambda cardIndex=card.index: self.setSelected(cardIndex))  # 点击卡片后将对应卡片切换为选中状态
@@ -177,9 +178,24 @@ class RuleListInterface(QFrame):
         self.currentIndex = index
         self.ruleCardList[self.currentIndex].setCardSelected(True)  # 再将选中的卡片切换为选中状态
 
+    def refreshRuleList(self):
+        """刷新规则卡片界面"""
+        for card in self.ruleCardList:
+            self.ruleCardLayout.removeWidget(card)
+        self.ruleCardList.clear()
+
+        self.rule_dict = load_config()
+
+        self.addRuleCard()
+
     def achieve_functions(self):
         """实现各控件功能"""
 
-        def card_click_operation():
-            """点击规则卡片则切换卡片是否选中状态"""
-            pass
+        """激活规则的按钮"""
+
+        def activate_rule():
+            index = self.currentIndex
+            switch_rule(self.rule_dict, index)
+            self.refreshRuleList()
+
+        self.activateRuleBtn.clicked.connect(activate_rule)
