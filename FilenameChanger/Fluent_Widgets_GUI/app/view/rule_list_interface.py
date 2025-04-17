@@ -1,9 +1,12 @@
+from PyQt6.QtGui import QPalette
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QApplication
 from PyQt6.QtCore import Qt
 
 from Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, PushButton, FluentIcon, CardWidget,
                                                SearchLineEdit, TransparentToolButton, SmoothScrollArea, IconWidget,
-                                               InfoBarIcon)
+                                               InfoBarIcon, Theme, isDarkTheme)
+from ..common.config import cfg
+from ..common.style_sheet import StyleSheet
 
 from rename_rules.rule_manager import load_config
 
@@ -65,16 +68,20 @@ class RuleCard(CardWidget):
 
     def setCardSelected(self, isSelected: bool):
         """切换卡片的选中状态"""
-        if isSelected == self.selected:  # 如果待切换的状态与当前状态相同，则不执行任何操作
+        sys_color = QApplication.palette().color(QPalette.ColorRole.WindowText)  # 获取系统文本色
+
+        if isSelected == self.selected:
             return
 
         self.selected = isSelected
 
-        if isSelected:
-            self.setProperty('isSelected', isSelected)
-            self.setStyle(QApplication.style())
+        if not isSelected:
+            self.setStyleSheet("background-color: transparent;")
         else:
-            pass
+            self.setStyleSheet(f'background-color: #0078D7;')
+
+        self.setProperty('isSelected', isSelected)
+        self.setStyle(QApplication.style())
 
 
 class RuleListInterface(QFrame):
