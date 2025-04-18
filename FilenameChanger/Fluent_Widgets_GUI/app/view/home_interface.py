@@ -1,8 +1,9 @@
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QFileDialog
 from PyQt6.QtCore import Qt
 
-from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, LineEdit, FluentIcon, PrimaryPushButton,
-                                               MessageBox, ToolButton)
+from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, LineEdit, FluentIcon,
+                                                               PrimaryPushButton,
+                                                               MessageBox, ToolButton)
 from FilenameChanger.file_operations.file_utils import is_directory_usable, rename
 from FilenameChanger.file_operations.file_utils import cancel_rename_operation
 
@@ -12,61 +13,67 @@ class HomeInterface(QFrame):
 
     def __init__(self, text: str, parent=None):
         super().__init__(parent=parent)
-        """实例化界面中的控件"""
+        self.setObjectName('HomeInterface')  # 设置全局唯一对象名，否则不能将该界面添加至导航栏
+
+        """基本布局设置"""
         self.totalWidget = QWidget()  # 创建一个总容器存放所有控件，使得调整窗口大小的时候各控件不会相互分离
+        self.interfaceTotalLayout = QVBoxLayout(self)  # 界面总布局器，只存放一个总容器控件
+        self.totalWidgetVLayout = QVBoxLayout(self.totalWidget)  # 总容器内的垂直布局器
+        self.setLayout(self.interfaceTotalLayout)  # 设置界面主布局器
+
+        self.interfaceTotalLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)  # 界面总布局器默认为居中对齐
+        self.totalWidgetVLayout.setSpacing(10)  # 增加一个10像素的空隔
+        self.totalWidgetVLayout.setContentsMargins(0, 180, 0, 200)  # 设置总容器布局器四周向内收缩距离
+        self.interfaceTotalLayout.addWidget(self.totalWidget, 1, Qt.AlignmentFlag.AlignCenter)
+
+        """标题标签"""
         self.label = SubtitleLabel(text, self.totalWidget)
-        self.warnLabel = SubtitleLabel(self.totalWidget)  # 提示用户是否输入正确的路径
+        setFont(self.label, 40)
+
+        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.totalWidgetVLayout.addWidget(self.label, 1)
+
+        """文件夹路径文本框"""
+        self.tipLabel = SubtitleLabel(self.totalWidget)  # 提示用户是否输入正确的路径
         self.folderLineEdit = LineEdit(self.totalWidget)
         self.folderSelectBtn = ToolButton(FluentIcon.FOLDER)
-        self.renameBtn = PrimaryPushButton(FluentIcon.PENCIL_INK, '文件重命名')
-        self.cancelOperationBtn = PrimaryPushButton(FluentIcon.HISTORY, '撤销重命名')
 
-        """实例化布局器"""
-        self.totalLayout = QVBoxLayout()  # 界面总布局器，只存放一个总容器控件
-        self.widgetVLayout = QVBoxLayout(self.totalWidget)  # 总容器内的垂直布局器
         self.folderSelectLayout = QHBoxLayout()  # 文件夹选择布局器（水平）
         self.lineEditLayout = QVBoxLayout()  # 文本框布局器（垂直）
-        self.buttonHBoxLayout = QHBoxLayout()  # 按钮布局器（水平）
 
-        self.setObjectName('HomeInterface')  # 设置全局唯一对象名
-
-        """设置控件属性"""
-        self.setLayout(self.totalLayout)  # 设置界面主布局器
-        setFont(self.label, 40)
         self.folderLineEdit.setFixedWidth(300)
         self.folderLineEdit.setClearButtonEnabled(True)
-        self.folderLineEdit.setPlaceholderText('请选择一个文件夹')
+        self.folderLineEdit.setPlaceholderText('请选择一个文件夹')  # 设置文本框提示文本
         self.folderSelectBtn.setFixedHeight(34)
+
+        self.folderSelectLayout.setContentsMargins(160, 10, 160, 0)
+
+        self.totalWidgetVLayout.addLayout(self.lineEditLayout, 1)
+        self.folderSelectLayout.addWidget(self.folderLineEdit, 1, Qt.AlignmentFlag.AlignCenter)
+        self.folderSelectLayout.addWidget(self.folderSelectBtn, 1, Qt.AlignmentFlag.AlignCenter)
+        self.lineEditLayout.addLayout(self.folderSelectLayout, 1)
+        self.lineEditLayout.addWidget(self.tipLabel, 1, Qt.AlignmentFlag.AlignCenter)
+
+        """功能按钮"""
+        self.renameBtn = PrimaryPushButton(FluentIcon.PENCIL_INK, '文件重命名')
+        self.cancelOperationBtn = PrimaryPushButton(FluentIcon.HISTORY, '撤销重命名')
+        self.buttonHBoxLayout = QHBoxLayout()  # 按钮布局器（水平）
+
         self.renameBtn.setFixedWidth(200)
         self.renameBtn.setEnabled(False)  # 先将其禁用防止未输入路径就重命名
         self.cancelOperationBtn.setFixedWidth(200)
 
-        """设置控件对齐方式"""
-        self.totalLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        """设置布局器中的空隔"""
-        self.widgetVLayout.setSpacing(20)
-        self.widgetVLayout.setContentsMargins(0, 180, 0, 200)
-        self.folderSelectLayout.setContentsMargins(160, 10, 160, 0)
         self.buttonHBoxLayout.setContentsMargins(100, 0, 100, 0)
 
-        """将控件添加至布局器"""
-        self.widgetVLayout.addWidget(self.label, 1)
-        self.widgetVLayout.addLayout(self.lineEditLayout, 1)
-        self.widgetVLayout.addLayout(self.buttonHBoxLayout, 1)
-        self.folderSelectLayout.addWidget(self.folderLineEdit, 1, Qt.AlignmentFlag.AlignCenter)
-        self.folderSelectLayout.addWidget(self.folderSelectBtn, 1, Qt.AlignmentFlag.AlignCenter)
-        self.lineEditLayout.addLayout(self.folderSelectLayout, 1)
-        self.lineEditLayout.addWidget(self.warnLabel, 1, Qt.AlignmentFlag.AlignCenter)
+        self.totalWidgetVLayout.addLayout(self.buttonHBoxLayout, 1)
         self.buttonHBoxLayout.addWidget(self.renameBtn, 0)
         self.buttonHBoxLayout.addWidget(self.cancelOperationBtn, 0)
-        self.totalLayout.addWidget(self.totalWidget, 1, Qt.AlignmentFlag.AlignCenter)
 
         self.achieve_functions()  # 调用控件功能函数
 
     def achieve_functions(self):
-        """实现各个控件的功能"""
+        """实现各控件的功能"""
 
         def confirm_operation(with_warning=True):
             """弹出确认操作的提示框"""
@@ -79,10 +86,12 @@ class HomeInterface(QFrame):
                 message = f"{warning}{'\n确认进行操作吗？'}"
             else:
                 message = '确认进行操作吗？'
+
             confirm_window = MessageBox('操作确认', content=message, parent=self)
             confirm_window.show()
             confirm_window.yesButton.setText('确认')
             confirm_window.cancelButton.setText('取消')
+
             if confirm_window.exec():
                 return 1
             else:
@@ -96,17 +105,17 @@ class HomeInterface(QFrame):
             targetDirectory, flag = is_directory_usable(targetDirectory)
             if flag == 1:
                 self.renameBtn.setEnabled(True)
-                self.warnLabel.setStyleSheet("""QLabel{color: rgb(72, 180, 72);
+                self.tipLabel.setStyleSheet("""QLabel{color: rgb(72, 180, 72);
                                               text-shadow: 2px 2px 4px black;}""")
-                self.warnLabel.setText('文件夹路径有效！')
+                self.tipLabel.setText('文件夹路径有效！')
             elif flag == 0:
                 self.renameBtn.setEnabled(False)
-                self.warnLabel.setStyleSheet("""QLabel{color: rgb(255, 100, 100);
+                self.tipLabel.setStyleSheet("""QLabel{color: rgb(255, 100, 100);
                                                 text-shadow: 2px 2px 4px black;}""")
-                self.warnLabel.setText('这不是一个有效的文件夹！')
+                self.tipLabel.setText('这不是一个有效的文件夹！')
             elif flag == -1:
                 self.renameBtn.setEnabled(False)
-                self.warnLabel.clear()
+                self.tipLabel.clear()
 
         self.folderLineEdit.textChanged.connect(get_directory)
 

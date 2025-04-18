@@ -106,8 +106,9 @@ def switch_rule(config_dict, index):
     """
     功能：切换需要加载的规则
     参数 config_dict：规则配置文件根字典
+    参数 index：需要切换到的规则的下标
     """
-    logging.info(f'用户切换至规则{index}')
+    logging.info(f'用户切换至规则{index + 1}')
     config_dict['selected_index'] = index
     # 将更改写入配置文件
     with open(config_path, 'w', encoding='utf-8') as f:
