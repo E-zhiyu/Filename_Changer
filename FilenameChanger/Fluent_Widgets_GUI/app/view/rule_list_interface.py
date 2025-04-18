@@ -14,14 +14,14 @@ from FilenameChanger.rename_rules.rule_manager import load_config, switch_rule
 class RuleCard(CardWidget):
     """定义规则卡片"""
 
-    def __init__(self, index, rule_dict, isActivated=False, parent=None):
+    def __init__(self, index, rule, isActive=False, parent=None):
         super().__init__(parent)
         """定义该卡片的属性"""
         self.index = index  # 记录该卡片在列表中的下标
-        self.name = rule_dict["name"]
-        self.desc = rule_dict["desc"]
-        self.type = rule_dict["type"]
-        self.keyFunctionDict = {k: v for k, v in rule_dict.items() if k not in ["type", "name", "desc"]}
+        self.name = rule["name"]
+        self.desc = rule["desc"]
+        self.type = rule["type"]
+        self.keyFunctionDict = {k: v for k, v in rule.items() if k not in ["type", "name", "desc"]}
         self.selected = False  # 初始状态为未被鼠标选中
 
         """卡片基本设置"""
@@ -46,29 +46,28 @@ class RuleCard(CardWidget):
         self.labelLayout.addWidget(self.contentLabel)
         self.mainHLayout.addLayout(self.labelLayout)  # 合并标签布局器至主布局器
 
-        """激活状态显示设置"""
-        if isActivated:
-            # 设置图标和文本标签
-            self.isActivatedIcon = IconWidget(InfoBarIcon.SUCCESS)
-            self.isActivatedLabel = SubtitleLabel(text='已激活', parent=self)
+        """激规则激活状态"""
+        self.isActivatedWidget = QWidget(self)  # 定义存放图标和文本标签的容器
+        self.activatedLayout = QHBoxLayout(self.isActivatedWidget)
+        self.isActivatedIcon = IconWidget()  # 显示激活信息的图标
+        self.isActivatedLabel = SubtitleLabel(text='', parent=self)
 
-            self.isActivatedWidget = QWidget(self)  # 定义存放图标和文本标签的容器
-            self.activatedLayout = QHBoxLayout(self.isActivatedWidget)  # 定义激活状态容器的布局器
+        setFont(self.isActivatedLabel, 15)
+        self.isActivatedIcon.setFixedSize(20, 20)
+        self.activatedLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)  # 激活状态布局方式为左对齐
+        self.activatedLayout.setSpacing(0)  # 完全取消激活状态布局器的控件间隔
 
-            setFont(self.isActivatedLabel, 15)
-            self.isActivatedIcon.setFixedSize(20, 20)
-            self.activatedLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)  # 激活状态布局方式为左对齐
-            self.activatedLayout.setSpacing(0)  # 完全取消激活状态布局器的控件间隔
-
-            # 添加控件到布局器
-            self.activatedLayout.addWidget(self.isActivatedIcon)
-            self.activatedLayout.addWidget(self.isActivatedLabel)
-            self.mainHLayout.addWidget(self.isActivatedWidget, 0, Qt.AlignmentFlag.AlignRight)
+        # 添加控件到布局器
+        self.activatedLayout.addWidget(self.isActivatedIcon)
+        self.activatedLayout.addWidget(self.isActivatedLabel)
+        self.mainHLayout.addWidget(self.isActivatedWidget, 0, Qt.AlignmentFlag.AlignRight)
 
         """更多按钮"""
         self.moreBtn = TransparentToolButton(FluentIcon.MORE)
         self.moreBtn.setFixedSize(32, 32)
         self.mainHLayout.addWidget(self.moreBtn)
+
+        self.setActive(isActive)
 
     def setCardSelected(self, isSelected: bool):
         """切换卡片的选中状态"""
@@ -83,6 +82,15 @@ class RuleCard(CardWidget):
             self.setStyleSheet("background-color: transparent;")
         else:
             self.setStyleSheet(f'background-color: #0078d4;')
+
+    def setActive(self, isActive: bool):
+        """切换激活状态"""
+        if isActive:
+            self.isActivatedIcon.setIcon(InfoBarIcon.SUCCESS)
+            self.isActivatedLabel.setText('已激活')
+        else:
+            self.isActivatedIcon.setIcon(None)
+            self.isActivatedLabel.setText('')
 
 
 class RuleListInterface(QFrame):
@@ -192,24 +200,22 @@ class RuleListInterface(QFrame):
         self.currentIndex = index
         self.ruleCardList[self.currentIndex].setCardSelected(True)  # 再将选中的卡片切换为选中状态
 
-    def refreshRuleList(self):
-        """刷新规则卡片界面"""
-        for card in self.ruleCardList:
-            self.ruleCardLayout.removeWidget(card)
-        self.ruleCardList.clear()
-
-        self.rule_dict = load_config()
-
-        self.addRuleCard()
-
     def achieve_functions(self):
         """实现各控件功能的方法"""
 
-        """激活规则的按钮"""
-
         def activate_rule():
+            """激活规则的按钮"""
             index = self.currentIndex
+
+            # 将旧的规则卡片设置为未激活
+            current_index = self.rule_dict['selected_index']
+            self.ruleCardList[current_index].setActive(False)
+
             switch_rule(self.rule_dict, index)
-            self.refreshRuleList()
+
+            # 重新加载规则，并将新的规则卡片设置为已激活
+            self.rule_dict = load_config()
+            current_index = self.rule_dict['selected_index']
+            self.ruleCardList[current_index].setActive(True)
 
         self.activateRuleBtn.clicked.connect(activate_rule)
