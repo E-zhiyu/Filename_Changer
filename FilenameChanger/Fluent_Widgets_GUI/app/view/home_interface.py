@@ -1,10 +1,10 @@
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QFileDialog
 from PyQt6.QtCore import Qt
 
-from Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, LineEdit, FluentIcon, PrimaryPushButton,
+from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, LineEdit, FluentIcon, PrimaryPushButton,
                                                MessageBox, ToolButton)
-from file_operations.file_utils import is_directory_usable, rename
-from file_operations.file_utils import cancel_rename_operation
+from FilenameChanger.file_operations.file_utils import is_directory_usable, rename
+from FilenameChanger.file_operations.file_utils import cancel_rename_operation
 
 
 class HomeInterface(QFrame):

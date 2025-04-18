@@ -2,13 +2,11 @@ from PyQt6.QtGui import QPalette
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QApplication
 from PyQt6.QtCore import Qt
 
-from Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, PushButton, FluentIcon, CardWidget,
+from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, PushButton, FluentIcon, CardWidget,
                                                SearchLineEdit, TransparentToolButton, SmoothScrollArea, IconWidget,
                                                InfoBarIcon, Theme, isDarkTheme)
-from ..common.config import cfg
-from ..common.style_sheet import StyleSheet
 
-from rename_rules.rule_manager import load_config, switch_rule
+from FilenameChanger.rename_rules.rule_manager import load_config, switch_rule
 
 
 class RuleCard(CardWidget):

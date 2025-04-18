@@ -1,7 +1,7 @@
 # coding: utf-8
 from enum import Enum
 
-from Fluent_Widgets_GUI.qfluentwidgets import StyleSheetBase, Theme, isDarkTheme, qconfig
+from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import StyleSheetBase, Theme, isDarkTheme, qconfig
 
 
 class StyleSheet(StyleSheetBase, Enum):

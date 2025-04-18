@@ -3,7 +3,7 @@ from PyQt6.QtCore import Qt, QUrl
 from PyQt6.QtGui import QPixmap, QDesktopServices
 from PyQt6.QtWidgets import QFrame, QLabel, QVBoxLayout, QWidget, QHBoxLayout
 
-from qfluentwidgets import IconWidget, FluentIcon, TextWrap, SingleDirectionScrollArea
+from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import IconWidget, FluentIcon, TextWrap, SingleDirectionScrollArea
 from ..common.style_sheet import StyleSheet
 
 

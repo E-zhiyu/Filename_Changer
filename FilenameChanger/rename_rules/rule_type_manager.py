@@ -1,7 +1,5 @@
 # FilenameChanger/rename_rules/rule_type_manager.py
-import logging
 import re
-from multiprocessing.spawn import old_main_modules
 
 from FilenameChanger.rename_rules.rule_manager import *
 from FilenameChanger.rename_rules import illegal_char
@@ -327,10 +325,10 @@ def use_type_4(config_dict, old_name_list):
     local_date = time.strftime(f'%Y{split_char}%m{split_char}%d', time.localtime(time.time()))
 
     try:
-        y, m, d = config_dict['rules'][selected_index]['date'].split()
-        date = f'{y}{split_char}{m}{split_char}{d}'
+        y, m, d = config_dict['rules'][selected_index]['date'].split(' ')
+        customize_date = f'{y}{split_char}{m}{split_char}{d}'
     except ValueError:  # 处理自定义日期为空的情况
-        date = ''
+        customize_date = ''
 
     new_name_list = []
 
@@ -339,7 +337,7 @@ def use_type_4(config_dict, old_name_list):
         try:
             file_name, ext = os.path.splitext(old_name)
         except ValueError:
-            ext = ''  # 处理没有扩展名的文件
+            ext = ''  # 处理没有扩展名的文件（不用处理没有文件名的文件，因为这种文件不会被扫描进列表）
 
         """判断是否含有日期"""
         logging.info('判断文件名是否含有日期')
@@ -367,13 +365,13 @@ def use_type_4(config_dict, old_name_list):
             new_name_list.append(new_name)
         else:
             """添加日期操作"""
-            if date:  # 判断自定义日期是否为空
+            if customize_date:  # 判断自定义日期是否为空
                 if position == 'head':
-                    new_name = f'{date}{file_name}{ext}'
-                    logging.info('已将当前系统日期添加至文件名头部')
+                    new_name = f'{customize_date}{file_name}{ext}'
+                    logging.info(f'已将日期：“{customize_date}”添加至文件名头部')
                 elif position == 'tail':
-                    new_name = f'{file_name}{date}{ext}'
-                    logging.info('已将当前系统日期添加至文件名尾部')
+                    new_name = f'{file_name}{customize_date}{ext}'
+                    logging.info(f'已将日期：“{customize_date}”添加至文件名尾部')
                 new_name_list.append(new_name)
             else:
                 if position == 'head':

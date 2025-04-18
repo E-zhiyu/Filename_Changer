@@ -1,7 +1,7 @@
 # coding: utf-8
 from enum import Enum
 
-from Fluent_Widgets_GUI.qfluentwidgets import FluentIconBase, getIconColor, Theme
+from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import FluentIconBase, getIconColor, Theme
 
 
 class Icon(FluentIconBase, Enum):
