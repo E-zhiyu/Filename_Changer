@@ -6,16 +6,16 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, se
                                                                CardWidget, SearchLineEdit, TransparentToolButton,
                                                                SmoothScrollArea, IconWidget, InfoBarIcon)
 
-from FilenameChanger.rename_rules.rule_manager import load_config, switch_rule
+from FilenameChanger.rename_rules.rule_manager import load_config, switch_rule, del_rules
+from Fluent_Widgets_GUI.qfluentwidgets import MessageBox
 
 
 class RuleCard(CardWidget):
     """定义规则卡片"""
 
-    def __init__(self, index, rule, isActive=False, parent=None):
+    def __init__(self, rule, isActive=False, parent=None):
         super().__init__(parent=parent)
         """定义该卡片的属性"""
-        self.index = index  # 记录该卡片在列表中的下标
         name = rule["name"]
         desc = rule["desc"]
         self.type = rule["type"]
@@ -193,12 +193,13 @@ class RuleListInterface(QFrame):
                 activated = True
             else:
                 activated = False
-            self.ruleCardList.append(RuleCard(index, rule, activated))  # 将规则以卡片的形式添加至卡片列表
+            self.ruleCardList.append(RuleCard(rule, activated))  # 将规则以卡片的形式添加至卡片列表
             index += 1
 
         for card in self.ruleCardList:
             self.ruleCardLayout.addWidget(card, 0)  # 依此将卡片添加至卡片布局器中
-            card.clicked.connect(lambda cardIndex=card.index: self.setSelected(cardIndex))  # 将点击卡片的动作连接至选中卡片函数
+            card.clicked.connect(
+                lambda cardIndex=self.ruleCardList.index(card): self.setSelected(cardIndex))  # 将点击卡片的动作连接至选中卡片函数
 
     def setSelected(self, index):
         """
@@ -214,8 +215,8 @@ class RuleListInterface(QFrame):
     def achieve_functions(self):
         """实现各控件功能的方法"""
 
-        def activate_rule():
-            """激活规则的按钮"""
+        def activate_rule_callback():
+            """切换激活的规则"""
             if self.currentIndex != -1:  # 防止用户在未选择卡片的时候点击激活按钮而产生BUG
                 # 将旧的规则卡片设置为未激活
                 current_index = self.rule_dict['selected_index']
@@ -228,4 +229,36 @@ class RuleListInterface(QFrame):
                 current_index = self.rule_dict['selected_index']
                 self.ruleCardList[current_index].setActive(True)
 
-        self.activateRuleBtn.clicked.connect(activate_rule)
+        self.activateRuleBtn.clicked.connect(activate_rule_callback)
+
+        def del_rule_callback():
+            """删除规则"""
+            if self.currentIndex != -1:  # 防止没有选择规则就删除规则
+                confirm_window = MessageBox('删除规则', '确认删除选中的规则吗？', parent=self)
+                confirm_window.yesButton.setText('确认')
+                confirm_window.cancelButton.setText('取消')
+                confirm_window.show()
+
+                if confirm_window.exec():
+                    for card in self.ruleCardList:
+                        self.ruleCardLayout.removeWidget(card)
+                    self.ruleCardList.clear()
+
+                    flag = del_rules(self.rule_dict, self.currentIndex)
+                    self.currentIndex = -1
+
+                    self.addRuleCard()
+
+                if flag == 1:
+                    title = '成功'
+                    message = '已删除选中的规则'
+                elif flag == 0:
+                    title = '失败'
+                    message = '无法删除最后一个规则'
+                message_window = MessageBox(title=title, content=message, parent=self)
+                message_window.yesButton.setText('确认')
+                message_window.cancelButton.hide()
+                message_window.show()
+                message_window.exec()
+
+        self.delRuleBtn.clicked.connect(del_rule_callback)

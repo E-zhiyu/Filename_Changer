@@ -21,7 +21,7 @@ class MainWindow(FluentWindow):
         self.initWindow()
 
         # 设置界面亮暗主题
-        setTheme(Theme.AUTO)
+        setTheme(Theme.DARK)
 
         # 实例化不同的子界面
         self.homeInterface = HomeInterface('文件更名器', self)

@@ -57,49 +57,33 @@ def init_json():
     logging.info('规则文件初始化成功')
 
 
-def del_rules(config_dict):
+def del_rules(config_dict, index):
     """
     功能：删除指定的规则
     参数 config_dict：规则配置文件根字典
+    参数 index：需要删除的规则的下标
     """
     if config_dict['num'] == 1:
         logging.error('无法移除最后一个规则')
-        print('无法删除最后一个规则！')
-        time.sleep(0.5)
-        return
+        return 0
     else:
-        while True:
-            try:
-                option = int(input('\n请选择（输入-1取消操作）：\n'))
-                if option == -1:
-                    logging.info('用户取消删除规则')
-                    print('已取消，正在返回主菜单……')
-                    time.sleep(0.5)
-                    return  # 结束函数跳出死循环
-                elif option <= 0 or option > config_dict['num']:  # 确保输入有效值
-                    raise ValueError
-                else:
-                    logging.info(f'用户删除第{option}个规则')
+        logging.info(f'用户删除第{index + 1}个规则，剩余规则{config_dict['num'] - 1}个')
 
-                    # 判断删除的规则是否被选中，删除被选中的规则则改为选中第一个规则
-                    if config_dict['selected_index'] == option - 1 and option != 1:  # 当删除第一个规则时仍然默认选中规则1
-                        logging.info(f'第{option}个规则为选中的规则，已更改至删除后的第一个规则')
-                        print(f'第{option}个规则是选中的规则，已更改至第一个规则！')
-                        config_dict['selected_index'] = 0
+        # 判断删除的规则是否被选中，删除被选中的规则则改为选中第一个规则
+        if config_dict['selected_index'] == index and index != 0:  # 当删除第一个规则时仍然默认选中第一个规则
+            logging.info(f'第{index + 1}个规则为选中的规则，已更改至删除后的第一个规则')
+            config_dict['selected_index'] = 0
 
-                    # 若删除的规则下标小于选中的规则，则将selected_index-1
-                    if option - 1 < config_dict['selected_index']:
-                        config_dict['selected_index'] -= 1
+        # 若删除的规则下标小于选中的规则，则将selected_index-1
+        if index < config_dict['selected_index']:
+            config_dict['selected_index'] -= 1
 
-                    config_dict['num'] -= 1
-                    del config_dict['rules'][option - 1]
-                    with open(config_path, 'w', encoding='utf-8') as f:
-                        json.dump(config_dict, f, ensure_ascii=False, indent=4)
-                    print(f'规则{option}已删除！')
-                    time.sleep(0.5)
-                    return  # 结束函数跳出死循环
-            except ValueError:
-                print('请选择一个有效的规则！')
+        config_dict['num'] -= 1
+        del config_dict['rules'][index]
+        with open(config_path, 'w', encoding='utf-8') as f:
+            json.dump(config_dict, f, ensure_ascii=False, indent=4)
+
+        return 1
 
 
 def switch_rule(config_dict, index):
