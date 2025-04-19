@@ -3,7 +3,7 @@
 from FilenameChanger import version
 
 from PyQt6.QtWidgets import QApplication
-from PyQt6.QtGui import QIcon, QDesktopServices
+from PyQt6.QtGui import QIcon
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import FluentIcon as FIF, setTheme, Theme
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (NavigationItemPosition, MessageBox, FluentWindow,

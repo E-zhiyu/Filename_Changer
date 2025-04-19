@@ -3,10 +3,8 @@ from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QApplicat
 from PyQt6.QtCore import Qt
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, PushButton, FluentIcon,
-                                                               CardWidget,
-                                                               SearchLineEdit, TransparentToolButton, SmoothScrollArea,
-                                                               IconWidget,
-                                                               InfoBarIcon, Theme, isDarkTheme)
+                                                               CardWidget, SearchLineEdit, TransparentToolButton,
+                                                               SmoothScrollArea, IconWidget, InfoBarIcon)
 
 from FilenameChanger.rename_rules.rule_manager import load_config, switch_rule
 
@@ -15,11 +13,11 @@ class RuleCard(CardWidget):
     """定义规则卡片"""
 
     def __init__(self, index, rule, isActive=False, parent=None):
-        super().__init__(parent)
+        super().__init__(parent=parent)
         """定义该卡片的属性"""
         self.index = index  # 记录该卡片在列表中的下标
-        self.name = rule["name"]
-        self.desc = rule["desc"]
+        name = rule["name"]
+        desc = rule["desc"]
         self.type = rule["type"]
         self.keyFunctionDict = {k: v for k, v in rule.items() if k not in ["type", "name", "desc"]}
         self.selected = False  # 初始状态为未被鼠标选中
@@ -29,11 +27,13 @@ class RuleCard(CardWidget):
         self.mainHLayout = QHBoxLayout(self)  # 设置卡片的主布局器（水平）
 
         """规则名和规则描述标签"""
-        self.titleLabel = SubtitleLabel(self.name, self)
-        self.contentLabel = SubtitleLabel(self.desc, self)
+        self.titleLabel = SubtitleLabel(text=name, parent=self)
+        self.contentLabel = SubtitleLabel(text=desc, parent=self)
         self.labelLayout = QVBoxLayout()
 
-        # 设置字号
+        # 设置属性
+        self.titleLabel.setStyleSheet('background-color:transparent')  # 将标签的背景色设为透明，防止选择卡片的时候影响美观
+        self.contentLabel.setStyleSheet('background-color:transparent')  # 将标签的背景色设为透明，防止选择卡片的时候影响美观
         setFont(self.titleLabel, 25)
         setFont(self.contentLabel, 16)
 
@@ -53,6 +53,7 @@ class RuleCard(CardWidget):
         self.isActivatedLabel = SubtitleLabel(text='', parent=self)
 
         setFont(self.isActivatedLabel, 15)
+        self.isActivatedWidget.setStyleSheet('background-color:transparent')  # 将背景色设为透明，防止选择规则卡片的时候影响美观
         self.isActivatedIcon.setFixedSize(20, 20)
         self.activatedLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)  # 激活状态布局方式为左对齐
         self.activatedLayout.setSpacing(0)  # 完全取消激活状态布局器的控件间隔
@@ -71,7 +72,7 @@ class RuleCard(CardWidget):
 
     def setCardSelected(self, isSelected: bool):
         """切换卡片的选中状态"""
-        sys_color = QApplication.palette().color(QPalette.ColorRole.WindowText)  # 获取系统文本色
+        # sys_color = QApplication.palette().color(QPalette.ColorRole.WindowText)  # 获取系统文本色
 
         if isSelected == self.selected:
             return
@@ -79,9 +80,19 @@ class RuleCard(CardWidget):
         self.selected = isSelected
 
         if not isSelected:
-            self.setStyleSheet("background-color: transparent;")
+            self.setStyleSheet("""
+                QWidget {
+                    background: transparent;
+                    border-radius: 5px;
+                }
+            """)
         else:
-            self.setStyleSheet(f'background-color: #0078d4;')
+            self.setStyleSheet("""
+                QWidget {
+                    background: #00c3dc;
+                    border-radius: 5px;
+                }
+            """)
 
     def setActive(self, isActive: bool):
         """切换激活状态"""
@@ -122,7 +133,7 @@ class RuleListInterface(QFrame):
         """功能按钮"""
         self.addBtn = PushButton(FluentIcon.ADD, '添加规则')
         self.activateRuleBtn = PushButton(FluentIcon.COMPLETED, '激活规则')
-        self.delRuleBtn = PushButton(FluentIcon.DELETE, '删除规则')
+        self.delRuleBtn = PushButton(FluentIcon.DELETE.icon(color='red'), '删除规则')
         self.btnLayout = QHBoxLayout()  # 控制顶部规则编辑按钮的布局
 
         self.btnLayout.setSpacing(4)
@@ -135,20 +146,22 @@ class RuleListInterface(QFrame):
 
         """搜索框"""
         self.searchLineEdit = SearchLineEdit()  # 实例化搜索框
+
         self.searchLineEdit.setFixedWidth(300)
         self.searchLineEdit.setPlaceholderText('搜索规则名称')  # 设置输入提示语
 
         self.widgetVLayout.addWidget(self.searchLineEdit, 0)  # 将搜索框添加至总容器布局器
 
         """规则卡片展示区域"""
-        self.ruleViewArea = QFrame(self.totalWidget)  # 额外新建一个容器作为规则展示区域
-        self.ruleScrollArea = SmoothScrollArea()  # 创建平滑滚动容器
-        self.ruleScrollWidget = QWidget(self.ruleViewArea)  # 创建存放所有规则卡片的容器
+        self.ruleScrollArea = SmoothScrollArea(self.totalWidget)  # 创建平滑滚动区域
+        self.ruleCardWidget = QWidget(self.ruleScrollArea)  # 创建存放所有规则卡片的容器
+        self.ruleCardLayout = QVBoxLayout(self.ruleCardWidget)  # 规则卡片的垂直布局器
 
-        self.ruleCardLayout = QVBoxLayout(self.ruleScrollWidget)  # 规则卡片的垂直布局器
-        self.ruleViewLayout = QHBoxLayout(self.ruleViewArea)  # 存放规则卡片区域
+        self.ruleScrollArea.setWidget(self.ruleCardWidget)  # 将规则卡片容器放入滚动区域，使其可以滚动
 
-        self.ruleViewLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)  # 从左至右添加规则卡片区域和规则详情面板
+        # 去掉滚动区域的黑色边框
+        # self.ruleScrollArea.enableTransparentBackground()
+
         self.ruleCardLayout.setAlignment(Qt.AlignmentFlag.AlignTop)  # 设置卡片对齐方式为顶对齐
         self.ruleCardLayout.setSpacing(7)  # 设置卡片布局器间隔：每个卡片间隔距离为7
 
@@ -162,12 +175,10 @@ class RuleListInterface(QFrame):
 
     def initRuleViewArea(self):
         """初始化规则卡片显示区域"""
-        self.ruleScrollArea.setWidget(self.ruleScrollWidget)  # 设置ruleScrollArea的父容器为ruleScrollWidget
         self.ruleScrollArea.setWidgetResizable(True)
         self.ruleScrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)  # 水平滚动条永远不显示
 
-        self.widgetVLayout.addWidget(self.ruleViewArea)
-        self.ruleViewLayout.addWidget(self.ruleScrollArea)
+        self.widgetVLayout.addWidget(self.ruleScrollArea)
 
         self.addRuleCard()  # 将规则卡片列表中的卡片添加到界面中
 
@@ -205,17 +216,16 @@ class RuleListInterface(QFrame):
 
         def activate_rule():
             """激活规则的按钮"""
-            index = self.currentIndex
+            if self.currentIndex != -1:  # 防止用户在未选择卡片的时候点击激活按钮而产生BUG
+                # 将旧的规则卡片设置为未激活
+                current_index = self.rule_dict['selected_index']
+                self.ruleCardList[current_index].setActive(False)
 
-            # 将旧的规则卡片设置为未激活
-            current_index = self.rule_dict['selected_index']
-            self.ruleCardList[current_index].setActive(False)
+                index = self.currentIndex
+                switch_rule(self.rule_dict, index)  # 切换规则并保存至配置文件
 
-            switch_rule(self.rule_dict, index)
-
-            # 重新加载规则，并将新的规则卡片设置为已激活
-            self.rule_dict = load_config()
-            current_index = self.rule_dict['selected_index']
-            self.ruleCardList[current_index].setActive(True)
+                # 并新的规则卡片设置为已激活
+                current_index = self.rule_dict['selected_index']
+                self.ruleCardList[current_index].setActive(True)
 
         self.activateRuleBtn.clicked.connect(activate_rule)
