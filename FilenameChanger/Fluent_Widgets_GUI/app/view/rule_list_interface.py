@@ -4,10 +4,10 @@ from PyQt6.QtCore import Qt
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, PushButton, FluentIcon,
                                                                CardWidget, SearchLineEdit, TransparentToolButton,
-                                                               SmoothScrollArea, IconWidget, InfoBarIcon)
+                                                               SmoothScrollArea, IconWidget, InfoBarIcon, MessageBox,
+                                                               FluentWindow)
 
 from FilenameChanger.rename_rules.rule_manager import load_config, switch_rule, del_rules
-from Fluent_Widgets_GUI.qfluentwidgets import MessageBox
 
 
 class RuleCard(CardWidget):
@@ -72,8 +72,6 @@ class RuleCard(CardWidget):
 
     def setCardSelected(self, isSelected: bool):
         """切换卡片的选中状态"""
-        # sys_color = QApplication.palette().color(QPalette.ColorRole.WindowText)  # 获取系统文本色
-
         if isSelected == self.selected:
             return
 
@@ -102,6 +100,13 @@ class RuleCard(CardWidget):
         else:
             self.isActivatedIcon.setIcon(None)
             self.isActivatedLabel.setText('')
+
+
+class AddRuleInterface(FluentWindow):
+    """添加规则的窗口"""
+
+    def __init__(self, parent=None):
+        super().__init__()
 
 
 class RuleListInterface(QFrame):
@@ -158,9 +163,6 @@ class RuleListInterface(QFrame):
         self.ruleCardLayout = QVBoxLayout(self.ruleCardWidget)  # 规则卡片的垂直布局器
 
         self.ruleScrollArea.setWidget(self.ruleCardWidget)  # 将规则卡片容器放入滚动区域，使其可以滚动
-
-        # 去掉滚动区域的黑色边框
-        # self.ruleScrollArea.enableTransparentBackground()
 
         self.ruleCardLayout.setAlignment(Qt.AlignmentFlag.AlignTop)  # 设置卡片对齐方式为顶对齐
         self.ruleCardLayout.setSpacing(7)  # 设置卡片布局器间隔：每个卡片间隔距离为7
@@ -249,16 +251,20 @@ class RuleListInterface(QFrame):
 
                     self.addRuleCard()
 
-                if flag == 1:
-                    title = '成功'
-                    message = '已删除选中的规则'
-                elif flag == 0:
-                    title = '失败'
-                    message = '无法删除最后一个规则'
-                message_window = MessageBox(title=title, content=message, parent=self)
-                message_window.yesButton.setText('确认')
-                message_window.cancelButton.hide()
-                message_window.show()
-                message_window.exec()
+                    if flag == 1:
+                        title = '成功'
+                        message = '已删除选中的规则'
+                    elif flag == 0:
+                        title = '失败'
+                        message = '无法删除最后一个规则'
+                    message_window = MessageBox(title=title, content=message, parent=self)
+                    message_window.yesButton.setText('确认')
+                    message_window.cancelButton.hide()
+                    message_window.show()
+                    message_window.exec()
 
         self.delRuleBtn.clicked.connect(del_rule_callback)
+
+        def add_rule_callback():
+            """添加规则"""
+            pass

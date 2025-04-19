@@ -120,7 +120,7 @@ class HomeInterface(QFrame):
         self.folderLineEdit.textChanged.connect(get_directory)
 
         # 重命名按钮功能实现
-        def rename_button_function():
+        def rename_button_callback():
             if confirm_operation():  # 弹出消息框确认操作
                 targetDirectory = self.folderLineEdit.text()
                 targetDirectory = targetDirectory.strip('\"')
@@ -142,10 +142,10 @@ class HomeInterface(QFrame):
                 message_window.show()
                 message_window.exec()
 
-        self.renameBtn.clicked.connect(rename_button_function)
+        self.renameBtn.clicked.connect(rename_button_callback)
 
         # 撤销重命名按钮功能实现
-        def cancel_button_function():
+        def cancel_button_callback():
             if confirm_operation():  # 弹出消息框确认操作
                 flag = cancel_rename_operation()
 
@@ -168,10 +168,10 @@ class HomeInterface(QFrame):
                 message_window.show()
                 message_window.exec()
 
-        self.cancelOperationBtn.clicked.connect(cancel_button_function)
+        self.cancelOperationBtn.clicked.connect(cancel_button_callback)
 
         # 文件夹浏览按钮功能实现
-        def open_folder_dialog():
+        def select_folder_callback():
             folder_path = QFileDialog.getExistingDirectory(
                 self,
                 '选择文件夹',
@@ -181,4 +181,4 @@ class HomeInterface(QFrame):
             if folder_path:
                 self.folderLineEdit.setText(folder_path)
 
-        self.folderSelectBtn.clicked.connect(open_folder_dialog)
+        self.folderSelectBtn.clicked.connect(select_folder_callback)
