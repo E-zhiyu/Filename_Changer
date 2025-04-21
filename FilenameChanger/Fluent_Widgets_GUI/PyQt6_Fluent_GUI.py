@@ -23,4 +23,4 @@ def run_with_gui():
     w = MainWindow()
     w.show()
 
-    app.exec()
+    sys.exit(app.exec())

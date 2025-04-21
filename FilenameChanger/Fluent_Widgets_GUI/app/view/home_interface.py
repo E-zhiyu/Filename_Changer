@@ -88,7 +88,6 @@ class HomeInterface(QFrame):
                 message = '确认进行操作吗？'
 
             confirm_window = MessageBox('操作确认', content=message, parent=self)
-            confirm_window.show()
             confirm_window.yesButton.setText('确认')
             confirm_window.cancelButton.setText('取消')
 
@@ -139,7 +138,6 @@ class HomeInterface(QFrame):
                 message_window.cancelButton.hide()
                 message_window.buttonLayout.insertStretch(1)
                 message_window.yesButton.setText("确认")
-                message_window.show()
                 message_window.exec()
 
         self.renameBtn.clicked.connect(rename_button_callback)
@@ -165,7 +163,6 @@ class HomeInterface(QFrame):
                 message_window.cancelButton.hide()
                 message_window.buttonLayout.insertStretch(1)
                 message_window.yesButton.setText("确认")
-                message_window.show()
                 message_window.exec()
 
         self.cancelOperationBtn.clicked.connect(cancel_button_callback)

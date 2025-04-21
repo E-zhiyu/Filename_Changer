@@ -7,7 +7,7 @@ from PyQt6.QtGui import QIcon
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import FluentIcon as FIF, setTheme, Theme
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (NavigationItemPosition, MessageBox, FluentWindow,
-                                               NavigationAvatarWidget, SystemThemeListener)
+                                                               NavigationAvatarWidget, SystemThemeListener)
 
 from FilenameChanger.Fluent_Widgets_GUI.app.view.home_interface import HomeInterface
 from FilenameChanger.Fluent_Widgets_GUI.app.view.rule_list_interface import RuleListInterface
@@ -31,6 +31,8 @@ class MainWindow(FluentWindow):
 
     def initNavigation(self):
         """初始化导航栏"""
+        self.navigationInterface.setExpandWidth(200)  # 设置导航栏展开宽度
+
         # 创建导航栏选项
         self.addSubInterface(self.homeInterface, FIF.HOME, '主页')
         self.addSubInterface(self.ruleListInterface, FIF.LAYOUT, '规则列表')
