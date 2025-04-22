@@ -1,3 +1,5 @@
+import logging
+
 from PyQt6.QtGui import QPalette
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QApplication, QButtonGroup
 from PyQt6.QtCore import Qt, pyqtSignal
@@ -7,8 +9,9 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, se
                                                                SmoothScrollArea, IconWidget, InfoBarIcon, MessageBox,
                                                                ComboBox, MessageBoxBase, LineEdit, RadioButton)
 
-from FilenameChanger.rename_rules.rule_manager import load_config, switch_rule, del_rules
-from rename_rules.rule_manager import save_new_rule
+from FilenameChanger.rename_rules.rule_manager import load_config, switch_rule, del_rules, save_new_rule
+
+from FilenameChanger.log.log_recorder import *
 
 
 class RuleCard(CardWidget):
@@ -35,7 +38,7 @@ class RuleCard(CardWidget):
         # 设置属性
         self.titleLabel.setStyleSheet('background-color:transparent')  # 将标签的背景色设为透明，防止选择卡片的时候影响美观
         self.contentLabel.setStyleSheet('background-color:transparent')  # 将标签的背景色设为透明，防止选择卡片的时候影响美观
-        setFont(self.titleLabel, 25)
+        setFont(self.titleLabel, 22)
         setFont(self.contentLabel, 16)
 
         # 设置布局器对齐方式和间隔
@@ -69,6 +72,7 @@ class RuleCard(CardWidget):
         self.moreBtn.setFixedSize(32, 32)
         self.mainHLayout.addWidget(self.moreBtn)"""
 
+        """设置卡片的激活显示状态"""
         self.setActive(isActive)
 
     def setCardSelected(self, isSelected: bool):
@@ -88,7 +92,7 @@ class RuleCard(CardWidget):
         else:
             self.setStyleSheet("""
                 QWidget {
-                    background: #00c3dc;
+                    background: #ff009faa;
                     border-radius: 5px;
                 }
             """)
@@ -120,7 +124,9 @@ class AddRuleInterface(MessageBoxBase):
         self.yesButton.setText('确认')  # 修改按钮文本
         self.cancelButton.setText('取消')
 
-        self.new_layout_list = []
+        self.new_layout_list = []  # 存放新增加的布局，便于重选规则类型后刷新界面布局
+
+        self.yesButton.setEnabled(False)  # 初始将确认按钮设置为禁用状态，防止什么都没输入就点击确认
 
         """选择规则种类"""
         all_rule_type = ('1.交换分隔符前后内容', '2.修改后缀名', '3.修改特定字符串', '4.文件名添加或删除日期')
@@ -167,6 +173,7 @@ class AddRuleInterface(MessageBoxBase):
 
     def refreshLayout(self):
         """选择的规则类型改变时改变窗口布局"""
+        self.yesButton.setEnabled(True)  # 一旦选择了规则类型就将该按钮设置为可用
         self.new_rule_type = int(self.ruleTypeComboBox.currentText()[:1])
         self.new_control.clear()
 
@@ -499,7 +506,10 @@ class RuleListInterface(QFrame):
                 confirm_window.yesButton.setText('确认')
                 confirm_window.cancelButton.setText('取消')
 
+                logging.info('用户点击删除规则按钮，确认操作中……')
                 if confirm_window.exec():
+                    logging.info('用户确认删除规则')
+
                     for card in self.ruleCardList:
                         self.ruleCardLayout.removeWidget(card)
                     self.ruleCardList.clear()
@@ -519,16 +529,17 @@ class RuleListInterface(QFrame):
                     message_window.yesButton.setText('确认')
                     message_window.cancelButton.hide()
                     message_window.exec()
+                else:
+                    logging.info('用户取消删除规则')
 
         self.delRuleBtn.clicked.connect(del_rule_callback)
 
         # 添加规则功能实现
         def save_rule(rule):
             """保存已解析的规则并将其添加至界面中"""
-            config_dict = load_config()
-            save_new_rule(config_dict, rule)
+            save_new_rule(self.rule_dict, rule)
 
-            new_card=RuleCard(rule)
+            new_card = RuleCard(rule)
             self.ruleCardList.append(new_card)
             self.ruleCardLayout.addWidget(new_card, 0)
             new_card.clicked.connect(
@@ -541,43 +552,66 @@ class RuleListInterface(QFrame):
             if addRuleWindow.exec():
                 """解析用户输入的规则"""
                 if addRuleWindow.new_rule_type == 1:
-                    data = {
+                    rule = {
                         'type': 1,
                         'name': addRuleWindow.ruleNameLineEdit.text(),
                         'desc': addRuleWindow.ruleDescLineEdit.text(),
                         'split_char': addRuleWindow.new_control['splitCharLineEdit'].text()
                     }
+                    logging.info('用户添加规则类型1')
+                    logging.info(
+                        f'名称：{addRuleWindow.ruleNameLineEdit.text()}\n描述：{addRuleWindow.ruleDescLineEdit.text()}')
+                    logging.info(f'分隔符：{addRuleWindow.new_control["splitCharLineEdit"].text()}')
                 elif addRuleWindow.new_rule_type == 2:
-                    data = {
+                    rule = {
                         'type': 2,
                         'name': addRuleWindow.ruleNameLineEdit.text(),
                         'desc': addRuleWindow.ruleDescLineEdit.text(),
                         'new_ext': addRuleWindow.new_control['extLineEdit'].text()
                     }
+                    logging.info('用户添加规则类型2')
+                    logging.info(
+                        f'名称：{addRuleWindow.ruleNameLineEdit.text()}\n描述：{addRuleWindow.ruleDescLineEdit.text()}')
+                    logging.info(f'新扩展名：{addRuleWindow.new_control["extLineEdit"].text()}')
                 elif addRuleWindow.new_rule_type == 3:
-                    data = {
+                    rule = {
                         'type': 3,
                         'name': addRuleWindow.ruleNameLineEdit.text(),
                         'desc': addRuleWindow.ruleDescLineEdit.text(),
                         'target_str': addRuleWindow.new_control['oldStrLineEdit'].text(),
                         'new_str': addRuleWindow.new_control['newStrLineEdit'].text()
                     }
+                    logging.info('用户添加规则类型3')
+                    logging.info(
+                        f'名称：{addRuleWindow.ruleNameLineEdit.text()}\n描述：{addRuleWindow.ruleDescLineEdit.text()}\n')
+                    logging.info(
+                        f'原字符串：{addRuleWindow.new_control["oldStrLineEdit"].text()}\n新字符串：{addRuleWindow.new_control["newStrLineEdit"].text()}')
                 elif addRuleWindow.new_rule_type == 4:
-                    data = {
+                    rule = {
                         'type': 4,
                         'name': addRuleWindow.ruleNameLineEdit.text(),
                         'desc': addRuleWindow.ruleDescLineEdit.text(),
-                        'date': addRuleWindow.new_control['customDateLineEdit'].text(),
                         'split_char': addRuleWindow.new_control['splitCharLineEdit'].text()
                     }
+                    logging.info('用户添加规则类型4')
+                    logging.info(
+                        f'名称：{addRuleWindow.ruleNameLineEdit.text()}\n描述：{addRuleWindow.ruleDescLineEdit.text()}\n')
+                    logging.info(f'分隔符：{addRuleWindow.new_control["splitCharLineEdit"].text()}')
 
                     if addRuleWindow.new_control['headBtn'].isChecked():
-                        data['position'] = 'head'
+                        rule['position'] = 'head'
+                        logging.info(f'位置：头部')
                     elif addRuleWindow.new_control['tailBtn'].isChecked():
-                        data['position'] = 'tail'
+                        rule['position'] = 'tail'
+                        logging.info(f'位置：尾部')
 
                     if addRuleWindow.new_control['sysDateBtn'].isChecked():
-                        data['date'] = None
-                addRuleWindow.submit_data.emit(data)  # 发送规则种类、名称和描述的信号
+                        rule['date'] = None
+                        logging.info('日期：动态填充系统日期')
+                    else:
+                        rule['date'] = addRuleWindow.new_control['customDateLineEdit'].text()
+                        logging.info(f'日期：{addRuleWindow.new_control["customDateLineEdit"].text()}')
+
+                addRuleWindow.submit_data.emit(rule)  # 发送规则种类、名称和描述的信号
 
         self.addRuleBtn.clicked.connect(add_rule_callback)

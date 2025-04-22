@@ -19,9 +19,14 @@ def load_config():
     try:
         with open(config_path, 'r', encoding='utf-8') as f:
             logging.info('加载规则配置……')
-            return json.load(f)
+            config = json.load(f)
+
+            if not config:  # 防止规则文件存在但是被修改为空
+                raise FileNotFoundError
+
+            return config
     except FileNotFoundError:
-        logging.info('未找到配置文件，正在创建并初始化……')
+        logging.info('配置文件为空或不存在，正在初始化……')
         init_json()
         with open(config_path, 'r', encoding='utf-8') as f:
             logging.info('规则配置已初始化并成功加载')

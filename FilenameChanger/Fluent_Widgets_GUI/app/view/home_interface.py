@@ -7,6 +7,8 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, se
 from FilenameChanger.file_operations.file_utils import is_directory_usable, rename
 from FilenameChanger.file_operations.file_utils import cancel_rename_operation
 
+from FilenameChanger.log.log_recorder import *
+
 
 class HomeInterface(QFrame):
     """定义主页布局"""
@@ -120,7 +122,10 @@ class HomeInterface(QFrame):
 
         # 重命名按钮功能实现
         def rename_button_callback():
+            logging.info('用户点击重命名按钮，确认操作中……')
             if confirm_operation():  # 弹出消息框确认操作
+                logging.info('用户确认重命名')
+
                 targetDirectory = self.folderLineEdit.text()
                 targetDirectory = targetDirectory.strip('\"')
                 flag = rename(targetDirectory)
@@ -139,12 +144,16 @@ class HomeInterface(QFrame):
                 message_window.buttonLayout.insertStretch(1)
                 message_window.yesButton.setText("确认")
                 message_window.exec()
+            else:
+                logging.info('用户取消重命名')
 
         self.renameBtn.clicked.connect(rename_button_callback)
 
         # 撤销重命名按钮功能实现
         def cancel_button_callback():
+            logging.info('用户点击撤销重命名按钮，确认操作中……')
             if confirm_operation():  # 弹出消息框确认操作
+                logging.info('用户确认撤销重命名')
                 flag = cancel_rename_operation()
 
                 if flag == 1:
@@ -164,6 +173,8 @@ class HomeInterface(QFrame):
                 message_window.buttonLayout.insertStretch(1)
                 message_window.yesButton.setText("确认")
                 message_window.exec()
+            else:
+                logging.info('用户取消撤销重命名')
 
         self.cancelOperationBtn.clicked.connect(cancel_button_callback)
 

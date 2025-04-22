@@ -32,6 +32,7 @@ def is_directory_usable(directory):
             logging.error('【错误】输入路径时发生未知错误！')
             return directory, 0
     else:
+        logging.info('用户清空输入框的路径')
         return None, -1
 
 
