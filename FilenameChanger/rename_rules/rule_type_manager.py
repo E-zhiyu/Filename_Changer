@@ -2,82 +2,10 @@
 import re
 
 from FilenameChanger.rename_rules.rule_manager import *
-from FilenameChanger.rename_rules import illegal_char
 
 """
 根据规则种类采用不同写入和读取方式的模块
 """
-
-
-def set_new_rule(config_dict):
-    """
-    功能：提示用户输入规则
-    参数 config_dict：配置文件根字典
-    """
-    all_rule_types = """
-【1】交换特定符号前后内容
-【2】批量修改文件扩展名
-【3】更改文件名中特定字符串（每个文件仅修改一处）
-【4】文件名增加或删除当前日期
-    """
-    print('创建新规则'.center(42, '—'))
-    print('以下为所有规则类型')
-    print(all_rule_types)
-
-    cycle = True
-    while cycle:
-        try:
-            rule_type = int(input('请选择（输入-1取消）：'))
-            cycle = False  # 用户输入后更改循环条件跳出循环
-            if rule_type == -1:
-                logging.info('用户取消写入规则')
-                print('已取消，正在返回主菜单……')
-                time.sleep(0.5)
-                return
-        except ValueError:  # 防止没有输入
-            print('请选择一个规则类型！')
-
-    logging.info(f'用户选择规则类型{rule_type}')
-    if rule_type == 1:
-        input_type_1(config_dict)
-    elif rule_type == 2:
-        input_type_2(config_dict)
-    elif rule_type == 3:
-        input_type_3(config_dict)
-    elif rule_type == 4:
-        input_type_4(config_dict)
-    else:
-        print('【选择错误】你选择了一个不存在的操作！即将返回主菜单……')
-
-    time.sleep(0.5)
-
-
-def input_type_1(config_dict):
-    """
-    功能：输入规则类型一并保存
-    规则类型：拆分特定分隔符前后的文件名并交换
-    参数 config_dict：配置文件根字典
-    """
-    new_rule_dict = {}  # 创建文件名分割规则字典
-    new_rule_dict['type'] = 1
-
-    # 常规信息输入
-    new_rule_dict['name'] = input('请输入规则名称：')
-    logging.info(f'输入规则名称：“{new_rule_dict["name"]}”')
-    new_rule_dict['desc'] = input('请输入规则描述：')
-    logging.info(f'输入规则描述：“{new_rule_dict["desc"]}”')
-
-    # 输入分隔符
-    do_cycle = True
-    while do_cycle:
-        new_rule_dict['split_char'] = input('请输入分隔符：')
-        if new_rule_dict['split_char'] in illegal_char:
-            print(f'文件名不能包含{illegal_char}！')
-        else:
-            do_cycle = False
-    logging.info(f'输入分隔符：“{new_rule_dict["split_char"]}”')
-
-    save_new_rule(config_dict, new_rule_dict)  # 保存输入的规则
 
 
 def use_type_1(config_dict, old_name_list):
@@ -121,39 +49,6 @@ def use_type_1(config_dict, old_name_list):
     return new_name_list
 
 
-def input_type_2(config_dict):
-    """
-    功能：输入规则类型二并保存
-    规则类型：批量更改扩展名
-    参数 config_dict：配置文件根字典
-    """
-    new_rule_dict = {}
-    new_rule_dict['type'] = 2
-
-    # 常规信息输入
-    new_rule_dict['name'] = input('请输入规则名称：')
-    logging.info(f'输入规则名称：“{new_rule_dict["name"]}”')
-    new_rule_dict['desc'] = input('请输入规则描述：')
-    logging.info(f'输入规则描述：“{new_rule_dict["desc"]}”')
-
-    # 输入新文件扩展名
-    do_cycle = True
-    while do_cycle:
-        new_rule_dict['new_ext'] = input('请输入新的文件扩展名：')
-        if new_rule_dict['new_ext'].startswith('.'):
-            new_rule_dict['new_ext'] = new_rule_dict['new_ext'][1:]  # 去除用户输入的“.”
-        """检测是否含有非法字符"""
-        for char in illegal_char:
-            if char in new_rule_dict['new_ext']:
-                print(f'文件名不能包含{illegal_char}')
-                break
-        else:  # 循环正常结束则跳出while循环
-            do_cycle = False
-    logging.info(f'输入新文件扩展名：“{new_rule_dict["new_ext"]}”')
-
-    save_new_rule(config_dict, new_rule_dict)
-
-
 def use_type_2(config_dict, old_name_list):
     """
     功能：应用类型二的规则
@@ -175,48 +70,6 @@ def use_type_2(config_dict, old_name_list):
         new_name_list.append(new_name)
 
     return new_name_list
-
-
-def input_type_3(config_dict):
-    """
-    功能：输入规则类型三并保存
-    规则类型：修改特定字符串
-    参数 config_dict：配置文件根字典
-    """
-    new_rule_dict = {}
-    new_rule_dict['type'] = 3
-
-    # 常规信息输入
-    new_rule_dict['name'] = input('请输入规则名称：')
-    logging.info(f'输入规则名称：“{new_rule_dict["name"]}”')
-    new_rule_dict['desc'] = input('请输入规则描述：')
-    logging.info(f'输入规则描述：“{new_rule_dict["desc"]}”')
-
-    # 输入目标字符串
-    do_cycle = True
-    while do_cycle:
-        new_rule_dict['target_str'] = input('请输入需要修改的字符串：')
-        for char in illegal_char:
-            if char in new_rule_dict['target_str']:
-                print(f'文件名不能含有{illegal_char}！')
-                break
-        else:
-            do_cycle = False
-    logging.info(f'输入目标字符串：“{new_rule_dict["target_str"]}”')
-
-    # 输入新字符串
-    do_cycle = True
-    while do_cycle:
-        new_rule_dict['new_str'] = input('请输入修改后的字符串：')
-        for char in illegal_char:
-            if char in new_rule_dict['new_str']:
-                print(f'文件名不能含有{illegal_char}！')
-                break
-        else:
-            do_cycle = False
-    logging.info(f'输入新字符串：“{new_rule_dict["new_str"]}”')
-
-    save_new_rule(config_dict, new_rule_dict)
 
 
 def use_type_3(config_dict, old_name_list):
@@ -250,66 +103,6 @@ def use_type_3(config_dict, old_name_list):
         new_name_list.append(new_name)
 
     return new_name_list
-
-
-def input_type_4(config_dict):
-    """
-    功能：输入规则类型四并保存
-    规则类型：增加或移除文件名中的日期
-    参数 config_dict：配置文件根字典
-    """
-    new_rule_dict = {}
-    new_rule_dict['type'] = 4
-
-    # 常规信息输入
-    new_rule_dict['name'] = input('请输入规则名称：')
-    logging.info(f'输入规则名称：“{new_rule_dict["name"]}”')
-    new_rule_dict['desc'] = input('请输入规则描述：')
-    logging.info(f'输入规则描述：“{new_rule_dict["desc"]}”')
-
-    # 自定义添加的日期（默认为当前系统日期）
-    date_type_re = r'\d{4} \d{1,2} \d{1,2}'
-    while True:
-        new_rule_dict['date'] = input('请输入待填充的日期，留空默认填充重命名时的系统日期（输入格式为YYYY MM DD）\n')
-        if re.match(date_type_re, new_rule_dict['date']):
-            break
-        else:
-            print('请输入正确的日期格式！')
-    logging.info(f'输入日期：“{new_rule_dict["date"]}”')
-
-    # 选择日期添加到的位置
-    position = ''
-    prompt = """
-【1】文件名头部
-【2】文件名尾部
-    """
-    print('请选择日期在文件名中的位置：')
-    print(prompt)
-    while position == '':
-        try:
-            user_option = int(input())
-            if user_option == 1:
-                position = 'head'
-            elif user_option == 2:
-                position = 'tail'
-            else:
-                print('请选择一个有效值！')
-        except ValueError:
-            print('该选项为必填选项，请不要跳过输入！')
-    logging.info(f'输入日期在文件名中的位置：“{position}”')
-    new_rule_dict['position'] = position
-
-    # 输入日期分隔符
-    do_cycle = True
-    while do_cycle:
-        new_rule_dict['split_char'] = input('请输入年月日分隔符：')
-        if new_rule_dict['split_char'] in illegal_char:  # 检测输入的分隔符是否合法
-            print(f'文件名不能包含{illegal_char}！')
-        else:
-            do_cycle = False
-    logging.info(f'输入年月日分隔符：“{new_rule_dict["split_char"]}”')
-
-    save_new_rule(config_dict, new_rule_dict)
 
 
 def use_type_4(config_dict, old_name_list):
