@@ -3,9 +3,9 @@ FilenameChanger/rename_rules/rename_rules.json
 main.spec
 dist
 build
-FilenameChanger/docs/Bugs.md
 filenamechanger.egg-info
 FilenameChanger/logs
 FilenameChanger/test.py
-待修复的BUG.txt
 FilenameChanger/rename_history
+app/
+TodoList.md

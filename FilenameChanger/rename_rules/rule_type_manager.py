@@ -1,7 +1,5 @@
 # FilenameChanger/rename_rules/rule_type_manager.py
-import logging
 import re
-from multiprocessing.spawn import old_main_modules
 
 from FilenameChanger.rename_rules.rule_manager import *
 from FilenameChanger.rename_rules import illegal_char
@@ -91,20 +89,20 @@ def use_type_1(config_dict, old_name_list):
     """
     selected_index = config_dict['selected_index']
     split_char = config_dict['rules'][selected_index]['split_char']
-    old_name_list = []  # 文件名列表
+    old_filename_list = []  # 文件名列表
     old_ext_list = []  # 扩展名列表
     for file in old_name_list:
-        try:  # 处理没有扩展名的文件
+        try:
             signal_name, signal_ext = os.path.splitext(file)  # 分离文件名和扩展名
         except ValueError:
             signal_ext = ''  # 处理没有扩展名的文件
 
-        old_name_list.append(signal_name)
+        old_filename_list.append(signal_name)
         old_ext_list.append(signal_ext)
 
     front = []  # 前半部分文件名
     behind = []  # 后半部分文件名
-    for signal_name in old_name_list:
+    for signal_name in old_filename_list:
         parts = signal_name.split(split_char, maxsplit=1)  # 将拆分的两个部分存放至列表parts中
         f = parts[0]
         b = parts[1] if len(parts) > 1 else ''  # 默认第二部分为空，用于处理无法拆分的文件名
@@ -112,12 +110,12 @@ def use_type_1(config_dict, old_name_list):
         behind.append(b)
     new_name_list = []
     for f, b, e in zip(front, behind, old_ext_list):
-        f.strip()  # 去除前后空格
+        f = f.strip()  # 去除前后空格
         if b:
-            b.strip()  # 去除前后空格
-            new = b + ' ' + split_char + ' ' + f + e  # 将f,b前后调换生成新文件名
+            b = b.strip()  # 去除前后空格
+            new = f'{b} {split_char} {f}{e}'  # 将f,b前后调换生成新文件名
         else:
-            new = f + e  # 若没有第二部分文件名则保持原状
+            new = f'{f}{e}'  # 若没有第二部分文件名则保持原状
         new_name_list.append(new)  # 将新名字并入新文件名列表
 
     return new_name_list
@@ -173,7 +171,7 @@ def use_type_2(config_dict, old_name_list):
 
     new_name_list = []
     for signal_name in name_list:
-        new_name = signal_name + '.' + new_ext
+        new_name = f'{signal_name}.{new_ext}'
         new_name_list.append(new_name)
 
     return new_name_list
@@ -246,9 +244,9 @@ def use_type_3(config_dict, old_name_list):
     for file_name, ext in zip(old_file_name_list, old_file_ext_list):
         try:
             f, b = file_name.split(target_str, 2)
-            new_name = f + new_str + b + ext
+            new_name = f'{f}{new_str}{b}{ext}'
         except ValueError:  # 处理无法拆分的情况
-            new_name = file_name + ext
+            new_name = f'{file_name}{ext}'
         new_name_list.append(new_name)
 
     return new_name_list
@@ -327,10 +325,10 @@ def use_type_4(config_dict, old_name_list):
     local_date = time.strftime(f'%Y{split_char}%m{split_char}%d', time.localtime(time.time()))
 
     try:
-        y, m, d = config_dict['rules'][selected_index]['date'].split()
-        date = y + split_char + m + split_char + d
+        y, m, d = config_dict['rules'][selected_index]['date'].split(' ')
+        customize_date = f'{y}{split_char}{m}{split_char}{d}'
     except ValueError:  # 处理自定义日期为空的情况
-        date = ''
+        customize_date = ''
 
     new_name_list = []
 
@@ -339,7 +337,7 @@ def use_type_4(config_dict, old_name_list):
         try:
             file_name, ext = os.path.splitext(old_name)
         except ValueError:
-            ext = ''  # 处理没有扩展名的文件
+            ext = ''  # 处理没有扩展名的文件（不用处理没有文件名的文件，因为这种文件不会被扫描进列表）
 
         """判断是否含有日期"""
         logging.info('判断文件名是否含有日期')
@@ -367,20 +365,20 @@ def use_type_4(config_dict, old_name_list):
             new_name_list.append(new_name)
         else:
             """添加日期操作"""
-            if date:  # 判断自定义日期是否为空
+            if customize_date:  # 判断自定义日期是否为空
                 if position == 'head':
-                    new_name = date + file_name + ext
-                    logging.info('已将当前系统日期添加至文件名头部')
+                    new_name = f'{customize_date}{file_name}{ext}'
+                    logging.info(f'已将日期：“{customize_date}”添加至文件名头部')
                 elif position == 'tail':
-                    new_name = file_name + date + ext
-                    logging.info('已将当前系统日期添加至文件名尾部')
+                    new_name = f'{file_name}{customize_date}{ext}'
+                    logging.info(f'已将日期：“{customize_date}”添加至文件名尾部')
                 new_name_list.append(new_name)
             else:
                 if position == 'head':
-                    new_name = local_date + file_name + ext
+                    new_name = f'{local_date}{file_name}{ext}'
                     logging.info('已将当前系统日期添加至文件名头部')
                 elif position == 'tail':
-                    new_name = file_name + local_date + ext
+                    new_name = f'{file_name}{local_date}{ext}'
                     logging.info('已将当前系统日期添加至文件名尾部')
                 new_name_list.append(new_name)
 
