@@ -1,6 +1,6 @@
 from PyQt6.QtGui import QPalette
-from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QApplication, QComboBox, QButtonGroup
-from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QApplication, QButtonGroup
+from PyQt6.QtCore import Qt, pyqtSignal
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, PushButton, FluentIcon,
                                                                CardWidget, SearchLineEdit, TransparentToolButton,
@@ -8,6 +8,7 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, se
                                                                ComboBox, MessageBoxBase, LineEdit, RadioButton)
 
 from FilenameChanger.rename_rules.rule_manager import load_config, switch_rule, del_rules
+from rename_rules.rule_manager import save_new_rule
 
 
 class RuleCard(CardWidget):
@@ -105,6 +106,10 @@ class RuleCard(CardWidget):
 class AddRuleInterface(MessageBoxBase):
     """添加规则时弹出的窗口"""
 
+    """定义发送给外部变量的信号"""
+    submit_data = pyqtSignal(dict)  # 定义发射字典的信号对象，用于发射所有输入的内容
+    new_control = {}  # 存放新增加的控件，便于外部函数调用
+
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         """基本设置"""
@@ -162,7 +167,8 @@ class AddRuleInterface(MessageBoxBase):
 
     def refreshLayout(self):
         """选择的规则类型改变时改变窗口布局"""
-        new_rule_type = int(self.ruleTypeComboBox.currentText()[:1])
+        self.new_rule_type = int(self.ruleTypeComboBox.currentText()[:1])
+        self.new_control.clear()
 
         """删除旧的控件"""
         for layout in self.new_layout_list:
@@ -173,7 +179,8 @@ class AddRuleInterface(MessageBoxBase):
             layout.deleteLater()
         self.new_layout_list.clear()
 
-        if new_rule_type == 1:
+        if self.new_rule_type == 1:
+
             """设置新的窗口高度"""
             new_height = self.base_height + 1 * 40
             self.widget.setFixedHeight(new_height)
@@ -192,11 +199,12 @@ class AddRuleInterface(MessageBoxBase):
             splitCharLineEdit.setPlaceholderText('请输入分隔符')
             splitCharLineEdit.setFixedWidth(120)
             splitCharLayout.addWidget(splitCharLineEdit)
+            self.new_control['splitCharLineEdit'] = splitCharLineEdit
 
             # 将新控件的水平布局添加到主布局
             self.viewLayout.addLayout(splitCharLayout)
 
-        elif new_rule_type == 2:
+        elif self.new_rule_type == 2:
             """设置新的窗口高度"""
             new_height = self.base_height + 1 * 40
             self.widget.setFixedHeight(new_height)
@@ -215,11 +223,12 @@ class AddRuleInterface(MessageBoxBase):
             extLineEdit.setPlaceholderText('请输入新的扩展名')
             extLineEdit.setFixedWidth(150)
             extLayout.addWidget(extLineEdit)
+            self.new_control['extLineEdit'] = extLineEdit
 
             # 将新布局添加至主布局
             self.viewLayout.addLayout(extLayout)
 
-        elif new_rule_type == 3:
+        elif self.new_rule_type == 3:
             """设置新的窗口高度"""
             new_height = self.base_height + 2 * 40
             self.widget.setFixedHeight(new_height)
@@ -238,6 +247,7 @@ class AddRuleInterface(MessageBoxBase):
             oldStrLineEdit.setPlaceholderText('请输入原字符串')
             oldStrLineEdit.setFixedWidth(150)
             oldStrLayout.addWidget(oldStrLineEdit)
+            self.new_control['oldStrLineEdit'] = oldStrLineEdit
 
             # 将旧字符串相关布局添加到主布局
             self.viewLayout.addLayout(oldStrLayout)
@@ -256,11 +266,12 @@ class AddRuleInterface(MessageBoxBase):
             newStrLineEdit.setPlaceholderText('请输入新字符串')
             newStrLineEdit.setFixedWidth(150)
             newStrLayout.addWidget(newStrLineEdit)
+            self.new_control['newStrLineEdit'] = newStrLineEdit
 
             # 将旧字符串相关布局添加到主布局
             self.viewLayout.addLayout(newStrLayout)
 
-        elif new_rule_type == 4:
+        elif self.new_rule_type == 4:
             """设置新的窗口高度"""
             new_height = self.base_height + 4 * 40
             self.widget.setFixedHeight(new_height)
@@ -278,12 +289,13 @@ class AddRuleInterface(MessageBoxBase):
             radioLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
             self.new_layout_list.append(radioLayout)
 
-            sysDateBtn = RadioButton('动态系统日期')
+            sysDateBtn = RadioButton('动态填充系统日期')
             dateBtnGroup = QButtonGroup(self)  # 创建按钮组
             sysDateBtn.setChecked(True)  # 默认填充重命名时的系统日期
             dateBtnGroup.addButton(sysDateBtn)
 
             radioLayout.addWidget(sysDateBtn)
+            self.new_control['sysDateBtn'] = sysDateBtn
 
             # 自定义填充日期
             customDateBtn = RadioButton('自定义')
@@ -298,7 +310,9 @@ class AddRuleInterface(MessageBoxBase):
             dateLineEdit.setFixedWidth(150)
 
             customDateLayout.addWidget(customDateBtn)
+            self.new_control['customDateBtn'] = customDateBtn
             customDateLayout.addWidget(dateLineEdit)
+            self.new_control['customDateLineEdit'] = dateLineEdit
             radioLayout.addLayout(customDateLayout)
 
             dateLayout.addLayout(radioLayout)
@@ -325,7 +339,9 @@ class AddRuleInterface(MessageBoxBase):
             headBtn.setChecked(True)  # 设置默认选中的按钮
 
             posLayout.addWidget(headBtn)
+            self.new_control['headBtn'] = headBtn
             posLayout.addWidget(tailBtn)
+            self.new_control['tailBtn'] = tailBtn
 
             # 将日期位置输入布局添加至主布局
             self.viewLayout.addLayout(posLayout)
@@ -344,6 +360,7 @@ class AddRuleInterface(MessageBoxBase):
             splitCharLineEdit.setPlaceholderText('请输入年月日间的分隔符')
             splitCharLineEdit.setFixedWidth(200)
             splitCharLayout.addWidget(splitCharLineEdit)
+            self.new_control['splitCharLineEdit'] = splitCharLineEdit
 
             # 将日期分隔符输入的布局添加至主布局
             self.viewLayout.addLayout(splitCharLayout)
@@ -457,6 +474,7 @@ class RuleListInterface(QFrame):
     def achieve_functions(self):
         """实现各控件功能的方法"""
 
+        # 激活规则功能实现
         def activate_rule_callback():
             """切换激活的规则"""
             if self.currentIndex != -1:  # 防止用户在未选择卡片的时候点击激活按钮而产生BUG
@@ -473,6 +491,7 @@ class RuleListInterface(QFrame):
 
         self.activateRuleBtn.clicked.connect(activate_rule_callback)
 
+        # 删除规则功能实现
         def del_rule_callback():
             """删除规则"""
             if self.currentIndex != -1:  # 防止没有选择规则就删除规则
@@ -503,10 +522,62 @@ class RuleListInterface(QFrame):
 
         self.delRuleBtn.clicked.connect(del_rule_callback)
 
+        # 添加规则功能实现
+        def save_rule(rule):
+            """保存已解析的规则并将其添加至界面中"""
+            config_dict = load_config()
+            save_new_rule(config_dict, rule)
+
+            new_card=RuleCard(rule)
+            self.ruleCardList.append(new_card)
+            self.ruleCardLayout.addWidget(new_card, 0)
+            new_card.clicked.connect(
+                lambda cardIndex=self.ruleCardList.index(new_card): self.setSelected(cardIndex))  # 将点击卡片的动作连接至选中卡片函数
+
         def add_rule_callback():
             """添加规则"""
-            self.addRuleWindow = AddRuleInterface(self)
-            if self.addRuleWindow.exec():
-                pass
+            addRuleWindow = AddRuleInterface(self)
+            addRuleWindow.submit_data.connect(save_rule)  # 将发射的信号传递给信号处理函数
+            if addRuleWindow.exec():
+                """解析用户输入的规则"""
+                if addRuleWindow.new_rule_type == 1:
+                    data = {
+                        'type': 1,
+                        'name': addRuleWindow.ruleNameLineEdit.text(),
+                        'desc': addRuleWindow.ruleDescLineEdit.text(),
+                        'split_char': addRuleWindow.new_control['splitCharLineEdit'].text()
+                    }
+                elif addRuleWindow.new_rule_type == 2:
+                    data = {
+                        'type': 2,
+                        'name': addRuleWindow.ruleNameLineEdit.text(),
+                        'desc': addRuleWindow.ruleDescLineEdit.text(),
+                        'new_ext': addRuleWindow.new_control['extLineEdit'].text()
+                    }
+                elif addRuleWindow.new_rule_type == 3:
+                    data = {
+                        'type': 3,
+                        'name': addRuleWindow.ruleNameLineEdit.text(),
+                        'desc': addRuleWindow.ruleDescLineEdit.text(),
+                        'target_str': addRuleWindow.new_control['oldStrLineEdit'].text(),
+                        'new_str': addRuleWindow.new_control['newStrLineEdit'].text()
+                    }
+                elif addRuleWindow.new_rule_type == 4:
+                    data = {
+                        'type': 4,
+                        'name': addRuleWindow.ruleNameLineEdit.text(),
+                        'desc': addRuleWindow.ruleDescLineEdit.text(),
+                        'date': addRuleWindow.new_control['customDateLineEdit'].text(),
+                        'split_char': addRuleWindow.new_control['splitCharLineEdit'].text()
+                    }
+
+                    if addRuleWindow.new_control['headBtn'].isChecked():
+                        data['position'] = 'head'
+                    elif addRuleWindow.new_control['tailBtn'].isChecked():
+                        data['position'] = 'tail'
+
+                    if addRuleWindow.new_control['sysDateBtn'].isChecked():
+                        data['date'] = None
+                addRuleWindow.submit_data.emit(data)  # 发送规则种类、名称和描述的信号
 
         self.addRuleBtn.clicked.connect(add_rule_callback)
