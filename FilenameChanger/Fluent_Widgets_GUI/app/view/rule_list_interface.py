@@ -1,8 +1,8 @@
 import logging
 
-from PyQt6.QtGui import QPalette
+from PyQt6.QtGui import QPalette, QRegularExpressionValidator
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QApplication, QButtonGroup
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtCore import Qt, pyqtSignal, QRegularExpression
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, PushButton, FluentIcon,
                                                                CardWidget, SearchLineEdit, TransparentToolButton,
@@ -177,6 +177,10 @@ class AddRuleInterface(MessageBoxBase):
         self.new_rule_type = int(self.ruleTypeComboBox.currentText()[:1])
         self.new_control.clear()
 
+        """创建输入框限制器，防止输入文件名不能存在的字符"""
+        regex = QRegularExpression(r'[^\/:*?"<>|]')  # 限制器内容
+        validator = QRegularExpressionValidator(regex)  # 限制器对象
+
         """删除旧的控件"""
         for layout in self.new_layout_list:
             while layout.count():
@@ -207,6 +211,7 @@ class AddRuleInterface(MessageBoxBase):
             splitCharLineEdit.setFixedWidth(120)
             splitCharLayout.addWidget(splitCharLineEdit)
             self.new_control['splitCharLineEdit'] = splitCharLineEdit
+            splitCharLineEdit.setValidator(validator)  # 设置限制器
 
             # 将新控件的水平布局添加到主布局
             self.viewLayout.addLayout(splitCharLayout)
@@ -231,6 +236,7 @@ class AddRuleInterface(MessageBoxBase):
             extLineEdit.setFixedWidth(150)
             extLayout.addWidget(extLineEdit)
             self.new_control['extLineEdit'] = extLineEdit
+            extLineEdit.setValidator(validator)  # 设置限制器
 
             # 将新布局添加至主布局
             self.viewLayout.addLayout(extLayout)
@@ -255,6 +261,7 @@ class AddRuleInterface(MessageBoxBase):
             oldStrLineEdit.setFixedWidth(150)
             oldStrLayout.addWidget(oldStrLineEdit)
             self.new_control['oldStrLineEdit'] = oldStrLineEdit
+            oldStrLineEdit.setValidator(validator)  # 设置限制器
 
             # 将旧字符串相关布局添加到主布局
             self.viewLayout.addLayout(oldStrLayout)
@@ -274,6 +281,7 @@ class AddRuleInterface(MessageBoxBase):
             newStrLineEdit.setFixedWidth(150)
             newStrLayout.addWidget(newStrLineEdit)
             self.new_control['newStrLineEdit'] = newStrLineEdit
+            newStrLineEdit.setValidator(validator)  # 设置限制器
 
             # 将旧字符串相关布局添加到主布局
             self.viewLayout.addLayout(newStrLayout)
@@ -320,6 +328,7 @@ class AddRuleInterface(MessageBoxBase):
             self.new_control['customDateBtn'] = customDateBtn
             customDateLayout.addWidget(dateLineEdit)
             self.new_control['customDateLineEdit'] = dateLineEdit
+            dateLineEdit.setValidator(validator)  # 设置限制器
             radioLayout.addLayout(customDateLayout)
 
             dateLayout.addLayout(radioLayout)
@@ -368,6 +377,7 @@ class AddRuleInterface(MessageBoxBase):
             splitCharLineEdit.setFixedWidth(200)
             splitCharLayout.addWidget(splitCharLineEdit)
             self.new_control['splitCharLineEdit'] = splitCharLineEdit
+            splitCharLineEdit.setValidator(validator)  # 设置限制器
 
             # 将日期分隔符输入的布局添加至主布局
             self.viewLayout.addLayout(splitCharLayout)

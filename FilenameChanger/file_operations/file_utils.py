@@ -1,7 +1,6 @@
 # file_operations/file_utils.py
 import platform  # 判断系统类型
 import stat  # 判断文件属性
-import re  # 导入正则表达式模块
 
 from FilenameChanger import history_file_path
 from FilenameChanger.rename_rules.rule_type_manager import *
