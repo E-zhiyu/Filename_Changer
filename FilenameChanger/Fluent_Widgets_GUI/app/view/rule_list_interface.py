@@ -113,13 +113,16 @@ class AddRuleInterface(MessageBoxBase):
     """定义发送给外部变量的信号"""
     submit_data = pyqtSignal(dict)  # 定义发射字典的信号对象，用于发射所有输入的内容
     new_control = {}  # 存放新增加的控件，便于外部函数调用
+    must_filled_text_list = []  # 必须填写的文本的列表
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
+        self.errorInfoLabel = SubtitleLabel(text='你还有必填的选项未填写！')  # 提示错误信息的标签
+
         """基本设置"""
         self.widget.setMinimumWidth(400)  # 设置对话框最小宽度
         self.base_height = 250
-        self.widget.setFixedHeight(self.base_height)  # 设置基本高度
+        self.widget.setMinimumHeight(self.base_height)  # 设置基本高度
 
         self.yesButton.setText('确认')  # 修改按钮文本
         self.cancelButton.setText('取消')
@@ -150,8 +153,8 @@ class AddRuleInterface(MessageBoxBase):
         self.ruleNameLineEdit = LineEdit()
         self.ruleNameLayout = QHBoxLayout()
 
-        self.ruleNameLineEdit.setPlaceholderText('输入规则名称')
-        self.ruleNameLineEdit.setFixedWidth(150)
+        self.ruleNameLineEdit.setPlaceholderText('输入规则名称（必填）')
+        self.ruleNameLineEdit.setFixedWidth(200)
         self.ruleNameLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
         self.ruleNameLayout.addWidget(self.ruleNameLabel)
@@ -170,6 +173,26 @@ class AddRuleInterface(MessageBoxBase):
         self.ruleDescLayout.addWidget(self.ruleDescLabel)
         self.ruleDescLayout.addWidget(self.ruleDescLineEdit)
         self.viewLayout.addLayout(self.ruleDescLayout)
+
+    def validate(self):
+        """重写验证输入数据的方法"""
+        self.must_filled_text_list.append(self.ruleNameLineEdit.text())
+        if self.new_rule_type == 1:
+            self.must_filled_text_list.append(self.new_control['splitCharLineEdit'].text())
+        elif self.new_rule_type == 2:
+            self.must_filled_text_list.append(self.new_control['extLineEdit'].text())
+        elif self.new_rule_type == 3:
+            self.must_filled_text_list.append(self.new_control['oldStrLineEdit'].text())
+            self.must_filled_text_list.append(self.new_control['newStrLineEdit'].text())
+        elif self.new_rule_type == 4:
+            self.must_filled_text_list.append(self.new_control['splitCharLineEdit'].text())
+
+        for text in self.must_filled_text_list:
+            if not text:
+                self.errorInfoLabel.setHidden(False)
+                return False
+        else:
+            return True
 
     def refreshLayout(self):
         """选择的规则类型改变时改变窗口布局"""
@@ -194,7 +217,7 @@ class AddRuleInterface(MessageBoxBase):
 
             """设置新的窗口高度"""
             new_height = self.base_height + 1 * 40
-            self.widget.setFixedHeight(new_height)
+            self.widget.setMinimumHeight(new_height)
 
             """分隔符输入"""
             splitCharLayout = QHBoxLayout()
@@ -207,8 +230,8 @@ class AddRuleInterface(MessageBoxBase):
 
             # 输入框
             splitCharLineEdit = LineEdit()
-            splitCharLineEdit.setPlaceholderText('请输入分隔符')
-            splitCharLineEdit.setFixedWidth(120)
+            splitCharLineEdit.setPlaceholderText('请输入分隔符（必填）')
+            splitCharLineEdit.setFixedWidth(170)
             splitCharLayout.addWidget(splitCharLineEdit)
             self.new_control['splitCharLineEdit'] = splitCharLineEdit
             splitCharLineEdit.setValidator(validator)  # 设置限制器
@@ -219,7 +242,7 @@ class AddRuleInterface(MessageBoxBase):
         elif self.new_rule_type == 2:
             """设置新的窗口高度"""
             new_height = self.base_height + 1 * 40
-            self.widget.setFixedHeight(new_height)
+            self.widget.setMinimumHeight(new_height)
 
             """新扩展名输入"""
             extLayout = QHBoxLayout()
@@ -232,8 +255,8 @@ class AddRuleInterface(MessageBoxBase):
 
             # 输入框
             extLineEdit = LineEdit()
-            extLineEdit.setPlaceholderText('请输入新的扩展名')
-            extLineEdit.setFixedWidth(150)
+            extLineEdit.setPlaceholderText('请输入新的扩展名（必填）')
+            extLineEdit.setFixedWidth(200)
             extLayout.addWidget(extLineEdit)
             self.new_control['extLineEdit'] = extLineEdit
             extLineEdit.setValidator(validator)  # 设置限制器
@@ -244,7 +267,7 @@ class AddRuleInterface(MessageBoxBase):
         elif self.new_rule_type == 3:
             """设置新的窗口高度"""
             new_height = self.base_height + 2 * 40
-            self.widget.setFixedHeight(new_height)
+            self.widget.setMinimumHeight(new_height)
 
             """原字符串输入"""
             oldStrLayout = QHBoxLayout()
@@ -257,8 +280,8 @@ class AddRuleInterface(MessageBoxBase):
 
             # 输入框
             oldStrLineEdit = LineEdit()
-            oldStrLineEdit.setPlaceholderText('请输入原字符串')
-            oldStrLineEdit.setFixedWidth(150)
+            oldStrLineEdit.setPlaceholderText('请输入原字符串（必填）')
+            oldStrLineEdit.setFixedWidth(200)
             oldStrLayout.addWidget(oldStrLineEdit)
             self.new_control['oldStrLineEdit'] = oldStrLineEdit
             oldStrLineEdit.setValidator(validator)  # 设置限制器
@@ -278,7 +301,7 @@ class AddRuleInterface(MessageBoxBase):
             # 输入框
             newStrLineEdit = LineEdit()
             newStrLineEdit.setPlaceholderText('请输入新字符串')
-            newStrLineEdit.setFixedWidth(150)
+            newStrLineEdit.setFixedWidth(200)
             newStrLayout.addWidget(newStrLineEdit)
             self.new_control['newStrLineEdit'] = newStrLineEdit
             newStrLineEdit.setValidator(validator)  # 设置限制器
@@ -289,7 +312,7 @@ class AddRuleInterface(MessageBoxBase):
         elif self.new_rule_type == 4:
             """设置新的窗口高度"""
             new_height = self.base_height + 4 * 40
-            self.widget.setFixedHeight(new_height)
+            self.widget.setMinimumHeight(new_height)
 
             """日期填充选择"""
             dateLayout = QHBoxLayout()
@@ -317,7 +340,7 @@ class AddRuleInterface(MessageBoxBase):
             dateBtnGroup.addButton(customDateBtn)
 
             customDateLayout = QHBoxLayout()  # 输入框和自定义日期按钮的水平布局
-            customDateLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+            # customDateLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
             self.new_layout_list.append(customDateLayout)
 
             dateLineEdit = LineEdit()
@@ -326,7 +349,7 @@ class AddRuleInterface(MessageBoxBase):
 
             customDateLayout.addWidget(customDateBtn)
             self.new_control['customDateBtn'] = customDateBtn
-            customDateLayout.addWidget(dateLineEdit)
+            customDateLayout.addWidget(dateLineEdit, 0, Qt.AlignmentFlag.AlignLeft)
             self.new_control['customDateLineEdit'] = dateLineEdit
             dateLineEdit.setValidator(validator)  # 设置限制器
             radioLayout.addLayout(customDateLayout)
@@ -373,7 +396,7 @@ class AddRuleInterface(MessageBoxBase):
 
             # 输入框
             splitCharLineEdit = LineEdit()
-            splitCharLineEdit.setPlaceholderText('请输入年月日间的分隔符')
+            splitCharLineEdit.setPlaceholderText('请输入年月日间的分隔符（必填）')
             splitCharLineEdit.setFixedWidth(200)
             splitCharLayout.addWidget(splitCharLineEdit)
             self.new_control['splitCharLineEdit'] = splitCharLineEdit
@@ -381,6 +404,13 @@ class AddRuleInterface(MessageBoxBase):
 
             # 将日期分隔符输入的布局添加至主布局
             self.viewLayout.addLayout(splitCharLayout)
+
+        """验证不通过时的警告文本框"""
+        setFont(self.errorInfoLabel, 15)
+        self.errorInfoLabel.setStyleSheet("color: red;")
+        self.errorInfoLabel.setHidden(True)  # 默认设置为不可见
+
+        self.viewLayout.addWidget(self.errorInfoLabel, 0, Qt.AlignmentFlag.AlignCenter)
 
 
 class RuleListInterface(QFrame):
