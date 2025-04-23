@@ -346,18 +346,22 @@ class AddRuleInterface(MessageBoxBase):
             dateBtnGroup.addButton(customDateBtn)
 
             customDateLayout = QHBoxLayout()  # 输入框和自定义日期按钮的水平布局
-            # customDateLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+            customDateLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
             self.new_layout_list.append(customDateLayout)
 
             dateLineEdit = LineEdit()
             dateLineEdit.setPlaceholderText('年月日用空格隔开')
             dateLineEdit.setFixedWidth(150)
 
+            # 为自定义日期输入框添加日期格式限制
+            format_regex = QRegularExpression(r'\d{1,4} \d{1,2} \d{1,2}')
+            date_validator = QRegularExpressionValidator(format_regex)
+            dateLineEdit.setValidator(date_validator)  # 设置输入的格式限制
+
             customDateLayout.addWidget(customDateBtn)
             self.new_control['customDateBtn'] = customDateBtn
             customDateLayout.addWidget(dateLineEdit, 0, Qt.AlignmentFlag.AlignLeft)
             self.new_control['customDateLineEdit'] = dateLineEdit
-            dateLineEdit.setValidator(validator)  # 设置限制器
             radioLayout.addLayout(customDateLayout)
 
             dateLayout.addLayout(radioLayout)
