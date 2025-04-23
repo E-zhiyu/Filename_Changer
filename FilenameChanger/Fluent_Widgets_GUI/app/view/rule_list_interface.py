@@ -176,6 +176,9 @@ class AddRuleInterface(MessageBoxBase):
 
     def validate(self):
         """重写验证输入数据的方法"""
+        self.must_filled_text_list.clear()  # 先清除上一次待检测的内容
+
+        """将需要检测的文本框的内容存放至列表"""
         self.must_filled_text_list.append(self.ruleNameLineEdit.text())
         if self.new_rule_type == 1:
             self.must_filled_text_list.append(self.new_control['splitCharLineEdit'].text())
@@ -186,7 +189,10 @@ class AddRuleInterface(MessageBoxBase):
             self.must_filled_text_list.append(self.new_control['newStrLineEdit'].text())
         elif self.new_rule_type == 4:
             self.must_filled_text_list.append(self.new_control['splitCharLineEdit'].text())
+            if self.new_control['customDateBtn'].isChecked():
+                self.must_filled_text_list.append(self.new_control['customDateLineEdit'].text())
 
+        """对列表中的内容进行检测，为空则不通过"""
         for text in self.must_filled_text_list:
             if not text:
                 self.errorInfoLabel.setHidden(False)
@@ -201,7 +207,7 @@ class AddRuleInterface(MessageBoxBase):
         self.new_control.clear()
 
         """创建输入框限制器，防止输入文件名不能存在的字符"""
-        regex = QRegularExpression(r'[^\/:*?"<>|]')  # 限制器内容
+        regex = QRegularExpression(r'[^\/:*?"<>|]+')  # 限制器内容
         validator = QRegularExpressionValidator(regex)  # 限制器对象
 
         """删除旧的控件"""
