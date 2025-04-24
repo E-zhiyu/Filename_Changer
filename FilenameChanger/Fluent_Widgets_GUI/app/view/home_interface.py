@@ -126,8 +126,7 @@ class HomeInterface(QFrame):
             if confirm_operation():  # 弹出消息框确认操作
                 logging.info('用户确认重命名')
 
-                targetDirectory = self.folderLineEdit.text()
-                targetDirectory = targetDirectory.strip('\"')
+                targetDirectory = self.folderLineEdit.text().strip('\"')
                 flag = rename(targetDirectory)
                 # 显示一个消息提示框
                 if flag == 1:

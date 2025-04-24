@@ -1,7 +1,7 @@
 import logging
 
 from PyQt6.QtGui import QPalette, QRegularExpressionValidator
-from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QApplication, QButtonGroup
+from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QApplication, QButtonGroup, QLayout
 from PyQt6.QtCore import Qt, pyqtSignal, QRegularExpression
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, PushButton, FluentIcon,
@@ -491,12 +491,27 @@ class RuleListInterface(QFrame):
 
     def initRuleViewArea(self):
         """初始化规则卡片显示区域"""
+        """删除旧的布局"""
+        while self.ruleCardLayout.count():
+            item = self.ruleCardLayout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+        """添加新的布局"""
         self.ruleScrollArea.setWidgetResizable(True)
         self.ruleScrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)  # 水平滚动条永远不显示
 
         self.widgetVLayout.addWidget(self.ruleScrollArea)
+        if self.rule_dict['rules']:
+            self.ruleCardLayout.setAlignment(Qt.AlignmentFlag.AlignTop)  # 卡片默认顶部对齐
 
-        self.addRuleCard()  # 将规则卡片列表中的卡片添加到界面中
+            self.addRuleCard()  # 将规则卡片列表中的卡片添加到界面中
+        else:
+            ruleEmptyLabel = SubtitleLabel(text='当前规则列表为空，请先添加规则', parent=self.ruleCardWidget)
+
+            self.ruleCardLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+            self.ruleCardLayout.addWidget(ruleEmptyLabel, 0, Qt.AlignmentFlag.AlignCenter)
 
     def addRuleCard(self):
         """将规则卡片列表中的卡片添加到界面中"""
@@ -589,11 +604,7 @@ class RuleListInterface(QFrame):
             """保存已解析的规则并将其添加至界面中"""
             save_new_rule(self.rule_dict, rule)
 
-            new_card = RuleCard(rule)
-            self.ruleCardList.append(new_card)
-            self.ruleCardLayout.addWidget(new_card, 0)
-            new_card.clicked.connect(
-                lambda cardIndex=self.ruleCardList.index(new_card): self.setSelected(cardIndex))  # 将点击卡片的动作连接至选中卡片函数
+            self.initRuleViewArea()
 
         def add_rule_callback():
             """添加规则"""
