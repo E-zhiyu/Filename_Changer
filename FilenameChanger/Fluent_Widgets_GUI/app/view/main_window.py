@@ -11,6 +11,7 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (NavigationItemPos
 
 from FilenameChanger.Fluent_Widgets_GUI.app.view.home_interface import HomeInterface
 from FilenameChanger.Fluent_Widgets_GUI.app.view.rule_list_interface import RuleListInterface
+from FilenameChanger.Fluent_Widgets_GUI.app.view.info_interface import InfoInterface
 
 
 class MainWindow(FluentWindow):
@@ -26,6 +27,7 @@ class MainWindow(FluentWindow):
         # 实例化不同的子界面
         self.homeInterface = HomeInterface('文件更名器', self)
         self.ruleListInterface = RuleListInterface('规则列表', self)
+        self.infoInterface = InfoInterface(self)
 
         self.initNavigation()
 
@@ -38,8 +40,7 @@ class MainWindow(FluentWindow):
         self.addSubInterface(self.ruleListInterface, FIF.LAYOUT, '规则列表')
 
         # 添加导航栏底部按钮
-        """self.addSubInterface(self.settingInterface, FIF.SETTING, '设置', NavigationItemPosition.BOTTOM)  # 添加导航栏设置按钮
-        self.addSubInterface(self.infoInterface, FIF.INFO, '关于', NavigationItemPosition.BOTTOM)  # 添加应用详情界面"""
+        self.addSubInterface(self.infoInterface, FIF.INFO, '关于', NavigationItemPosition.BOTTOM)  # 添加应用详情界面
 
     def initWindow(self):
         """初始化窗口"""

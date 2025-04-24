@@ -1,7 +1,6 @@
 # file_operations/file_utils.py
 import platform  # 判断系统类型
 import stat  # 判断文件属性
-import re  # 导入正则表达式模块
 
 from FilenameChanger import history_file_path
 from FilenameChanger.rename_rules.rule_type_manager import *
@@ -32,6 +31,7 @@ def is_directory_usable(directory):
             logging.error('【错误】输入路径时发生未知错误！')
             return directory, 0
     else:
+        logging.info('用户清空输入框的路径')
         return None, -1
 
 
@@ -40,12 +40,12 @@ def rename(directory):
     功能：实现“文件重命名”操作
     """
     config_dict = load_config()  # 重命名时加载已保存的规则
+    if not config_dict['rules']:  # 若规则为空，则结束本函数
+        logging.info('规则为空，请先前往规则设置写入规则！')
+        return -1
     logging.info(
         f'当前活跃的规则为“规则{config_dict['selected_index'] + 1}”，'
         f'规则种类：{config_dict['rules'][config_dict['selected_index']]['type']}')
-    if not config_dict['rules']:  # 若规则为空，则结束本函数
-        print('规则为空，请先前往规则设置写入规则！')
-        return -1
 
     old_name_list = get_files_in_directory(directory)  # old_file_names列表将包含该目录下所有文件的文件名（包含扩展名）
     if not old_name_list:  # 判断文件夹是否为空，为空则返回0
