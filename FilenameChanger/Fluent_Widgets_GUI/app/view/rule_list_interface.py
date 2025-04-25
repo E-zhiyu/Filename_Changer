@@ -842,7 +842,7 @@ class RuleListInterface(QFrame):
 
         self.addRuleBtn.clicked.connect(add_rule_callback)
 
-        # 搜索规则实现
+        # 搜索框功能实现
         pass
 
     def showInfoDialog(self, rule):

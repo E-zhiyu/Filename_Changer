@@ -26,6 +26,16 @@ help_content_md = """\
 - 为了确保文件重命名不会损害您的设备，本程序将不会修改任何隐藏文件、只读文件和系统文件，尽管如此，我仍建议您将需要重命名的文件单独存放至一个干净的文件夹内，以免造成不可挽回的后果。
 """
 changeLog_content_md = """\
+# v2.1.0
+
+### 新增内容
+- 新增搜索框，可以搜索规则名称和描述
+- 新增规则卡片“更多”按钮，可以呼出菜单进行更多操作
+- 新增规则详情界面，可通过规则卡片“更多”按钮的菜单呼出
+
+### 优化和修复
+- 修复使用填充系统日期的第四类规则重命名会导致程序崩溃的BUG
+
 # v2.0.0
 
 ### 新增内容
@@ -37,7 +47,7 @@ changeLog_content_md = """\
 - 修复规则列表为空时进行重命名操作导致程序崩溃的BUG
 - 优化添加规则界面的输入框，对输入内容进行了一些限制（例如不能存在于文件名中的字符）
 - 新增规则时若还有未输入的必填项，则点击确定按钮时会提示先填写必填项再点击确定
-\n
+
 # v2.0.0-pre1
 
 ### 新增内容
@@ -47,7 +57,7 @@ changeLog_content_md = """\
 - 优化新文件名的生成方式，减小内存开销
 - 优化重命名记录的逻辑，现在只记录成功重命名的文件
 - 修复第一类规则重命名后会导致文件名出现过多空格的BUG
-\n
+
 # v1.4.1
 
 ### 新增内容
@@ -56,7 +66,7 @@ changeLog_content_md = """\
 ### 优化和修复
 - 修复对没有扩展名的文件重命名时会崩溃的BUG
 - 优化日志记录，现在会记录当前激活的规则的序号和种类
-\n
+
 # v1.4.0
 
 ### 新增功能
@@ -65,19 +75,19 @@ changeLog_content_md = """\
 ### 优化和修复
 - 日志优化，现在日志文件会以日期命名，以便查看当天程序运行状况
 - 现在重命名的确认操作在扫描文件夹之前，避免用户停留在确认步骤时修改目标文件夹导致实际文件名与扫描到的文件名不匹配
-\n
+
 # v1.3.0
 
 ### 新增功能
 - 新增重命名记录功能，记录重命名前后的文件名以便撤销重命名操作
 - 新增撤销重命名功能，帮助用户快速恢复重命名前的状态
-\n
+
 # v1.2.1
 
 ### 优化和修复
 - 修复用户输入空文件夹路径导致程序崩溃的BUG
 - 优化交互逻辑，现在执行完操作后会停顿0.5秒再回到主菜单
-\n
+
 # v1.2.0
 
 ### 新增功能
@@ -85,12 +95,12 @@ changeLog_content_md = """\
 
 ### BUG修复
 - 修复删除已激活规则前面的规则会导致选中最后一个规则的BUG
-\n
+
 # v1.1.1
 
 ### BUG修复
 - 修复删除已选中的规则时不会自动切换至可用规则BUG（这可能导致下标越界使得程序崩溃）
-\n
+
 # v1.1.0
 
 ### 新增内容
@@ -102,7 +112,7 @@ changeLog_content_md = """\
 - 优化提示语，使得格式更加统一
 - 优化规则文件内容格式，以支持多重规则
 - 在操作选择界面可以取消本次操作并返回主菜单
-\n
+
 # v1.0.0
 这已经是最早的版本了！
 
@@ -112,10 +122,10 @@ changeLog_content_md = """\
 """
 
 
-class ChangeLogInterface(MessageBoxBase):
+class textInterface(MessageBoxBase):
     """更新日志界面"""
 
-    def __init__(self, parent=None):
+    def __init__(self, title, text, parent=None):
         super().__init__(parent=parent)
         self.cancelButton.setHidden(True)  # 不需要取消按钮
         self.yesButton.setText('确定')
@@ -124,52 +134,20 @@ class ChangeLogInterface(MessageBoxBase):
         self.widget.setFixedHeight(700)  # 设置固定窗口高度
 
         """标题文本标签"""
-        self.titleLabel = SubtitleLabel(text='更新日志', parent=self.widget)
+        self.titleLabel = SubtitleLabel(text=title, parent=self.widget)
 
         self.viewLayout.addWidget(self.titleLabel)
 
         """更新日志内容"""
-        self.changeLogTextBrowser = TextBrowser()  # 存放更新日志的容器
-        self.changeLogScrollArea = SmoothScrollArea(parent=self.widget)
-        self.changeLogScrollArea.setWidget(self.changeLogTextBrowser)  # 将更新日志容器放入滚动界面
+        self.textBrowser = TextBrowser()  # 存放更新日志的容器
+        self.textScrollArea = SmoothScrollArea(parent=self.widget)
+        self.textScrollArea.setWidget(self.textBrowser)  # 将更新日志容器放入滚动界面
 
-        self.changeLogScrollArea.setWidgetResizable(True)  # 将大小设置为可变
+        self.textScrollArea.setWidgetResizable(True)  # 将大小设置为可变
 
-        self.viewLayout.addWidget(self.changeLogScrollArea)
+        self.viewLayout.addWidget(self.textScrollArea)
 
-        self.changeLogTextBrowser.setMarkdown(changeLog_content_md)  # 将内容添加至文本框
-
-
-class HelpInterface(MessageBoxBase):
-    """获取帮助界面"""
-
-    def __init__(self, parent=None):
-        super().__init__(parent=parent)
-        self.cancelButton.setHidden(True)
-        self.yesButton.setText('确定')
-
-        self.widget.setMinimumWidth(600)  # 设置最小窗口宽度
-        self.widget.setFixedHeight(700)  # 设置固定窗口高度
-
-        self.viewLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
-
-        """标题标签"""
-        self.howToUseLabel = SubtitleLabel(text='帮助', parent=self.widget)
-
-        setFont(self.howToUseLabel, 25)
-
-        self.viewLayout.addWidget(self.howToUseLabel)
-
-        """内容展示"""
-        self.contentScrollArea = SmoothScrollArea()
-        self.useTextBrowser = TextBrowser(parent=self.widget)
-        self.contentScrollArea.setWidget(self.useTextBrowser)  # 将文本框放入滚动页面
-
-        self.contentScrollArea.setWidgetResizable(True)  # 将大小设置为可变
-
-        self.viewLayout.addWidget(self.contentScrollArea)
-
-        self.useTextBrowser.setMarkdown(help_content_md)
+        self.textBrowser.setMarkdown(text)  # 将内容添加至文本框
 
 
 class InfoInterface(QFrame):
@@ -229,14 +207,14 @@ class InfoInterface(QFrame):
 
         # 实现更新日志按钮功能
         def changeLogBtn_function():
-            changeLog = ChangeLogInterface(self)
+            changeLog = textInterface(title='更新日志', text=changeLog_content_md, parent=self)
             changeLog.exec()
 
         self.changeLogBtn.clicked.connect(changeLogBtn_function)
 
         # 实现帮助按钮功能
         def helpBtn_function():
-            help = HelpInterface(self)
+            help = textInterface(title='帮助界面', text=help_content_md, parent=self)
             help.exec()
 
         self.helpBtn.clicked.connect(helpBtn_function)
