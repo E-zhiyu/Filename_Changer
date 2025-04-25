@@ -120,7 +120,7 @@ def use_type_4(config_dict, old_name_list):
     try:
         y, m, d = config_dict['rules'][selected_index]['date'].split(' ')
         customize_date = f'{y}{split_char}{m}{split_char}{d}'
-    except ValueError:  # 处理自定义日期为空的情况
+    except (AttributeError, ValueError):  # 处理自定义日期为空的情况
         customize_date = ''
 
     new_name_list = []

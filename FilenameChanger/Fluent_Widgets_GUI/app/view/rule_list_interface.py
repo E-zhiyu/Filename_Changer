@@ -1,13 +1,13 @@
 import logging
 
-from PyQt6.QtGui import QPalette, QRegularExpressionValidator
+from PyQt6.QtGui import QPalette, QRegularExpressionValidator, QAction
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QApplication, QButtonGroup, QLayout
 from PyQt6.QtCore import Qt, pyqtSignal, QRegularExpression
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, PushButton, FluentIcon,
                                                                CardWidget, SearchLineEdit, TransparentToolButton,
                                                                SmoothScrollArea, IconWidget, InfoBarIcon, MessageBox,
-                                                               ComboBox, MessageBoxBase, LineEdit, RadioButton)
+                                                               ComboBox, MessageBoxBase, LineEdit, RadioButton,RoundMenu)
 
 from FilenameChanger.rename_rules.rule_manager import load_config, switch_rule, del_rules, save_new_rule
 
@@ -68,12 +68,15 @@ class RuleCard(CardWidget):
         self.mainHLayout.addWidget(self.isActivatedWidget, 0, Qt.AlignmentFlag.AlignRight)
 
         """更多按钮"""
-        """self.moreBtn = TransparentToolButton(FluentIcon.MORE)
+        self.moreBtn = TransparentToolButton(FluentIcon.MORE)
         self.moreBtn.setFixedSize(32, 32)
-        self.mainHLayout.addWidget(self.moreBtn)"""
+        self.mainHLayout.addWidget(self.moreBtn)
 
         """设置卡片的激活显示状态"""
         self.setActive(isActive)
+
+        """实现更多按钮功能"""
+        self.__achieveMoreBtn()
 
     def setCardSelected(self, isSelected: bool):
         """切换卡片的选中状态"""
@@ -105,6 +108,10 @@ class RuleCard(CardWidget):
         else:
             self.isActivatedIcon.setIcon(None)
             self.isActivatedLabel.setText('')
+
+    def __achieveMoreBtn(self):
+        """实现更多按钮的功能"""
+        pass
 
 
 class AddRuleInterface(MessageBoxBase):
@@ -464,12 +471,12 @@ class RuleListInterface(QFrame):
         self.widgetVLayout.addLayout(self.btnLayout, 0)  # 将按钮布局器合并至总容器的布局器
 
         """搜索框"""
-        """self.searchLineEdit = SearchLineEdit()  # 实例化搜索框
+        self.searchLineEdit = SearchLineEdit()  # 实例化搜索框
 
         self.searchLineEdit.setFixedWidth(300)
         self.searchLineEdit.setPlaceholderText('搜索规则名称')  # 设置输入提示语
 
-        self.widgetVLayout.addWidget(self.searchLineEdit, 0)  # 将搜索框添加至总容器布局器"""
+        self.widgetVLayout.addWidget(self.searchLineEdit, 0)  # 将搜索框添加至总容器布局器
 
         """规则卡片展示区域"""
         self.ruleScrollArea = SmoothScrollArea(self.totalWidget)  # 创建平滑滚动区域
@@ -676,3 +683,6 @@ class RuleListInterface(QFrame):
                 addRuleWindow.submit_data.emit(rule)  # 发送规则种类、名称和描述的信号
 
         self.addRuleBtn.clicked.connect(add_rule_callback)
+
+        # 搜索规则实现
+        pass

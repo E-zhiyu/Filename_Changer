@@ -2,11 +2,10 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFrame, QWidget, QVBoxLayout
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, PushButton, FluentIcon, MessageBoxBase,
-                                                               SmoothScrollArea, TextBrowser)
+                                                               SmoothScrollArea, TextBrowser, HyperlinkButton)
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import setFont
 
 from FilenameChanger import version, author
-from Fluent_Widgets_GUI.qfluentwidgets import HyperlinkButton
 
 help_content_md = """\
 # 使用方法\n
@@ -30,118 +29,87 @@ changeLog_content_md = """\
 # v2.0.0
 
 ### 新增内容
-
 - 新增关于软件的界面，可以查看更新日志和帮助文档
-
 - 没有规则时会在规则列表显示“当前没有任何规则”字样
 
 ### 优化和修复
-
 - 修复添加规则界面直接点击“确定”导致程序崩溃的BUG，现在只有选择规则类型后才能点击确定按钮
-
 - 修复规则列表为空时进行重命名操作导致程序崩溃的BUG
-  
 - 优化添加规则界面的输入框，对输入内容进行了一些限制（例如不能存在于文件名中的字符）
-  
 - 新增规则时若还有未输入的必填项，则点击确定按钮时会提示先填写必填项再点击确定
 \n
 # v2.0.0-pre1
 
 ### 新增内容
-
 - 新增图形化窗口，操作更加简单！
 
 ### 优化和修复
-
 - 优化新文件名的生成方式，减小内存开销
-  
 - 优化重命名记录的逻辑，现在只记录成功重命名的文件
-  
 - 修复第一类规则重命名后会导致文件名出现过多空格的BUG
 \n
 # v1.4.1
 
 ### 新增内容
-
 - 第四类规则能够自定义填充的日期，若不填充自定义日期则动态填充系统日期
 
 ### 优化和修复
-
 - 修复对没有扩展名的文件重命名时会崩溃的BUG
-  
 - 优化日志记录，现在会记录当前激活的规则的序号和种类
 \n
 # v1.4.0
 
 ### 新增功能
-
 - 新增第四类规则：检测文件名是否含有日期，有则移除，没有则添加当前日期，可选择添加到头部或尾部
 
 ### 优化和修复
-
 - 日志优化，现在日志文件会以日期命名，以便查看当天程序运行状况
-  
 - 现在重命名的确认操作在扫描文件夹之前，避免用户停留在确认步骤时修改目标文件夹导致实际文件名与扫描到的文件名不匹配
 \n
 # v1.3.0
 
 ### 新增功能
-
 - 新增重命名记录功能，记录重命名前后的文件名以便撤销重命名操作
-  
 - 新增撤销重命名功能，帮助用户快速恢复重命名前的状态
 \n
 # v1.2.1
 
 ### 优化和修复
-
 - 修复用户输入空文件夹路径导致程序崩溃的BUG
-  
 - 优化交互逻辑，现在执行完操作后会停顿0.5秒再回到主菜单
 \n
 # v1.2.0
 
 ### 新增功能
-
 - 新增第二、三类规则：批量修改扩展名、批量修改文件名中特定字符串
 
 ### BUG修复
-
 - 修复删除已激活规则前面的规则会导致选中最后一个规则的BUG
 \n
 # v1.1.1
 
 ### BUG修复
-
 - 修复删除已选中的规则时不会自动切换至可用规则BUG（这可能导致下标越界使得程序崩溃）
 \n
 # v1.1.0
 
 ### 新增内容
-
 - 现在可以保存多个重命名规则
-  
 - 新增规则查看、删除和激活的功能
-  
 - 新增日志功能
 
 ### 优化
-
 - 优化提示语，使得格式更加统一
-  
 - 优化规则文件内容格式，以支持多重规则
-  
 - 在操作选择界面可以取消本次操作并返回主菜单
 \n
 # v1.0.0
-
 这已经是最早的版本了！
 
 ### 主要功能
-
 - 根据规则中的分隔符拆分文件名并交换位置
-  
-- 用户自定义分隔符"""
+- 用户自定义分隔符
+"""
 
 
 class ChangeLogInterface(MessageBoxBase):
