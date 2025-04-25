@@ -1,17 +1,167 @@
-import logging
-
-from PyQt6.QtGui import QPalette, QRegularExpressionValidator, QAction
-from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QApplication, QButtonGroup, QLayout
-from PyQt6.QtCore import Qt, pyqtSignal, QRegularExpression
+from PyQt6.QtGui import QPalette, QRegularExpressionValidator, QAction, QCursor
+from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QApplication, QButtonGroup, QLayout, QDialog
+from PyQt6.QtCore import Qt, pyqtSignal, QRegularExpression, QPoint
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, PushButton, FluentIcon,
                                                                CardWidget, SearchLineEdit, TransparentToolButton,
                                                                SmoothScrollArea, IconWidget, InfoBarIcon, MessageBox,
-                                                               ComboBox, MessageBoxBase, LineEdit, RadioButton,RoundMenu)
+                                                               ComboBox, MessageBoxBase, LineEdit, RadioButton,
+                                                               RoundMenu, Action, BodyLabel)
 
 from FilenameChanger.rename_rules.rule_manager import load_config, switch_rule, del_rules, save_new_rule
 
 from FilenameChanger.log.log_recorder import *
+
+
+class InfoDialog(MessageBoxBase):
+    """显示规则详情的界面"""
+
+    def __init__(self, rule, parent=None):
+        super().__init__(parent)
+        """基本设置"""
+        self.widget.setMinimumWidth(400)  # 设置最小窗口宽度
+
+        self.yesButton.setText('确认')
+        self.cancelButton.setHidden(True)
+
+        self.viewLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
+
+        # 标题标签
+        self.titleLabel = SubtitleLabel(text='规则详情', parent=self.widget)
+        setFont(self.titleLabel, 30)
+
+        self.viewLayout.addWidget(self.titleLabel, 0, Qt.AlignmentFlag.AlignCenter)
+
+        """显示规则通用信息"""
+        # 规则种类
+        self.typeLabel = SubtitleLabel(text='种类：', parent=self.widget)
+        self.typeContentLabel = BodyLabel(text=str(rule['type']), parent=self.widget)
+
+        self.typeLayout = QHBoxLayout()
+        self.typeLayout.setSpacing(0)
+        self.typeLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+
+        self.typeLayout.addWidget(self.typeLabel)
+        self.typeLayout.addWidget(self.typeContentLabel)
+        self.viewLayout.addLayout(self.typeLayout)
+
+        # 规则名称
+        self.nameLabel = SubtitleLabel(text='名称：', parent=self.widget)
+        self.nameContentLabel = BodyLabel(text=str(rule['name']), parent=self.widget)
+
+        self.nameLayout = QHBoxLayout()
+        self.nameLayout.setSpacing(0)
+        self.nameLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+
+        self.nameLayout.addWidget(self.nameLabel)
+        self.nameLayout.addWidget(self.nameContentLabel)
+        self.viewLayout.addLayout(self.nameLayout)
+
+        # 规则描述
+        self.descLabel = SubtitleLabel(text='规则描述：', parent=self.widget)
+        self.descContentLabel = BodyLabel(text=str(rule['desc']), parent=self.widget)
+
+        self.descLayout = QHBoxLayout()
+        self.descLayout.setSpacing(0)
+        self.descLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+
+        self.descLayout.addWidget(self.descLabel)
+        self.descLayout.addWidget(self.descContentLabel)
+        self.viewLayout.addLayout(self.descLayout)
+
+        """规则关键功能显示"""
+        if rule['type'] == 1:
+            # 分隔符
+            self.splitCharLabel = SubtitleLabel(text='分隔符：', parent=self.widget)
+            self.splitCharContentLabel = BodyLabel(text=(rule['split_char']), parent=self.widget)
+
+            self.splitCharLayout = QHBoxLayout()
+            self.splitCharLayout.setSpacing(0)
+            self.splitCharLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+
+            self.splitCharLayout.addWidget(self.splitCharLabel)
+            self.splitCharLayout.addWidget(self.splitCharContentLabel)
+            self.viewLayout.addLayout(self.splitCharLayout)
+        elif rule['type'] == 2:
+            # 新扩展名
+            self.extLabel = SubtitleLabel(text='新扩展名：', parent=self.widget)
+            self.extContentLabel = BodyLabel(text=(rule['new_ext']), parent=self.widget)
+
+            self.extLayout = QHBoxLayout()
+            self.extLayout.setSpacing(0)
+            self.extLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+
+            self.extLayout.addWidget(self.extLabel)
+            self.extLayout.addWidget(self.extContentLabel)
+            self.viewLayout.addLayout(self.extLayout)
+        elif rule['type'] == 3:
+            # 目标字符串
+            self.targetStrLabel = SubtitleLabel(text='原字符串：', parent=self.widget)
+            self.targetStrContentLabel = BodyLabel(text=(rule['target_str']), parent=self.widget)
+
+            self.targetStrLayout = QHBoxLayout()
+            self.targetStrLayout.setSpacing(0)
+            self.targetStrLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+
+            self.targetStrLayout.addWidget(self.targetStrLabel)
+            self.targetStrLayout.addWidget(self.targetStrContentLabel)
+            self.viewLayout.addLayout(self.targetStrLayout)
+
+            # 新字符串
+            self.newStrLabel = SubtitleLabel(text='新字符串：', parent=self.widget)
+            self.newStrContentLabel = BodyLabel(text=(rule['new_str']), parent=self.widget)
+
+            self.newStrLayout = QHBoxLayout()
+            self.newStrLayout.setSpacing(0)
+            self.newStrLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+
+            self.newStrLayout.addWidget(self.newStrLabel)
+            self.newStrLayout.addWidget(self.newStrContentLabel)
+            self.viewLayout.addLayout(self.newStrLayout)
+        elif rule['type'] == 4:
+            # 日期
+            self.dateLabel = SubtitleLabel(text='填充日期：', parent=self.widget)
+            if rule['date']:
+                date = rule['date']
+            else:
+                date = '动态填充系统日期'
+            self.dateContentLabel = BodyLabel(text=date, parent=self.widget)
+
+            self.dateLayout = QHBoxLayout()
+            self.dateLayout.setSpacing(0)
+            self.dateLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+
+            self.dateLayout.addWidget(self.dateLabel)
+            self.dateLayout.addWidget(self.dateContentLabel)
+            self.viewLayout.addLayout(self.dateLayout)
+
+            # 填充位置
+            self.posLabel = SubtitleLabel(text='位置：', parent=self.widget)
+            if rule['position'] == 'head':
+                pos = '头部'
+            elif rule['position'] == 'tail':
+                pos = '尾部'
+            self.posContentLabel = BodyLabel(text=pos, parent=self.widget)
+
+            self.posLayout = QHBoxLayout()
+            self.posLayout.setSpacing(0)
+            self.posLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+
+            self.posLayout.addWidget(self.posLabel)
+            self.posLayout.addWidget(self.posContentLabel)
+            self.viewLayout.addLayout(self.posLayout)
+
+            # 分隔符
+            self.splitCharLabel = SubtitleLabel(text='分隔符：', parent=self.widget)
+            self.splitCharContentLabel = BodyLabel(text=(rule['split_char']), parent=self.widget)
+
+            self.splitCharLayout = QHBoxLayout()
+            self.splitCharLayout.setSpacing(0)
+            self.splitCharLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+
+            self.splitCharLayout.addWidget(self.splitCharLabel)
+            self.splitCharLayout.addWidget(self.splitCharContentLabel)
+            self.viewLayout.addLayout(self.splitCharLayout)
 
 
 class RuleCard(CardWidget):
@@ -20,10 +170,10 @@ class RuleCard(CardWidget):
     def __init__(self, rule, isActive=False, parent=None):
         super().__init__(parent=parent)
         """定义该卡片的属性"""
-        name = rule["name"]
-        desc = rule["desc"]
-        self.type = rule["type"]
-        self.keyFunctionDict = {k: v for k, v in rule.items() if k not in ["type", "name", "desc"]}
+        self.parentInterface = parent  # 保存父亲界面到属性，便于调用父亲界面的方法
+        self.rule = rule  # 保存所有规则参数为一个属性
+        self.type = rule['type']  # 单独保存一份规则类型，便于外部函数调用
+
         self.selected = False  # 初始状态为未被鼠标选中
 
         """卡片基本设置"""
@@ -31,8 +181,8 @@ class RuleCard(CardWidget):
         self.mainHLayout = QHBoxLayout(self)  # 设置卡片的主布局器（水平）
 
         """规则名和规则描述标签"""
-        self.titleLabel = SubtitleLabel(text=name, parent=self)
-        self.contentLabel = SubtitleLabel(text=desc, parent=self)
+        self.titleLabel = SubtitleLabel(text=self.rule['name'], parent=self)
+        self.contentLabel = SubtitleLabel(text=self.rule['desc'], parent=self)
         self.labelLayout = QVBoxLayout()
 
         # 设置属性
@@ -76,7 +226,8 @@ class RuleCard(CardWidget):
         self.setActive(isActive)
 
         """实现更多按钮功能"""
-        self.__achieveMoreBtn()
+        self.moreBtn.clicked.connect(
+            lambda: self.creatMenu(self.moreBtn.mapToGlobal(QPoint(-self.moreBtn.width() - 50, 25))))
 
     def setCardSelected(self, isSelected: bool):
         """切换卡片的选中状态"""
@@ -109,9 +260,16 @@ class RuleCard(CardWidget):
             self.isActivatedIcon.setIcon(None)
             self.isActivatedLabel.setText('')
 
-    def __achieveMoreBtn(self):
+    def creatMenu(self, pos):
         """实现更多按钮的功能"""
-        pass
+
+        menu = RoundMenu(parent=self)
+
+        # 添加显示规则详情的动作
+        menu.addAction(
+            Action(FluentIcon.ALIGNMENT, '规则详情', triggered=lambda: self.parentInterface.showInfoDialog(self.rule)))
+
+        menu.exec(pos, ani=True)
 
 
 class AddRuleInterface(MessageBoxBase):
@@ -531,7 +689,7 @@ class RuleListInterface(QFrame):
                 activated = True
             else:
                 activated = False
-            self.ruleCardList.append(RuleCard(rule, activated))  # 将规则以卡片的形式添加至卡片列表
+            self.ruleCardList.append(RuleCard(rule, activated, parent=self))  # 将规则以卡片的形式添加至卡片列表
             index += 1
 
         for card in self.ruleCardList:
@@ -686,3 +844,8 @@ class RuleListInterface(QFrame):
 
         # 搜索规则实现
         pass
+
+    def showInfoDialog(self, rule):
+        """显示规则详情"""
+        infoDialog = InfoDialog(rule, parent=self)
+        infoDialog.exec()

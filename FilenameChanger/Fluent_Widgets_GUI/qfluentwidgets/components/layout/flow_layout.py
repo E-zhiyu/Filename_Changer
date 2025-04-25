@@ -54,9 +54,9 @@ class FlowLayout(QLayout):
 
     def _onWidgetAdded(self, w, index=-1):
         if not self._isInstalledEventFilter:
-            if w.parent():
-                self._wParent = w.parent()
-                w.parent().installEventFilter(self)
+            if w.parentInterface():
+                self._wParent = w.parentInterface()
+                w.parentInterface().installEventFilter(self)
             else:
                 w.installEventFilter(self)
 

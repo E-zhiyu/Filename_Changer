@@ -640,7 +640,7 @@ class NavigationFlyoutMenu(ScrollArea):
 
         self.view.setFixedSize(w, self.view.sizeHint().height())
 
-        h = min(self.window().parent().height() - 48, self.view.height())
+        h = min(self.window().parentInterface().height() - 48, self.view.height())
 
         self.setFixedSize(w, h)
 
@@ -654,7 +654,7 @@ class NavigationFlyoutMenu(ScrollArea):
             if not node.isHidden():
                 w = max(w, node.suitableWidth() + 10)
 
-        window = self.window().parent()  # type: QWidget
+        window = self.window().parentInterface()  # type: QWidget
         return min(window.width() // 2 - 25, w) + 10
 
     def visibleTreeNodes(self):
