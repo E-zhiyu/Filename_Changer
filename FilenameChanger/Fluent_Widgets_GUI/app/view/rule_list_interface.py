@@ -267,14 +267,14 @@ class RuleCard(CardWidget):
 
         menu = RoundMenu(parent=self)
 
-        # 添加显示规则详情的动作
-        menu.addAction(
-            Action(FluentIcon.ALIGNMENT, '规则详情', triggered=lambda: self.parentInterface.showInfoDialog(self.rule)))
-
         # 添加修改规则的动作
         menu.addAction(
             Action(FluentIcon.EDIT, '修改规则',
                    triggered=lambda: self.parentInterface.reviseRule(self.rule, self.index)))
+
+        # 添加显示规则详情的动作
+        menu.addAction(
+            Action(FluentIcon.ALIGNMENT, '规则详情', triggered=lambda: self.parentInterface.showInfoDialog(self.rule)))
 
         menu.exec(pos, ani=True)
 
@@ -836,7 +836,8 @@ class RuleListInterface(QFrame):
             else:
                 reviseRuleWindow.new_control['sysDateBtn'].setChecked(True)
 
-        reviseRuleWindow.submit_data.connect(lambda: revise_rule(self.rule_dict, revised_rule, index))  # 将发射的信号传递给信号处理函数
+        reviseRuleWindow.submit_data.connect(
+            lambda: revise_rule(self.rule_dict, revised_rule, index))  # 将发射的信号传递给信号处理函数
 
         if reviseRuleWindow.exec():  # 显示窗口
             revised_rule = analise_rule(reviseRuleWindow)
