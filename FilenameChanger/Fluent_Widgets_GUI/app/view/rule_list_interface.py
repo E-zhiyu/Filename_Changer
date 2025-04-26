@@ -167,8 +167,9 @@ class InfoDialog(MessageBoxBase):
 class RuleCard(CardWidget):
     """定义规则卡片"""
 
-    def __init__(self, rule, isActive=False, parent=None):
+    def __init__(self, rule, index, isActive=False, parent=None):
         super().__init__(parent=parent)
+        self.index = index
         """定义该卡片的属性"""
         self.parentInterface = parent  # 保存父亲界面到属性，便于调用父亲界面的方法
         self.rule = rule  # 保存所有规则参数为一个属性
@@ -271,13 +272,13 @@ class RuleCard(CardWidget):
 
         # 添加修改规则的动作
         menu.addAction(
-            Action(FluentIcon.EDIT, '修改规则', triggered=lambda: self.parentInterface.showInfoDialog(self.rule)))
+            Action(FluentIcon.EDIT, '修改规则', triggered=lambda: self.parentInterface.reviseRule(self.rule)))
 
         menu.exec(pos, ani=True)
 
 
-class AddRuleInterface(MessageBoxBase):
-    """添加规则时弹出的窗口"""
+class ruleInputInterface(MessageBoxBase):
+    """规则参数输入窗口"""
 
     """定义发送给外部变量的信号"""
     submit_data = pyqtSignal(dict)  # 定义发射字典的信号对象，用于发射所有输入的内容
@@ -594,11 +595,11 @@ class AddRuleInterface(MessageBoxBase):
 
 class RuleListInterface(QFrame):
     """定义规则列表界面布局"""
+    rule_dict = None
 
     def __init__(self, text: str, parent=None):
         super().__init__(parent)
         self.setObjectName('RuleListInterface')
-        self.rule_dict = load_config()  # 加载规则
 
         """界面基本布局设置"""
         self.totalWidget = QWidget(self)  # 总容器
@@ -638,8 +639,8 @@ class RuleListInterface(QFrame):
         self.searchLineEdit.setFixedWidth(300)
         self.searchLineEdit.setPlaceholderText('搜索规则名称')  # 设置输入提示语
 
-        self.widgetVLayout.addWidget(self.searchLineEdit, 0)  # 将搜索框添加至总容器布局器
-"""
+        self.widgetVLayout.addWidget(self.searchLineEdit, 0)  # 将搜索框添加至总容器布局器"""
+
         """规则卡片展示区域"""
         self.ruleScrollArea = SmoothScrollArea(self.totalWidget)  # 创建平滑滚动区域
         self.ruleCardWidget = QWidget(self.ruleScrollArea)  # 创建存放所有规则卡片的容器
@@ -660,7 +661,8 @@ class RuleListInterface(QFrame):
 
     def initRuleViewArea(self):
         """初始化规则卡片显示区域"""
-        """删除旧的布局"""
+        self.rule_dict = load_config()  # 更新现存规则
+        """删除原有的规则卡片"""
         while self.ruleCardLayout.count():
             item = self.ruleCardLayout.takeAt(0)
             if item.widget():
@@ -684,6 +686,8 @@ class RuleListInterface(QFrame):
 
     def addRuleCard(self):
         """将规则卡片列表中的卡片添加到界面中"""
+        self.ruleCardList.clear()  # 先清空列表中已保存的规则卡片
+
         rule_list = self.rule_dict['rules']
         selected_index = self.rule_dict['selected_index']
 
@@ -693,13 +697,12 @@ class RuleListInterface(QFrame):
                 activated = True
             else:
                 activated = False
-            self.ruleCardList.append(RuleCard(rule, activated, parent=self))  # 将规则以卡片的形式添加至卡片列表
+            self.ruleCardList.append(RuleCard(rule, index, activated, parent=self))  # 将规则以卡片的形式添加至卡片列表
             index += 1
 
         for card in self.ruleCardList:
             self.ruleCardLayout.addWidget(card, 0)  # 依此将卡片添加至卡片布局器中
-            card.clicked.connect(
-                lambda cardIndex=self.ruleCardList.index(card): self.setSelected(cardIndex))  # 将点击卡片的动作连接至选中卡片函数
+            card.clicked.connect(lambda index=card.index: self.setSelected(index))  # 将点击卡片的动作连接至选中卡片函数
 
     def setSelected(self, index):
         """
@@ -713,7 +716,7 @@ class RuleListInterface(QFrame):
         self.ruleCardList[self.currentIndex].setCardSelected(True)  # 再将选中的卡片切换为选中状态
 
     def achieve_functions(self):
-        """实现各控件功能的方法"""
+        """实现各控件功能"""
 
         # 激活规则功能实现
         def activate_rule_callback():
@@ -744,18 +747,18 @@ class RuleListInterface(QFrame):
                 if confirm_window.exec():
                     logging.info('用户确认删除规则')
 
-                    for card in self.ruleCardList:
-                        self.ruleCardLayout.removeWidget(card)
-                    self.ruleCardList.clear()
-
                     flag = del_rules(self.rule_dict, self.currentIndex)
-                    self.currentIndex = -1
-
-                    self.addRuleCard()
 
                     if flag == 1:
                         title = '成功'
                         message = '已删除选中的规则'
+
+                        while self.ruleCardLayout.count():  # 逐个删除已存在的规则卡片
+                            item = self.ruleCardLayout.takeAt(0)  # 每次取最前面的规则卡片
+                            if item.widget():
+                                item.widget().deleteLater()
+
+                        self.addRuleCard()  # 重新将规则文件中的规则以卡片形式添加到展示区域
                     elif flag == 0:
                         title = '失败'
                         message = '无法删除最后一个规则'
@@ -763,29 +766,78 @@ class RuleListInterface(QFrame):
                     message_window.yesButton.setText('确认')
                     message_window.cancelButton.hide()
                     message_window.exec()
+                    self.currentIndex = -1
                 else:
                     logging.info('用户取消删除规则')
 
         self.delRuleBtn.clicked.connect(del_rule_callback)
 
-        # 添加规则功能实现
-        def save_rule(rule):
-            """保存已解析的规则并将其添加至界面中"""
-            save_new_rule(self.rule_dict, rule)
-
-            self.initRuleViewArea()
-
         def add_rule_callback():
             """添加规则"""
-            addRuleWindow = AddRuleInterface(self)
-            addRuleWindow.submit_data.connect(save_rule)  # 将发射的信号传递给信号处理函数
+            addRuleWindow = ruleInputInterface(self)
+            addRuleWindow.submit_data.connect(lambda: save_new_rule(self.rule_dict, rule))  # 将发射的信号传递给信号处理函数
             if addRuleWindow.exec():
                 rule = analise_rule(addRuleWindow)  # 解析输入的内容
                 addRuleWindow.submit_data.emit(rule)  # 发送规则种类、名称和描述的信号
+                self.initRuleViewArea()  # 刷新规则卡片布局
 
         self.addRuleBtn.clicked.connect(add_rule_callback)
 
+    # 规则卡片“更多”按钮菜单的各种功能实现
     def showInfoDialog(self, rule):
         """显示规则详情界面"""
         infoDialog = InfoDialog(rule, parent=self)
         infoDialog.exec()
+
+    def reviseRule(self, rule):
+        """修改规则"""
+        reviseRuleWindow = ruleInputInterface(self)
+
+        # 设置输入窗口的基本信息
+        type = rule['type']
+        name = rule['name']
+        desc = rule['desc']
+
+        reviseRuleWindow.ruleTypeComboBox.setCurrentIndex(type - 1)
+        reviseRuleWindow.ruleNameLineEdit.setText(name)
+        reviseRuleWindow.ruleDescLineEdit.setText(desc)
+
+        # 设置输入窗口的规则关键参数
+        if type == 1:
+            split_char = rule['split_char']
+
+            reviseRuleWindow.new_control['splitCharLineEdit'].setText(split_char)
+        elif type == 2:
+            new_ext = rule['new_ext']
+
+            reviseRuleWindow.new_control['extLineEdit'].setText(new_ext)
+        elif type == 3:
+            target_str = rule['target_str']
+            new_str = rule['new_str']
+
+            reviseRuleWindow.new_control['oldStrLineEdit'].setText(target_str)
+            reviseRuleWindow.new_control['newStrLineEdit'].setText(new_str)
+        elif type == 4:
+            split_char = rule['split_char']
+            position = rule['position']
+            date = rule['date']
+
+            reviseRuleWindow.new_control['splitCharLineEdit'].setText(split_char)
+            if position == 'head':
+                reviseRuleWindow.new_control['headBtn'].setChecked(True)
+            elif position == 'tail':
+                reviseRuleWindow.new_control['tailBtn'].setChecked(True)
+            reviseRuleWindow.new_control['customDateLineEdit'].setText(date)
+            if date:
+                reviseRuleWindow.new_control['customDateBtn'].setChecked(True)
+                reviseRuleWindow.new_control['sysDateBtn'].setChecked(False)
+            else:
+                reviseRuleWindow.new_control['sysDateBtn'].setChecked(True)
+
+        reviseRuleWindow.submit_data.connect(lambda: save_new_rule(self.rule_dict, rule))  # 将发射的信号传递给信号处理函数
+
+        if reviseRuleWindow.exec():  # 显示窗口
+            rule = analise_rule(reviseRuleWindow)
+            reviseRuleWindow.submit_data.emit(rule)  # 发送信号给规则保存函数
+            self.rule_dict = load_config()  # 刷新规则
+            self.initRuleViewArea()  # 刷新规则卡片布局

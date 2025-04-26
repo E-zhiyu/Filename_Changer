@@ -106,7 +106,7 @@ def switch_rule(config_dict, index):
 
 def analise_rule(addRuleWindow):
     """
-    功能：解析用户输入的规则
+    功能：解析用户添加规则时输入的规则参数
     参数 addRuleWindow：添加规则的窗口
     返回：解析的规则字典
     """
