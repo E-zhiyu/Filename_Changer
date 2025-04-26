@@ -2,6 +2,7 @@
 import json
 import os
 import time
+from json import JSONDecodeError
 
 from FilenameChanger import config_path
 from FilenameChanger.log.log_recorder import *
@@ -25,7 +26,7 @@ def load_config():
                 raise FileNotFoundError
 
             return config
-    except FileNotFoundError:
+    except (JSONDecodeError, FileNotFoundError):  # 防止规则文件存在但是为空而导致程序无法启动
         logging.info('配置文件为空或不存在，正在初始化……')
         init_json()
         with open(config_path, 'r', encoding='utf-8') as f:

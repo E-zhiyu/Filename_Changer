@@ -184,14 +184,14 @@ class RuleCard(CardWidget):
 
         """规则名和规则描述标签"""
         self.titleLabel = SubtitleLabel(text=self.rule['name'], parent=self)
-        self.contentLabel = SubtitleLabel(text=self.rule['desc'], parent=self)
+        self.descLabel = BodyLabel(text=self.rule['desc'], parent=self)
         self.labelLayout = QVBoxLayout()
 
         # 设置属性
         self.titleLabel.setStyleSheet('background-color:transparent')  # 将标签的背景色设为透明，防止选择卡片的时候影响美观
-        self.contentLabel.setStyleSheet('background-color:transparent')  # 将标签的背景色设为透明，防止选择卡片的时候影响美观
+        self.descLabel.setStyleSheet('background-color:transparent')  # 将标签的背景色设为透明，防止选择卡片的时候影响美观
         setFont(self.titleLabel, 22)
-        setFont(self.contentLabel, 16)
+        setFont(self.descLabel, 16)
 
         # 设置布局器对齐方式和间隔
         self.labelLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -199,7 +199,7 @@ class RuleCard(CardWidget):
 
         # 添加控件到布局器
         self.labelLayout.addWidget(self.titleLabel)
-        self.labelLayout.addWidget(self.contentLabel)
+        self.labelLayout.addWidget(self.descLabel)
         self.mainHLayout.addLayout(self.labelLayout)  # 合并标签布局器至主布局器
 
         """激规则激活状态"""
@@ -680,7 +680,7 @@ class RuleListInterface(QFrame):
 
             self.addRuleCard()  # 将规则卡片列表中的卡片添加到界面中
         else:
-            ruleEmptyLabel = SubtitleLabel(text='当前规则列表为空，请先添加规则', parent=self.ruleCardWidget)
+            ruleEmptyLabel = SubtitleLabel(text='这里连一个规则都还没有，点击上方的按钮添加你的第一个规则吧！', parent=self.ruleCardWidget)
 
             self.ruleCardLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
