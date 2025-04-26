@@ -38,7 +38,6 @@ def save_new_rule(config_dict, new_rule):
     功能：将新规则并入已存在的规则列表
     参数 config_dict：规则配置文件根字典
     参数 new_rule：新规则字典
-    参数 config_path：规则文件路径
     """
     config_dict['num'] += 1
     config_dict['rules'].append(new_rule)  # 将新规则字典并入现有的规则
@@ -47,6 +46,18 @@ def save_new_rule(config_dict, new_rule):
         json.dump(config_dict, f, ensure_ascii=False, indent=4)
     print('新规则已成功保存！')
     logging.info('新规则保存成功')
+
+
+def revise_rule(rule_dict, revised_rule, index):
+    """
+    功能：修改指定下标的规则并保存
+    参数 rule_dict：旧的规则字典
+    参数 revised_rule：修改后的规则列表
+    参数 index：需要修改的规则的下标
+    """
+    rule_dict['rules'][index] = revised_rule
+    with open(config_path, 'w', encoding='utf-8') as f:
+        json.dump(rule_dict, f, ensure_ascii=False, indent=4)
 
 
 def init_json():

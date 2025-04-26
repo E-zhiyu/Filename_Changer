@@ -8,7 +8,8 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, se
                                                                ComboBox, MessageBoxBase, LineEdit, RadioButton,
                                                                RoundMenu, Action, BodyLabel)
 
-from FilenameChanger.rename_rules.rule_manager import load_config, switch_rule, del_rules, save_new_rule, analise_rule
+from FilenameChanger.rename_rules.rule_manager import (load_config, switch_rule, del_rules, save_new_rule, analise_rule,
+                                                       revise_rule)
 
 from FilenameChanger.log.log_recorder import *
 
@@ -272,7 +273,8 @@ class RuleCard(CardWidget):
 
         # 添加修改规则的动作
         menu.addAction(
-            Action(FluentIcon.EDIT, '修改规则', triggered=lambda: self.parentInterface.reviseRule(self.rule)))
+            Action(FluentIcon.EDIT, '修改规则',
+                   triggered=lambda: self.parentInterface.reviseRule(self.rule, self.index)))
 
         menu.exec(pos, ani=True)
 
@@ -789,7 +791,7 @@ class RuleListInterface(QFrame):
         infoDialog = InfoDialog(rule, parent=self)
         infoDialog.exec()
 
-    def reviseRule(self, rule):
+    def reviseRule(self, rule, index):
         """修改规则"""
         reviseRuleWindow = ruleInputInterface(self)
 
@@ -834,10 +836,9 @@ class RuleListInterface(QFrame):
             else:
                 reviseRuleWindow.new_control['sysDateBtn'].setChecked(True)
 
-        reviseRuleWindow.submit_data.connect(lambda: save_new_rule(self.rule_dict, rule))  # 将发射的信号传递给信号处理函数
+        reviseRuleWindow.submit_data.connect(lambda: revise_rule(self.rule_dict, revised_rule, index))  # 将发射的信号传递给信号处理函数
 
         if reviseRuleWindow.exec():  # 显示窗口
-            rule = analise_rule(reviseRuleWindow)
-            reviseRuleWindow.submit_data.emit(rule)  # 发送信号给规则保存函数
-            self.rule_dict = load_config()  # 刷新规则
+            revised_rule = analise_rule(reviseRuleWindow)
+            reviseRuleWindow.submit_data.emit(revised_rule)  # 发送信号给规则保存函数
             self.initRuleViewArea()  # 刷新规则卡片布局
