@@ -8,7 +8,7 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, se
                                                                ComboBox, MessageBoxBase, LineEdit, RadioButton,
                                                                RoundMenu, Action, BodyLabel)
 
-from FilenameChanger.rename_rules.rule_manager import load_config, switch_rule, del_rules, save_new_rule
+from FilenameChanger.rename_rules.rule_manager import load_config, switch_rule, del_rules, save_new_rule, analise_rule
 
 from FilenameChanger.log.log_recorder import *
 
@@ -136,11 +136,11 @@ class InfoDialog(MessageBoxBase):
             self.viewLayout.addLayout(self.dateLayout)
 
             # 填充位置
-            self.posLabel = SubtitleLabel(text='位置：', parent=self.widget)
+            self.posLabel = SubtitleLabel(text='填充位置：', parent=self.widget)
             if rule['position'] == 'head':
-                pos = '头部'
+                pos = '文件名首'
             elif rule['position'] == 'tail':
-                pos = '尾部'
+                pos = '文件名尾'
             self.posContentLabel = BodyLabel(text=pos, parent=self.widget)
 
             self.posLayout = QHBoxLayout()
@@ -268,6 +268,10 @@ class RuleCard(CardWidget):
         # 添加显示规则详情的动作
         menu.addAction(
             Action(FluentIcon.ALIGNMENT, '规则详情', triggered=lambda: self.parentInterface.showInfoDialog(self.rule)))
+
+        # 添加修改规则的动作
+        menu.addAction(
+            Action(FluentIcon.EDIT, '修改规则', triggered=lambda: self.parentInterface.showInfoDialog(self.rule)))
 
         menu.exec(pos, ani=True)
 
@@ -629,13 +633,13 @@ class RuleListInterface(QFrame):
         self.widgetVLayout.addLayout(self.btnLayout, 0)  # 将按钮布局器合并至总容器的布局器
 
         """搜索框"""
-        self.searchLineEdit = SearchLineEdit()  # 实例化搜索框
+        """self.searchLineEdit = SearchLineEdit()  # 实例化搜索框
 
         self.searchLineEdit.setFixedWidth(300)
         self.searchLineEdit.setPlaceholderText('搜索规则名称')  # 设置输入提示语
 
         self.widgetVLayout.addWidget(self.searchLineEdit, 0)  # 将搜索框添加至总容器布局器
-
+"""
         """规则卡片展示区域"""
         self.ruleScrollArea = SmoothScrollArea(self.totalWidget)  # 创建平滑滚动区域
         self.ruleCardWidget = QWidget(self.ruleScrollArea)  # 创建存放所有规则卡片的容器
@@ -776,76 +780,12 @@ class RuleListInterface(QFrame):
             addRuleWindow = AddRuleInterface(self)
             addRuleWindow.submit_data.connect(save_rule)  # 将发射的信号传递给信号处理函数
             if addRuleWindow.exec():
-                """解析用户输入的规则"""
-                if addRuleWindow.new_rule_type == 1:
-                    rule = {
-                        'type': 1,
-                        'name': addRuleWindow.ruleNameLineEdit.text(),
-                        'desc': addRuleWindow.ruleDescLineEdit.text(),
-                        'split_char': addRuleWindow.new_control['splitCharLineEdit'].text()
-                    }
-                    logging.info('用户添加规则类型1')
-                    logging.info(
-                        f'名称：{addRuleWindow.ruleNameLineEdit.text()}\n描述：{addRuleWindow.ruleDescLineEdit.text()}')
-                    logging.info(f'分隔符：{addRuleWindow.new_control["splitCharLineEdit"].text()}')
-                elif addRuleWindow.new_rule_type == 2:
-                    rule = {
-                        'type': 2,
-                        'name': addRuleWindow.ruleNameLineEdit.text(),
-                        'desc': addRuleWindow.ruleDescLineEdit.text(),
-                        'new_ext': addRuleWindow.new_control['extLineEdit'].text()
-                    }
-                    logging.info('用户添加规则类型2')
-                    logging.info(
-                        f'名称：{addRuleWindow.ruleNameLineEdit.text()}\n描述：{addRuleWindow.ruleDescLineEdit.text()}')
-                    logging.info(f'新扩展名：{addRuleWindow.new_control["extLineEdit"].text()}')
-                elif addRuleWindow.new_rule_type == 3:
-                    rule = {
-                        'type': 3,
-                        'name': addRuleWindow.ruleNameLineEdit.text(),
-                        'desc': addRuleWindow.ruleDescLineEdit.text(),
-                        'target_str': addRuleWindow.new_control['oldStrLineEdit'].text(),
-                        'new_str': addRuleWindow.new_control['newStrLineEdit'].text()
-                    }
-                    logging.info('用户添加规则类型3')
-                    logging.info(
-                        f'名称：{addRuleWindow.ruleNameLineEdit.text()}\n描述：{addRuleWindow.ruleDescLineEdit.text()}\n')
-                    logging.info(
-                        f'原字符串：{addRuleWindow.new_control["oldStrLineEdit"].text()}\n新字符串：{addRuleWindow.new_control["newStrLineEdit"].text()}')
-                elif addRuleWindow.new_rule_type == 4:
-                    rule = {
-                        'type': 4,
-                        'name': addRuleWindow.ruleNameLineEdit.text(),
-                        'desc': addRuleWindow.ruleDescLineEdit.text(),
-                        'split_char': addRuleWindow.new_control['splitCharLineEdit'].text()
-                    }
-                    logging.info('用户添加规则类型4')
-                    logging.info(
-                        f'名称：{addRuleWindow.ruleNameLineEdit.text()}\n描述：{addRuleWindow.ruleDescLineEdit.text()}\n')
-                    logging.info(f'分隔符：{addRuleWindow.new_control["splitCharLineEdit"].text()}')
-
-                    if addRuleWindow.new_control['headBtn'].isChecked():
-                        rule['position'] = 'head'
-                        logging.info(f'位置：头部')
-                    elif addRuleWindow.new_control['tailBtn'].isChecked():
-                        rule['position'] = 'tail'
-                        logging.info(f'位置：尾部')
-
-                    if addRuleWindow.new_control['sysDateBtn'].isChecked():
-                        rule['date'] = None
-                        logging.info('日期：动态填充系统日期')
-                    else:
-                        rule['date'] = addRuleWindow.new_control['customDateLineEdit'].text()
-                        logging.info(f'日期：{addRuleWindow.new_control["customDateLineEdit"].text()}')
-
+                rule = analise_rule(addRuleWindow)  # 解析输入的内容
                 addRuleWindow.submit_data.emit(rule)  # 发送规则种类、名称和描述的信号
 
         self.addRuleBtn.clicked.connect(add_rule_callback)
 
-        # 搜索框功能实现
-        pass
-
     def showInfoDialog(self, rule):
-        """显示规则详情"""
+        """显示规则详情界面"""
         infoDialog = InfoDialog(rule, parent=self)
         infoDialog.exec()

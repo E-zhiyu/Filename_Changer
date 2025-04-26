@@ -102,3 +102,73 @@ def switch_rule(config_dict, index):
     # 将更改写入配置文件
     with open(config_path, 'w', encoding='utf-8') as f:
         json.dump(config_dict, f, ensure_ascii=False, indent=4)
+
+
+def analise_rule(addRuleWindow):
+    """
+    功能：解析用户输入的规则
+    参数 addRuleWindow：添加规则的窗口
+    返回：解析的规则字典
+    """
+    if addRuleWindow.new_rule_type == 1:
+        rule = {
+            'type': 1,
+            'name': addRuleWindow.ruleNameLineEdit.text(),
+            'desc': addRuleWindow.ruleDescLineEdit.text(),
+            'split_char': addRuleWindow.new_control['splitCharLineEdit'].text()
+        }
+        logging.info('用户添加规则类型1')
+        logging.info(
+            f'名称：{addRuleWindow.ruleNameLineEdit.text()}\n描述：{addRuleWindow.ruleDescLineEdit.text()}')
+        logging.info(f'分隔符：{addRuleWindow.new_control["splitCharLineEdit"].text()}')
+    elif addRuleWindow.new_rule_type == 2:
+        rule = {
+            'type': 2,
+            'name': addRuleWindow.ruleNameLineEdit.text(),
+            'desc': addRuleWindow.ruleDescLineEdit.text(),
+            'new_ext': addRuleWindow.new_control['extLineEdit'].text()
+        }
+        logging.info('用户添加规则类型2')
+        logging.info(
+            f'名称：{addRuleWindow.ruleNameLineEdit.text()}\n描述：{addRuleWindow.ruleDescLineEdit.text()}')
+        logging.info(f'新扩展名：{addRuleWindow.new_control["extLineEdit"].text()}')
+    elif addRuleWindow.new_rule_type == 3:
+        rule = {
+            'type': 3,
+            'name': addRuleWindow.ruleNameLineEdit.text(),
+            'desc': addRuleWindow.ruleDescLineEdit.text(),
+            'target_str': addRuleWindow.new_control['oldStrLineEdit'].text(),
+            'new_str': addRuleWindow.new_control['newStrLineEdit'].text()
+        }
+        logging.info('用户添加规则类型3')
+        logging.info(
+            f'名称：{addRuleWindow.ruleNameLineEdit.text()}\n描述：{addRuleWindow.ruleDescLineEdit.text()}\n')
+        logging.info(
+            f'原字符串：{addRuleWindow.new_control["oldStrLineEdit"].text()}\n新字符串：{addRuleWindow.new_control["newStrLineEdit"].text()}')
+    elif addRuleWindow.new_rule_type == 4:
+        rule = {
+            'type': 4,
+            'name': addRuleWindow.ruleNameLineEdit.text(),
+            'desc': addRuleWindow.ruleDescLineEdit.text(),
+            'split_char': addRuleWindow.new_control['splitCharLineEdit'].text()
+        }
+        logging.info('用户添加规则类型4')
+        logging.info(
+            f'名称：{addRuleWindow.ruleNameLineEdit.text()}\n描述：{addRuleWindow.ruleDescLineEdit.text()}\n')
+        logging.info(f'分隔符：{addRuleWindow.new_control["splitCharLineEdit"].text()}')
+
+        if addRuleWindow.new_control['headBtn'].isChecked():
+            rule['position'] = 'head'
+            logging.info(f'位置：头部')
+        elif addRuleWindow.new_control['tailBtn'].isChecked():
+            rule['position'] = 'tail'
+            logging.info(f'位置：尾部')
+
+        if addRuleWindow.new_control['sysDateBtn'].isChecked():
+            rule['date'] = None
+            logging.info('日期：动态填充系统日期')
+        else:
+            rule['date'] = addRuleWindow.new_control['customDateLineEdit'].text()
+            logging.info(f'日期：{addRuleWindow.new_control["customDateLineEdit"].text()}')
+
+    return rule
