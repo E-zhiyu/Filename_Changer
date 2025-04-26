@@ -289,7 +289,7 @@ class ruleInputInterface(MessageBoxBase):
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        self.errorInfoLabel = SubtitleLabel(text='你还有必填的选项未填写！')  # 提示错误信息的标签
+        self.errorInfoLabel = BodyLabel(text='你还有必填的选项未填写！')  # 提示错误信息的标签
 
         """基本设置"""
         self.widget.setMinimumWidth(400)  # 设置对话框最小宽度
@@ -589,7 +589,7 @@ class ruleInputInterface(MessageBoxBase):
 
         """验证不通过时的警告文本框"""
         setFont(self.errorInfoLabel, 15)
-        self.errorInfoLabel.setStyleSheet("color: red;")
+        self.errorInfoLabel.setStyleSheet("color: rgb(255, 100, 100);")
         self.errorInfoLabel.setHidden(True)  # 默认设置为不可见
 
         self.viewLayout.addWidget(self.errorInfoLabel, 0, Qt.AlignmentFlag.AlignCenter)
@@ -680,7 +680,8 @@ class RuleListInterface(QFrame):
 
             self.addRuleCard()  # 将规则卡片列表中的卡片添加到界面中
         else:
-            ruleEmptyLabel = SubtitleLabel(text='这里连一个规则都还没有，点击上方的按钮添加你的第一个规则吧！', parent=self.ruleCardWidget)
+            ruleEmptyLabel = SubtitleLabel(text='这里连一个规则都还没有，点击上方的按钮添加你的第一个规则吧！',
+                                           parent=self.ruleCardWidget)
 
             self.ruleCardLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 

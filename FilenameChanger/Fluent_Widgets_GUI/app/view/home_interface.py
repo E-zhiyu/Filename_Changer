@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QFileDialog
 from PyQt6.QtCore import Qt
 
-from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, LineEdit, FluentIcon,
+from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, BodyLabel, setFont, LineEdit, FluentIcon,
                                                                PrimaryPushButton,
                                                                MessageBox, ToolButton)
 from FilenameChanger.file_operations.file_utils import is_directory_usable, rename
@@ -18,26 +18,23 @@ class HomeInterface(QFrame):
         self.setObjectName('HomeInterface')  # 设置全局唯一对象名，否则不能将该界面添加至导航栏
 
         """基本布局设置"""
-        self.totalWidget = QWidget()  # 创建一个总容器存放所有控件，使得调整窗口大小的时候各控件不会相互分离
-        self.interfaceTotalLayout = QVBoxLayout(self)  # 界面总布局器，只存放一个总容器控件
-        self.totalWidgetVLayout = QVBoxLayout(self.totalWidget)  # 总容器内的垂直布局器
-        self.setLayout(self.interfaceTotalLayout)  # 设置界面主布局器
+        self.totalWidget = QWidget(self)  # 创建一个总容器存放所有控件，使得调整窗口大小的时候各控件不会相互分离
+        self.interfaceLayout = QVBoxLayout(self)  # 界面总布局器，只存放一个总容器控件
+        self.widgetLayout = QVBoxLayout(self.totalWidget)  # 总容器的垂直布局器
+        self.setLayout(self.interfaceLayout)  # 设置界面主布局器
 
-        self.interfaceTotalLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)  # 界面总布局器默认为居中对齐
-        self.totalWidgetVLayout.setSpacing(10)  # 增加一个10像素的空隔
-        self.totalWidgetVLayout.setContentsMargins(0, 180, 0, 200)  # 设置总容器布局器四周向内收缩距离
-        self.interfaceTotalLayout.addWidget(self.totalWidget, 1, Qt.AlignmentFlag.AlignCenter)
+        self.interfaceLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)  # 界面总布局器默认为居中对齐
+        self.interfaceLayout.addWidget(self.totalWidget, 0, Qt.AlignmentFlag.AlignCenter)
 
         """标题标签"""
         self.label = SubtitleLabel(text, self.totalWidget)
         setFont(self.label, 40)
 
-        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.totalWidgetVLayout.addWidget(self.label, 1)
+        self.widgetLayout.addWidget(self.label, 1, Qt.AlignmentFlag.AlignCenter)
+        self.widgetLayout.addSpacing(15)
 
         """文件夹路径文本框"""
-        self.tipLabel = SubtitleLabel(self.totalWidget)  # 提示用户是否输入正确的路径
+        self.tipLabel = BodyLabel(self.totalWidget)  # 提示用户是否输入正确的路径
         self.folderLineEdit = LineEdit(self.totalWidget)
         self.folderSelectBtn = ToolButton(FluentIcon.FOLDER)
 
@@ -48,28 +45,31 @@ class HomeInterface(QFrame):
         self.folderLineEdit.setClearButtonEnabled(True)
         self.folderLineEdit.setPlaceholderText('请选择一个文件夹')  # 设置文本框提示文本
         self.folderSelectBtn.setFixedHeight(34)
+        setFont(self.tipLabel, 17)
 
-        self.folderSelectLayout.setContentsMargins(160, 10, 160, 0)
+        self.folderSelectLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.totalWidgetVLayout.addLayout(self.lineEditLayout, 1)
-        self.folderSelectLayout.addWidget(self.folderLineEdit, 1, Qt.AlignmentFlag.AlignCenter)
-        self.folderSelectLayout.addWidget(self.folderSelectBtn, 1, Qt.AlignmentFlag.AlignCenter)
+        self.widgetLayout.addLayout(self.lineEditLayout, 1)
+        self.folderSelectLayout.addWidget(self.folderLineEdit)
+        self.folderSelectLayout.addWidget(self.folderSelectBtn)
         self.lineEditLayout.addLayout(self.folderSelectLayout, 1)
-        self.lineEditLayout.addWidget(self.tipLabel, 1, Qt.AlignmentFlag.AlignCenter)
+        self.lineEditLayout.addWidget(self.tipLabel, 1, Qt.AlignmentFlag.AlignCenter)  # 让提示标签以水平居中的方式加入布局
+        self.widgetLayout.addSpacing(10)
 
         """功能按钮"""
         self.renameBtn = PrimaryPushButton(FluentIcon.PENCIL_INK, '文件重命名')
         self.cancelOperationBtn = PrimaryPushButton(FluentIcon.HISTORY, '撤销重命名')
         self.buttonHBoxLayout = QHBoxLayout()  # 按钮布局器（水平）
 
-        self.renameBtn.setFixedWidth(200)
+        self.renameBtn.setFixedWidth(175)
         self.renameBtn.setEnabled(False)  # 先将其禁用防止未输入路径就重命名
-        self.cancelOperationBtn.setFixedWidth(200)
+        self.cancelOperationBtn.setFixedWidth(175)
 
-        self.buttonHBoxLayout.setContentsMargins(100, 0, 100, 0)
+        self.buttonHBoxLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.buttonHBoxLayout.setSpacing(30)  # 设置布局器的默认控件间隔
 
-        self.totalWidgetVLayout.addLayout(self.buttonHBoxLayout, 1)
-        self.buttonHBoxLayout.addWidget(self.renameBtn, 0)
+        self.widgetLayout.addLayout(self.buttonHBoxLayout)
+        self.buttonHBoxLayout.addWidget(self.renameBtn)
         self.buttonHBoxLayout.addWidget(self.cancelOperationBtn, 0)
 
         self.achieve_functions()  # 调用控件功能函数
@@ -98,7 +98,7 @@ class HomeInterface(QFrame):
             else:
                 return 0
 
-        def get_directory():
+        def dirLineEdit_function():
             # 文本框功能实现
             self.folderLineEdit.setFocus()
 
@@ -118,7 +118,7 @@ class HomeInterface(QFrame):
                 self.renameBtn.setEnabled(False)
                 self.tipLabel.clear()
 
-        self.folderLineEdit.textChanged.connect(get_directory)
+        self.folderLineEdit.textChanged.connect(dirLineEdit_function)
 
         # 重命名按钮功能实现
         def rename_button_callback():
