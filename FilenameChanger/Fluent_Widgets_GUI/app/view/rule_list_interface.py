@@ -338,7 +338,7 @@ class ruleInputInterface(MessageBoxBase):
         self.errorInfoLabel = BodyLabel(text='你还有必填的选项未填写！')  # 提示错误信息的标签
 
         """基本设置"""
-        self.widget.setMinimumWidth(400)  # 设置对话框最小宽度
+        self.widget.setMinimumWidth(450)  # 设置对话框最小宽度
         self.base_height = 250
         self.widget.setMinimumHeight(self.base_height)  # 设置基本高度
 
@@ -524,7 +524,7 @@ class ruleInputInterface(MessageBoxBase):
 
             # 输入框
             newStrLineEdit = LineEdit()
-            newStrLineEdit.setPlaceholderText('请输入新字符串')
+            newStrLineEdit.setPlaceholderText('请输入新字符串（必填）')
             newStrLineEdit.setFixedWidth(200)
             newStrLayout.addWidget(newStrLineEdit)
             self.new_control['newStrLineEdit'] = newStrLineEdit
@@ -589,12 +589,11 @@ class ruleInputInterface(MessageBoxBase):
 
             """填充位置选择"""
             posLayout = QHBoxLayout()
-            posLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
             self.new_layout_list.append(posLayout)
 
             # 文本标签
             posLabel = SubtitleLabel(text='日期插入位置', parent=self)
-            posLayout.addWidget(posLabel)
+            posLayout.addWidget(posLabel, 1, Qt.AlignmentFlag.AlignLeft)
 
             # 单选按钮
             headBtn = RadioButton('文件名首')
@@ -605,9 +604,9 @@ class ruleInputInterface(MessageBoxBase):
 
             headBtn.setChecked(True)  # 设置默认选中的按钮
 
-            posLayout.addWidget(headBtn)
+            posLayout.addWidget(headBtn, 0, Qt.AlignmentFlag.AlignRight)
             self.new_control['headBtn'] = headBtn
-            posLayout.addWidget(tailBtn)
+            posLayout.addWidget(tailBtn, 0, Qt.AlignmentFlag.AlignRight)
             self.new_control['tailBtn'] = tailBtn
 
             # 将日期位置输入布局添加至主布局
@@ -625,7 +624,7 @@ class ruleInputInterface(MessageBoxBase):
             # 输入框
             splitCharLineEdit = LineEdit()
             splitCharLineEdit.setPlaceholderText('请输入年月日间的分隔符（必填）')
-            splitCharLineEdit.setFixedWidth(200)
+            splitCharLineEdit.setFixedWidth(250)
             splitCharLayout.addWidget(splitCharLineEdit)
             self.new_control['splitCharLineEdit'] = splitCharLineEdit
             splitCharLineEdit.setValidator(validator)  # 设置限制器
@@ -814,9 +813,6 @@ class RuleListInterface(QFrame):
                     flag = del_rules(self.rule_dict, self.currentIndex)
 
                     if flag == 1:
-                        title = '成功'
-                        message = '已删除选中的规则'
-
                         while self.ruleCardLayout.count():  # 逐个删除已存在的规则卡片
                             item = self.ruleCardLayout.takeAt(0)  # 每次取最前面的规则卡片
                             if item.widget():
@@ -826,10 +822,10 @@ class RuleListInterface(QFrame):
                     elif flag == 0:
                         title = '失败'
                         message = '无法删除最后一个规则'
-                    message_window = MessageBox(title=title, content=message, parent=self)
-                    message_window.yesButton.setText('确认')
-                    message_window.cancelButton.hide()
-                    message_window.exec()
+                        message_window = MessageBox(title=title, content=message, parent=self)
+                        message_window.yesButton.setText('确认')
+                        message_window.cancelButton.hide()
+                        message_window.exec()
                     self.currentIndex = -1
                 else:
                     logging.info('用户取消删除规则')
