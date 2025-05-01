@@ -6,12 +6,58 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, se
                                                                CardWidget, SearchLineEdit, TransparentToolButton,
                                                                SmoothScrollArea, IconWidget, InfoBarIcon, MessageBox,
                                                                ComboBox, MessageBoxBase, LineEdit, RadioButton,
-                                                               RoundMenu, Action, BodyLabel)
+                                                               RoundMenu, Action, BodyLabel, TextBrowser)
 
 from FilenameChanger.rename_rules.rule_manager import (load_config, switch_rule, del_rules, save_new_rule, analise_rule,
                                                        revise_rule)
 
 from FilenameChanger.log.log_recorder import *
+
+rule_help_md = """\
+## 1.交换分隔符前后内容
+功能：交换指定分隔符或字符串前后的内容，不包括文件扩展名
+应用场景：音乐文件交换歌手和歌曲名的位置
+
+## 2.修改扩展名
+功能：将目标文件夹内文件的扩展名修改为用户自定义的扩展名，不影响文件内容
+应用场景：将某些资源的扩展名进行修改，防止发布的资源被网盘删除
+
+## 3.修改特定字符串
+功能：将文件名中的特定字符串修改为用户指定的字符串，只修改一处
+应用场景：快速修改文件名的格式
+
+## 4.添加或删除日期
+功能：为没有日期的文件名添加日期，已有日期的文件名则移除日期，可自定义日期填充内容
+应用场景：批量标注文件日期
+"""
+
+
+class RuleHelpWindow(MessageBoxBase):
+    """显示规则说明的窗口"""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        """基本设置"""
+        self.cancelButton.setHidden(True)
+        self.yesButton.setText('确定')
+
+        self.widget.setFixedWidth(600)
+        self.widget.setFixedHeight(700)
+
+        """标题标签"""
+        self.titleLabel = SubtitleLabel(text='规则说明', parent=self)
+
+        self.viewLayout.addWidget(self.titleLabel)
+
+        """文本内容显示"""
+        self.textBrowser = TextBrowser(parent=self)
+        self.textScrollArea = SmoothScrollArea(parent=self)
+
+        self.textScrollArea.setWidget(self.textBrowser)  # 将富文本浏览器放入滚动区域
+        self.textScrollArea.setWidgetResizable(True)  # 将滚动区域大小设置为可调
+
+        self.viewLayout.addWidget(self.textScrollArea)
+        self.textBrowser.setMarkdown(rule_help_md)
 
 
 class InfoDialog(MessageBoxBase):
@@ -304,7 +350,7 @@ class ruleInputInterface(MessageBoxBase):
         self.yesButton.setEnabled(False)  # 初始将确认按钮设置为禁用状态，防止什么都没输入就点击确认
 
         """选择规则种类"""
-        all_rule_type = ('1.交换分隔符前后内容', '2.修改后缀名', '3.修改特定字符串', '4.文件名添加或删除日期')
+        all_rule_type = ('1.交换分隔符前后内容', '2.修改后缀名', '3.修改特定字符串', '4.添加或删除日期')
         self.ruleTypeComboBox = ComboBox()
         self.ruleTypeLabel = SubtitleLabel(text='规则种类', parent=self.widget)
         self.ruleTypeLayout = QHBoxLayout()
@@ -621,6 +667,13 @@ class RuleListInterface(QFrame):
 
         self.widgetVLayout.addWidget(self.label, 0)  # 将标签添加至总容器的布局器
 
+        """规则说明按钮"""
+        self.ruleHelpBtn = PushButton(FluentIcon.HELP, '规则说明')
+
+        self.ruleHelpBtn.setFixedWidth(107)
+
+        self.widgetVLayout.addWidget(self.ruleHelpBtn)
+
         """功能按钮"""
         self.addRuleBtn = PushButton(FluentIcon.ADD, '添加规则')
         self.activateRuleBtn = PushButton(FluentIcon.COMPLETED, '激活规则')
@@ -721,6 +774,14 @@ class RuleListInterface(QFrame):
     def achieve_functions(self):
         """实现各控件功能"""
 
+        # 显示规则说明
+        def show_rule_help():
+            """显示规则说明窗口"""
+            ruleHelpWindow = RuleHelpWindow(self)
+            ruleHelpWindow.exec()
+
+        self.ruleHelpBtn.clicked.connect(show_rule_help)
+
         # 激活规则功能实现
         def activate_rule_callback():
             """切换激活的规则"""
@@ -775,6 +836,7 @@ class RuleListInterface(QFrame):
 
         self.delRuleBtn.clicked.connect(del_rule_callback)
 
+        # 添加规则
         def add_rule_callback():
             """添加规则"""
             addRuleWindow = ruleInputInterface(self)

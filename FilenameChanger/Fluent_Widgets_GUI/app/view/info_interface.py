@@ -149,13 +149,13 @@ class textInterface(MessageBoxBase):
         self.widget.setMinimumWidth(600)  # 设置最小窗口宽度
         self.widget.setFixedHeight(700)  # 设置固定窗口高度
 
-        """标题文本标签"""
+        """标题标签"""
         self.titleLabel = SubtitleLabel(text=title, parent=self.widget)
 
         self.viewLayout.addWidget(self.titleLabel)
 
-        """更新日志内容"""
-        self.textBrowser = TextBrowser()  # 存放更新日志的容器
+        """文本内容显示"""
+        self.textBrowser = TextBrowser(self)  # 存放更新日志的容器
         self.textScrollArea = SmoothScrollArea(parent=self.widget)
         self.textScrollArea.setWidget(self.textBrowser)  # 将更新日志容器放入滚动界面
 
