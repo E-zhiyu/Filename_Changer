@@ -4,8 +4,8 @@ from PyQt6.QtCore import Qt
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, BodyLabel, setFont, LineEdit, FluentIcon,
                                                                PrimaryPushButton,
                                                                MessageBox, ToolButton)
-from FilenameChanger.file_operations.file_utils import is_directory_usable, rename
-from FilenameChanger.history_operations.history_operations import cancel_rename_operation
+from FilenameChanger.file_history_operations.file_history_operations import (is_directory_usable, rename,
+                                                                             cancel_rename_operation)
 
 from FilenameChanger.log.log_recorder import *
 

@@ -2,11 +2,22 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFrame, QWidget, QHBoxLayout, QVBoxLayout
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, PushButton, FluentIcon, setFont,
-                                                               SmoothScrollArea)
+                                                               SmoothScrollArea, CardWidget)
+
+from FilenameChanger.file_history_operations.file_history_operations import load_history
+
+
+class HistoryCard(CardWidget):
+    """历史记录卡片"""
+
+    def __init__(self, parent=None):
+        super().__init__(parent=parent)
+        pass
 
 
 class HistoryListInterface(QFrame):
     """历史记录列表界面"""
+    history_list = []  # 定义类属性：历史记录列表
 
     def __init__(self, text: str, parent=None):
         super().__init__(parent=parent)
@@ -54,4 +65,5 @@ class HistoryListInterface(QFrame):
         self.addHistoryCards()  # 加载历史记录卡片
 
     def addHistoryCards(self):
+        self.history_list = load_history()  # 加载历史记录
         pass
