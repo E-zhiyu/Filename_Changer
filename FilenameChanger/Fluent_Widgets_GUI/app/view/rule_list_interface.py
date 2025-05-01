@@ -216,7 +216,7 @@ class RuleCard(CardWidget):
 
     def __init__(self, rule, index, isActive=False, parent=None):
         super().__init__(parent=parent)
-        self.index = index
+        self.index = index  # 记录规则对应的下标
         """定义该卡片的属性"""
         self.parentInterface = parent  # 保存父亲界面到属性，便于调用父亲界面的方法
         self.rule = rule  # 保存所有规则参数为一个属性
