@@ -45,7 +45,6 @@ def save_new_rule(config_dict, new_rule):
 
     with open(config_path, 'w', encoding='utf-8') as f:
         json.dump(config_dict, f, ensure_ascii=False, indent=4)
-    print('新规则已成功保存！')
     logging.info('新规则保存成功')
 
 

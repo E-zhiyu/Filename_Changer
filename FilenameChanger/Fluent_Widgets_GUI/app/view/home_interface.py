@@ -5,7 +5,7 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, Bo
                                                                PrimaryPushButton,
                                                                MessageBox, ToolButton)
 from FilenameChanger.file_operations.file_utils import is_directory_usable, rename
-from FilenameChanger.file_operations.file_utils import cancel_rename_operation
+from FilenameChanger.history_operations.history_operations import cancel_rename_operation
 
 from FilenameChanger.log.log_recorder import *
 
@@ -162,9 +162,6 @@ class HomeInterface(QFrame):
                     message = '历史记录为空，无法撤销重命名！'
                     title = '失败'
                 elif flag == -1:
-                    message = '历史记录文件不存在或已被删除！'
-                    title = '失败'
-                elif flag == -2:
                     message = '上次重命名的文件夹不存在或已被移除！'
                     title = '失败'
                 message_window = MessageBox(title=title, content=message, parent=self)
