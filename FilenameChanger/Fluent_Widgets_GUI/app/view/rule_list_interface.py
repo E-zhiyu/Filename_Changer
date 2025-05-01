@@ -216,8 +216,8 @@ class RuleCard(CardWidget):
 
     def __init__(self, rule, index, isActive=False, parent=None):
         super().__init__(parent=parent)
-        self.index = index  # 记录规则对应的下标
         """定义该卡片的属性"""
+        self.index = index  # 记录规则对应的下标
         self.parentInterface = parent  # 保存父亲界面到属性，便于调用父亲界面的方法
         self.rule = rule  # 保存所有规则参数为一个属性
         self.type = rule['type']  # 单独保存一份规则类型，便于外部函数调用
@@ -225,8 +225,8 @@ class RuleCard(CardWidget):
         self.selected = False  # 初始状态为未被鼠标选中
 
         """卡片基本设置"""
-        self.setFixedHeight(73)  # 设置卡片高度
-        self.mainHLayout = QHBoxLayout(self)  # 设置卡片的主布局器（水平）
+        self.setFixedHeight(75)  # 设置卡片高度
+        self.cardLayout = QHBoxLayout(self)  # 设置卡片的主布局器（水平）
 
         """规则名和规则描述标签"""
         self.titleLabel = SubtitleLabel(text=self.rule['name'], parent=self)
@@ -239,14 +239,10 @@ class RuleCard(CardWidget):
         setFont(self.titleLabel, 22)
         setFont(self.descLabel, 16)
 
-        # 设置布局器对齐方式和间隔
-        self.labelLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
-        self.labelLayout.setSpacing(5)
-
         # 添加控件到布局器
         self.labelLayout.addWidget(self.titleLabel)
         self.labelLayout.addWidget(self.descLabel)
-        self.mainHLayout.addLayout(self.labelLayout)  # 合并标签布局器至主布局器
+        self.cardLayout.addLayout(self.labelLayout)  # 合并标签布局器至主布局器
 
         """激规则激活状态"""
         self.isActivatedWidget = QWidget(self)  # 定义存放图标和文本标签的容器
@@ -263,12 +259,12 @@ class RuleCard(CardWidget):
         # 添加控件到布局器
         self.activatedLayout.addWidget(self.isActivatedIcon)
         self.activatedLayout.addWidget(self.isActivatedLabel)
-        self.mainHLayout.addWidget(self.isActivatedWidget, 0, Qt.AlignmentFlag.AlignRight)
+        self.cardLayout.addWidget(self.isActivatedWidget, 0, Qt.AlignmentFlag.AlignRight)
 
         """更多按钮"""
         self.moreBtn = TransparentToolButton(FluentIcon.MORE)
         self.moreBtn.setFixedSize(32, 32)
-        self.mainHLayout.addWidget(self.moreBtn)
+        self.cardLayout.addWidget(self.moreBtn)
 
         """设置卡片的激活显示状态"""
         self.setActive(isActive)
