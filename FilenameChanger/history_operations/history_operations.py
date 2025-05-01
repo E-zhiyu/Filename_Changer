@@ -64,3 +64,20 @@ def cancel_rename_operation():
     rename_files(directory, new_name_list, old_name_list, False)  # 把新旧文件名反过来
 
     return 1
+
+
+def history_clear():
+    """清除所有历史记录"""
+    with open(history_file_path, 'w', encoding='utf-8') as f:
+        json.dump([], f, ensure_ascii=False, indent=4)
+
+
+def history_del(history_list, index):
+    """
+    功能：删除指定下标的历史记录
+    参数 history_list：历史记录列表
+    参数 index：指定删除的历史记录下标
+    """
+    del history_list[index]
+    with open(history_file_path, 'w', encoding='utf-8') as f:
+        json.dump(history_list, f, ensure_ascii=False, indent=4)
