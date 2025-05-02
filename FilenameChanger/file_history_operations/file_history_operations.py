@@ -224,6 +224,7 @@ def cancel_rename_operation():
 
 def history_clear():
     """清除所有历史记录"""
+    logging.info('历史记录已清空')
     with open(history_file_path, 'w', encoding='utf-8') as f:
         json.dump([], f, ensure_ascii=False, indent=4)
 
@@ -235,5 +236,6 @@ def history_del(history_list, index):
     参数 index：指定删除的历史记录下标
     """
     del history_list[index]
+    logging.info(f'删除历史记录，下标：{index}')
     with open(history_file_path, 'w', encoding='utf-8') as f:
         json.dump(history_list, f, ensure_ascii=False, indent=4)
