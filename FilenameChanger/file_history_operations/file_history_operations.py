@@ -55,7 +55,10 @@ def rename(directory):
     logging.info('开始文件重命名……')
     rename_files(directory, old_name_list, new_name_list)  # 执行重命名操作
 
-    return 1
+    if old_name_list == new_name_list:  # 判断重命名前后文件名是否完全相同
+        return -2
+    else:
+        return 1
 
 
 def hidden_or_protected(directory):
@@ -132,11 +135,13 @@ def rename_files(directory, old_name_list, new_name_list, with_record_history=Tr
                     new_record_dict['new_name_list'].append(new_name)
 
     """将重命名记录保存至文件中"""
-    if new_record_dict['new_name_list'] and with_record_history:
+    if new_record_dict['new_name_list'] and with_record_history:  # 只有新旧文件名不相同且启用了记录功能才会记录重命名历史
         history_list.append(new_record_dict)
         with open(history_file_path, 'w', encoding='utf-8') as f:
             json.dump(history_list, f, ensure_ascii=False, indent=4)
-            logging.info('新增一条重命名记录')
+            logging.info('新增的历史记录已追加至文件中')
+    elif not new_record_dict['new_name_list']:
+        logging.info('未追加新的重命名记录，因为所有文件新旧文件名都相同')
 
 
 def get_new_name_list(config_dict, old_name_list):
