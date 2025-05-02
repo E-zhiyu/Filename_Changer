@@ -141,16 +141,20 @@ class HomeInterface(QFrame):
                 elif flag == -1:
                     message = '规则列表为空！请先写入规则！'
                     title = '失败'
+                elif flag == -2:
+                    message = '所有文件的新旧文件名都相同\n（本次重命名不会产生新的重命名记录）'
+                    title = '失败'
                 message_window = MessageBox(title=title, content=message, parent=self)
                 message_window.cancelButton.hide()
                 message_window.buttonLayout.insertStretch(1)
                 message_window.yesButton.setText("确认")
                 message_window.exec()
+
+                # 重命名成功才将按钮点击的信号发送出去
+                if flag == 1:
+                    self.refreshView_signal.emit()
             else:
                 logging.info('用户取消重命名')
-
-            #将按钮点击的信号发送出去
-            self.refreshView_signal.emit()
 
         self.renameBtn.clicked.connect(rename_button_callback)
 
@@ -175,11 +179,12 @@ class HomeInterface(QFrame):
                 message_window.buttonLayout.insertStretch(1)
                 message_window.yesButton.setText("确认")
                 message_window.exec()
+
+                # 撤销成功才将按钮点击的信号发送出去
+                if flag == 1:
+                    self.refreshView_signal.emit()
             else:
                 logging.info('用户取消撤销重命名')
-
-            # 将按钮点击的信号发送出去
-            self.refreshView_signal.emit()
 
         self.cancelOperationBtn.clicked.connect(cancel_button_callback)
 
