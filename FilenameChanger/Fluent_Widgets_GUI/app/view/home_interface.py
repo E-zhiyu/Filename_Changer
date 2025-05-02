@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QFileDialog
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, BodyLabel, setFont, LineEdit, FluentIcon,
                                                                PrimaryPushButton,
@@ -12,6 +12,9 @@ from FilenameChanger.log.log_recorder import *
 
 class HomeInterface(QFrame):
     """定义主页布局"""
+
+    # 定义触发历史记录列表刷新布局方法的信号
+    refreshView_signal = pyqtSignal()
 
     def __init__(self, text: str, parent=None):
         super().__init__(parent=parent)
@@ -146,6 +149,9 @@ class HomeInterface(QFrame):
             else:
                 logging.info('用户取消重命名')
 
+            #将按钮点击的信号发送出去
+            self.refreshView_signal.emit()
+
         self.renameBtn.clicked.connect(rename_button_callback)
 
         # 撤销重命名按钮功能实现
@@ -171,6 +177,9 @@ class HomeInterface(QFrame):
                 message_window.exec()
             else:
                 logging.info('用户取消撤销重命名')
+
+            # 将按钮点击的信号发送出去
+            self.refreshView_signal.emit()
 
         self.cancelOperationBtn.clicked.connect(cancel_button_callback)
 

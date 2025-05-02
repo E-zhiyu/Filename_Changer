@@ -31,7 +31,11 @@ class MainWindow(FluentWindow):
         self.historyListInterface = HistoryListInterface('历史记录', self)
         self.infoInterface = InfoInterface(self)
 
+        # 初始化导航栏
         self.initNavigation()
+
+        # 将各窗口的信号连接至对应方法
+        self.homeInterface.refreshView_signal.connect(lambda: self.historyListInterface.initCardView())
 
     def initNavigation(self):
         """初始化导航栏"""
