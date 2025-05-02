@@ -45,7 +45,7 @@ def save_new_rule(config_dict, new_rule):
 
     with open(config_path, 'w', encoding='utf-8') as f:
         json.dump(config_dict, f, ensure_ascii=False, indent=4)
-    logging.info('新规则保存成功')
+        logging.info('新规则已成功保存')
 
 
 def revise_rule(rule_dict, revised_rule, index):
@@ -87,7 +87,7 @@ def del_rules(config_dict, index):
 
         # 判断删除的规则是否被选中，删除被选中的规则则改为选中第一个规则
         if config_dict['selected_index'] == index and index != 0:  # 当删除第一个规则时仍然默认选中第一个规则
-            logging.info(f'第{index + 1}个规则为选中的规则，已更改至删除后的第一个规则')
+            logging.info(f'第{index + 1}个规则为激活的规则，更改为激活第一个规则')
             config_dict['selected_index'] = 0
 
         # 若删除的规则下标小于选中的规则，则将selected_index-1
@@ -128,9 +128,9 @@ def analise_rule(addRuleWindow):
             'desc': addRuleWindow.ruleDescLineEdit.text(),
             'split_char': addRuleWindow.new_control['splitCharLineEdit'].text()
         }
-        logging.info('用户添加规则类型1')
-        logging.info(
-            f'名称：{addRuleWindow.ruleNameLineEdit.text()}\n描述：{addRuleWindow.ruleDescLineEdit.text()}')
+        logging.info('规则类型：1')
+        logging.info(f'名称：{addRuleWindow.ruleNameLineEdit.text()}')
+        logging.info(f'描述：{addRuleWindow.ruleDescLineEdit.text()}')
         logging.info(f'分隔符：{addRuleWindow.new_control["splitCharLineEdit"].text()}')
     elif addRuleWindow.new_rule_type == 2:
         rule = {
@@ -139,9 +139,9 @@ def analise_rule(addRuleWindow):
             'desc': addRuleWindow.ruleDescLineEdit.text(),
             'new_ext': addRuleWindow.new_control['extLineEdit'].text()
         }
-        logging.info('用户添加规则类型2')
-        logging.info(
-            f'名称：{addRuleWindow.ruleNameLineEdit.text()}\n描述：{addRuleWindow.ruleDescLineEdit.text()}')
+        logging.info('规则类型：2')
+        logging.info(f'名称：{addRuleWindow.ruleNameLineEdit.text()}')
+        logging.info(f'描述：{addRuleWindow.ruleDescLineEdit.text()}')
         logging.info(f'新扩展名：{addRuleWindow.new_control["extLineEdit"].text()}')
     elif addRuleWindow.new_rule_type == 3:
         rule = {
@@ -151,11 +151,11 @@ def analise_rule(addRuleWindow):
             'target_str': addRuleWindow.new_control['oldStrLineEdit'].text(),
             'new_str': addRuleWindow.new_control['newStrLineEdit'].text()
         }
-        logging.info('用户添加规则类型3')
-        logging.info(
-            f'名称：{addRuleWindow.ruleNameLineEdit.text()}\n描述：{addRuleWindow.ruleDescLineEdit.text()}\n')
-        logging.info(
-            f'原字符串：{addRuleWindow.new_control["oldStrLineEdit"].text()}\n新字符串：{addRuleWindow.new_control["newStrLineEdit"].text()}')
+        logging.info('规则类型：3')
+        logging.info(f'名称：{addRuleWindow.ruleNameLineEdit.text()}')
+        logging.info(f'描述：{addRuleWindow.ruleDescLineEdit.text()}')
+        logging.info(f'原字符串：{addRuleWindow.new_control["oldStrLineEdit"].text()}')
+        logging.info(f'新字符串：{addRuleWindow.new_control["newStrLineEdit"].text()}')
     elif addRuleWindow.new_rule_type == 4:
         rule = {
             'type': 4,
@@ -163,9 +163,9 @@ def analise_rule(addRuleWindow):
             'desc': addRuleWindow.ruleDescLineEdit.text(),
             'split_char': addRuleWindow.new_control['splitCharLineEdit'].text()
         }
-        logging.info('用户添加规则类型4')
-        logging.info(
-            f'名称：{addRuleWindow.ruleNameLineEdit.text()}\n描述：{addRuleWindow.ruleDescLineEdit.text()}\n')
+        logging.info('规则类型：4')
+        logging.info(f'名称：{addRuleWindow.ruleNameLineEdit.text()}')
+        logging.info(f'描述：{addRuleWindow.ruleDescLineEdit.text()}')
         logging.info(f'分隔符：{addRuleWindow.new_control["splitCharLineEdit"].text()}')
 
         if addRuleWindow.new_control['headBtn'].isChecked():

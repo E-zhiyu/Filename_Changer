@@ -136,7 +136,7 @@ class HomeInterface(QFrame):
                     message = '文件重命名完成！'
                     title = '成功'
                 elif flag == 0:
-                    message = '文件夹为空！'
+                    message = '文件夹不存在或为空！'
                     title = '失败'
                 elif flag == -1:
                     message = '规则列表为空！请先写入规则！'

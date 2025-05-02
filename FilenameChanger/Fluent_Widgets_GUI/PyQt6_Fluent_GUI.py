@@ -8,6 +8,8 @@ from PyQt6.QtWidgets import QApplication
 from FilenameChanger.Fluent_Widgets_GUI.app.common.config import cfg
 from FilenameChanger.Fluent_Widgets_GUI.app.view.main_window import MainWindow
 
+from FilenameChanger.log.log_recorder import *
+
 # 启用DPI比例
 if cfg.get(cfg.dpiScale) != "Auto":
     os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "0"
@@ -23,4 +25,6 @@ def run_with_gui():
     w = MainWindow()
     w.show()
 
-    sys.exit(app.exec())
+    app.exec()
+    logging.info('程序结束运行\n')
+    sys.exit()

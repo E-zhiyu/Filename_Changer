@@ -704,16 +704,18 @@ class RuleListInterface(QFrame):
         """初始化规则卡片展示区域"""
         self.ruleCardList = []  # 存放规则卡片的列表
         self.currentIndex = -1  # 当前鼠标选中的卡片的下标
-        self.initRuleViewArea()
+        self.initRuleViewArea()  # 初始化布局
 
         """实现控件功能"""
         self.achieve_functions()
 
     def initRuleViewArea(self):
         """初始化规则卡片显示区域"""
+        logging.info('开始更新规则卡片布局')
         self.rule_dict = load_config()  # 更新现存规则
         rule_list = self.rule_dict['rules']
         selected_index = self.rule_dict['selected_index']
+        self.currentIndex = -1  # 先将目前选中的卡片下标置为-1，否则会有下标越界风险
 
         """删除原有的规则卡片"""
         while self.ruleCardLayout.count():
@@ -803,7 +805,7 @@ class RuleListInterface(QFrame):
                     flag = del_rules(self.rule_dict, self.currentIndex)
 
                     if flag == 1:
-                        self.initRuleViewArea()
+                        self.initRuleViewArea()  # （删除规则）刷新规则卡片布局
 
                     elif flag == 0:
                         title = '失败'
@@ -822,12 +824,16 @@ class RuleListInterface(QFrame):
         # 添加规则
         def add_rule_callback():
             """添加规则"""
+            logging.info('进行操作：添加规则')
             addRuleWindow = ruleInputInterface(self)
             addRuleWindow.submit_data.connect(lambda: save_new_rule(self.rule_dict, rule))  # 将发射的信号传递给信号处理函数
             if addRuleWindow.exec():
+                logging.info('用户确认添加规则')
                 rule = analise_rule(addRuleWindow)  # 解析输入的内容
                 addRuleWindow.submit_data.emit(rule)  # 发送规则种类、名称和描述的信号
-                self.initRuleViewArea()  # 刷新规则卡片布局
+                self.initRuleViewArea()  # （添加规则）刷新规则卡片布局
+            else:
+                logging.info('用户取消添加规则')
 
         self.addRuleBtn.clicked.connect(add_rule_callback)
 
@@ -839,6 +845,7 @@ class RuleListInterface(QFrame):
 
     def reviseRule(self, rule, index):
         """修改规则"""
+        logging.info('进行操作：修改规则')
         reviseRuleWindow = ruleInputInterface(self)
 
         # 设置输入窗口的基本信息
@@ -886,6 +893,9 @@ class RuleListInterface(QFrame):
             lambda: revise_rule(self.rule_dict, revised_rule, index))  # 将发射的信号传递给信号处理函数
 
         if reviseRuleWindow.exec():  # 显示窗口
+            logging.info('用户确认修改规则')
             revised_rule = analise_rule(reviseRuleWindow)
             reviseRuleWindow.submit_data.emit(revised_rule)  # 发送信号给规则保存函数
-            self.initRuleViewArea()  # 刷新规则卡片布局
+            self.initRuleViewArea()  # （修改规则）刷新规则卡片布局
+        else:
+            logging.info('用户取消修改规则')

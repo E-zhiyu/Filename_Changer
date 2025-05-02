@@ -101,7 +101,7 @@ def get_files_in_directory(directory):
         if not old_name:
             raise FileNotFoundError
     except FileNotFoundError:
-        logging.error('目标路径为空，文件名列表获取失败')
+        logging.error('文件名获取失败：目标文件夹不存在或为空')
         return None
     else:
         return old_name

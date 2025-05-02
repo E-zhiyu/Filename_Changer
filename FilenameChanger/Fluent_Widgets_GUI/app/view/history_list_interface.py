@@ -169,13 +169,15 @@ class HistoryListInterface(QFrame):
         """初始化卡片展示区域"""
         self.currentIndex = -1
         self.cardList = []
-        self.initCardView()  # 加载历史记录卡片
+        self.initCardView()  # 初始化布局
 
         """实现控件功能"""
         self.achieveFunctions()
 
     def initCardView(self):
         """刷新化卡片展示区域"""
+        logging.info('开始更新历史记录卡片布局')
+        self.currentIndex = -1  # 先将目前选中的卡片下标置为-1，否则会有下标越界风险
         self.history_list = load_history()  # 加载历史记录
 
         """删除旧的布局"""
@@ -222,7 +224,7 @@ class HistoryListInterface(QFrame):
         def delHistory():
             if self.currentIndex > -1:
                 history_del(self.history_list, self.currentIndex)
-                self.initCardView()
+                self.initCardView()  #（删除历史记录）刷新卡片布局
                 self.currentIndex -= 1  # 将选中卡片的下标恢复为-1防止下标越界
 
         self.delBtn.clicked.connect(delHistory)
@@ -238,7 +240,7 @@ class HistoryListInterface(QFrame):
                 if confirmWindow.exec():
                     logging.info('用户确认清空历史记录')
                     history_clear()
-                    self.initCardView()
+                    self.initCardView()  #（清空历史记录）刷新卡片布局
                     self.currentIndex -= 1
                 else:
                     logging.info('用户取消清空历史记录')

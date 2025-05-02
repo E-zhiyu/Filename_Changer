@@ -133,7 +133,7 @@ def use_type_4(config_dict, old_name_list):
             ext = ''  # 处理没有扩展名的文件（不用处理没有文件名的文件，因为这种文件不会被扫描进列表）
 
         """判断是否含有日期"""
-        logging.info('判断文件名是否含有日期')
+        logging.info(f'判断文件“{old_name}”是否含有日期')
         date_type_re = (
             r'\d{4}-\d{1,2}-\d{1,2}',
             r'\d{8}',

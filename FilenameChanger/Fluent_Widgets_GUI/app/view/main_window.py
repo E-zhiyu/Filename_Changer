@@ -6,8 +6,7 @@ from PyQt6.QtWidgets import QApplication
 from PyQt6.QtGui import QIcon
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import FluentIcon as FIF, setTheme, Theme
-from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (NavigationItemPosition, MessageBox, FluentWindow,
-                                                               NavigationAvatarWidget, SystemThemeListener)
+from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (NavigationItemPosition, FluentWindow)
 
 from FilenameChanger.Fluent_Widgets_GUI.app.view.home_interface import HomeInterface
 from FilenameChanger.Fluent_Widgets_GUI.app.view.rule_list_interface import RuleListInterface
@@ -44,10 +43,10 @@ class MainWindow(FluentWindow):
         # 创建导航栏选项
         self.addSubInterface(self.homeInterface, FIF.HOME, '主页')
         self.addSubInterface(self.ruleListInterface, FIF.LAYOUT, '规则列表')
-        self.addSubInterface(self.historyListInterface, FIF.HISTORY, '历史记录')
+        self.addSubInterface(self.historyListInterface, FIF.HISTORY, '重命名记录')
 
         # 添加导航栏底部按钮
-        self.addSubInterface(self.infoInterface, FIF.INFO, '关于', NavigationItemPosition.BOTTOM)  # 添加应用详情界面
+        self.addSubInterface(self.infoInterface, FIF.INFO, '关于软件', NavigationItemPosition.BOTTOM)  # 添加应用详情界面
 
     def initWindow(self):
         """初始化窗口"""
