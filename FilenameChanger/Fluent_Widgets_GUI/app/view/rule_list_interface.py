@@ -712,11 +712,15 @@ class RuleListInterface(QFrame):
     def initRuleViewArea(self):
         """初始化规则卡片显示区域"""
         self.rule_dict = load_config()  # 更新现存规则
+        rule_list = self.rule_dict['rules']
+        selected_index = self.rule_dict['selected_index']
+
         """删除原有的规则卡片"""
         while self.ruleCardLayout.count():
             item = self.ruleCardLayout.takeAt(0)
             if item.widget():
                 item.widget().deleteLater()
+        self.ruleCardList.clear()  # 清空列表中已保存的规则卡片
 
         """添加新的布局"""
         self.ruleScrollArea.setWidgetResizable(True)
@@ -726,34 +730,24 @@ class RuleListInterface(QFrame):
         if self.rule_dict['rules']:
             self.ruleCardLayout.setAlignment(Qt.AlignmentFlag.AlignTop)  # 卡片默认顶部对齐
 
-            self.addRuleCard()  # 将规则卡片列表中的卡片添加到界面中
+            index = 0
+            for rule in rule_list:  # 添加至卡片列表，便于其他函数调用
+                if index == selected_index:
+                    activated = True
+                else:
+                    activated = False
+
+                card = RuleCard(rule, index, activated, parent=self)
+                card.clicked.connect(lambda index=card.index: self.setSelected(index))  # 将点击卡片的动作连接至选中卡片方法
+                self.ruleCardList.append(card)  # 将规则以卡片的形式添加至卡片列表
+                self.ruleCardLayout.addWidget(card, 0)  # 依此将卡片添加至卡片布局器中
+
+                index += 1
         else:
-            ruleEmptyLabel = SubtitleLabel(text='这里连一个规则都还没有，点击上方的按钮添加你的第一个规则吧！',
+            ruleEmptyLabel = SubtitleLabel(text='您还未创建任何规则，点击上方的按钮创建一个规则吧！',
                                            parent=self.ruleCardWidget)
-
             self.ruleCardLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
             self.ruleCardLayout.addWidget(ruleEmptyLabel, 0, Qt.AlignmentFlag.AlignCenter)
-
-    def addRuleCard(self):
-        """将规则卡片列表中的卡片添加到界面中"""
-        self.ruleCardList.clear()  # 先清空列表中已保存的规则卡片
-
-        rule_list = self.rule_dict['rules']
-        selected_index = self.rule_dict['selected_index']
-
-        index = 0
-        for rule in rule_list:  # 添加至卡片列表，便于其他函数调用
-            if index == selected_index:
-                activated = True
-            else:
-                activated = False
-            self.ruleCardList.append(RuleCard(rule, index, activated, parent=self))  # 将规则以卡片的形式添加至卡片列表
-            index += 1
-
-        for card in self.ruleCardList:
-            self.ruleCardLayout.addWidget(card, 0)  # 依此将卡片添加至卡片布局器中
-            card.clicked.connect(lambda index=card.index: self.setSelected(index))  # 将点击卡片的动作连接至选中卡片函数
 
     def setSelected(self, index):
         """
@@ -809,12 +803,8 @@ class RuleListInterface(QFrame):
                     flag = del_rules(self.rule_dict, self.currentIndex)
 
                     if flag == 1:
-                        while self.ruleCardLayout.count():  # 逐个删除已存在的规则卡片
-                            item = self.ruleCardLayout.takeAt(0)  # 每次取最前面的规则卡片
-                            if item.widget():
-                                item.widget().deleteLater()
+                        self.initRuleViewArea()
 
-                        self.addRuleCard()  # 重新将规则文件中的规则以卡片形式添加到展示区域
                     elif flag == 0:
                         title = '失败'
                         message = '无法删除最后一个规则'
@@ -822,7 +812,8 @@ class RuleListInterface(QFrame):
                         message_window.yesButton.setText('确认')
                         message_window.cancelButton.hide()
                         message_window.exec()
-                    self.currentIndex = -1
+
+                    self.currentIndex = -1  # 无论是否删除成功都把选中的下标置为-1
                 else:
                     logging.info('用户取消删除规则')
 
