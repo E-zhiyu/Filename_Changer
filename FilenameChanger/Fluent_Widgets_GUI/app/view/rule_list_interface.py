@@ -684,12 +684,12 @@ class RuleListInterface(QFrame):
         self.widgetVLayout.addLayout(self.btnLayout, 0)  # 将按钮布局器合并至总容器的布局器
 
         """搜索框"""
-        self.searchLineEdit = SearchLineEdit()  # 实例化搜索框
+        """self.searchLineEdit = SearchLineEdit()  # 实例化搜索框
 
         self.searchLineEdit.setFixedWidth(300)
         self.searchLineEdit.setPlaceholderText('搜索规则名称')  # 设置输入提示语
 
-        self.widgetVLayout.addWidget(self.searchLineEdit, 0)  # 将搜索框添加至总容器布局器
+        self.widgetVLayout.addWidget(self.searchLineEdit, 0)  # 将搜索框添加至总容器布局器"""
 
         """规则卡片展示区域"""
         self.ruleScrollArea = SmoothScrollArea(self.totalWidget)  # 创建平滑滚动区域
