@@ -12,22 +12,36 @@ from FilenameChanger.log.log_recorder import *
 class InfoWindow(MessageBoxBase):
     """记录详情界面"""
 
-    def __init__(self, old_name_list, new_name_list, parent=None):
+    def __init__(self, history_dict, parent=None):
         super().__init__(parent=parent)
-        self.old_name_list = old_name_list
-        self.new_name_list = new_name_list
+        self.old_name_list = history_dict['old_name_list']
+        self.new_name_list = history_dict['new_name_list']
+        self.directory = history_dict['directory']
+        self.time = history_dict.get('time', '未知时间')  # 由于老版本没有time关键字，所以用get方法防止KeyError
 
         """基本设置"""
         self.yesButton.setText('确定')
         self.cancelButton.setHidden(True)
 
         self.widget.setMinimumWidth(700)
+        self.widget.setMinimumHeight(600)
         self.viewLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        self.viewLayout.setSpacing(5)
 
         """标题标签"""
         self.titleLabel = SubtitleLabel(text='历史记录详情', parent=self.widget)
 
         self.viewLayout.addWidget(self.titleLabel)
+
+        """路径和日期标签"""
+        self.timeLabel = BodyLabel(text=self.time, parent=self.widget)
+        self.directoryLabel = BodyLabel(text=f'路径：{self.directory}', parent=self.widget)
+
+        setFont(self.timeLabel, 18)
+        setFont(self.directoryLabel, 15)
+
+        self.viewLayout.addWidget(self.timeLabel)
+        self.viewLayout.addWidget(self.directoryLabel)
 
         """文件名更改详情的展示区域"""
         self.infoScrollArea = SmoothScrollArea(parent=self.widget)
@@ -64,6 +78,8 @@ class HistoryCard(CardWidget):
         self.parentInterface = parent  # 记录卡片的父亲容器
         self.selected = False  # 默认没有选中该卡片
 
+        time = history_dict.get('time', '未知时间')
+
         """基本布局设置"""
         self.setFixedHeight(75)
         self.cardLayout = QHBoxLayout()  # 卡片主布局（水平）
@@ -71,7 +87,7 @@ class HistoryCard(CardWidget):
         self.setLayout(self.cardLayout)
 
         """卡片信息显示"""
-        self.timeLabel = SubtitleLabel(history_dict['time'], self)
+        self.timeLabel = SubtitleLabel(text=time, parent=self)
         self.directoryLabel = BodyLabel(history_dict['directory'], self)
         self.labelLayout = QVBoxLayout(self)
 
@@ -115,8 +131,7 @@ class HistoryCard(CardWidget):
 
     def showInfo(self):
         """显示记录详情"""
-        infoWindow = InfoWindow(self.history_dict['old_name_list'], self.history_dict['new_name_list'],
-                                self.parentInterface)
+        infoWindow = InfoWindow(self.history_dict, self.parentInterface)
         infoWindow.exec()
 
 
@@ -224,7 +239,7 @@ class HistoryListInterface(QFrame):
         def delHistory():
             if self.currentIndex > -1:
                 history_del(self.history_list, self.currentIndex)
-                self.initCardView()  #（删除历史记录）刷新卡片布局
+                self.initCardView()  # （删除历史记录）刷新卡片布局
                 self.currentIndex -= 1  # 将选中卡片的下标恢复为-1防止下标越界
 
         self.delBtn.clicked.connect(delHistory)
@@ -240,7 +255,7 @@ class HistoryListInterface(QFrame):
                 if confirmWindow.exec():
                     logging.info('用户确认清空历史记录')
                     history_clear()
-                    self.initCardView()  #（清空历史记录）刷新卡片布局
+                    self.initCardView()  # （清空历史记录）刷新卡片布局
                     self.currentIndex -= 1
                 else:
                     logging.info('用户取消清空历史记录')
