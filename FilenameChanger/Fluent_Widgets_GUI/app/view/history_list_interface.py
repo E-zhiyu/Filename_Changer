@@ -93,6 +93,8 @@ class HistoryCard(CardWidget):
 
         setFont(self.timeLabel, 22)
         setFont(self.directoryLabel, 16)
+        self.timeLabel.setStyleSheet('background-color:transparent')
+        self.directoryLabel.setStyleSheet('background-color:transparent')
 
         self.labelLayout.addWidget(self.timeLabel)
         self.labelLayout.addWidget(self.directoryLabel)
