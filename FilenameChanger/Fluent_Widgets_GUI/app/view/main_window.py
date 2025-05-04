@@ -52,7 +52,7 @@ class MainWindow(FluentWindow):
         """初始化窗口"""
         self.resize(1100, 750)
         self.setMinimumWidth(760)
-        self.setWindowIcon(QIcon(':/qfluentwidgets/images/logo.png'))
+        self.setWindowIcon(QIcon('./Fluent_Widgets_GUI/qfluentwidgets/_rc/images/logo.png'))
         self.setWindowTitle(f'FilenameChanger-v{version}')
 
         desktop = QApplication.screens()[0].availableGeometry()
