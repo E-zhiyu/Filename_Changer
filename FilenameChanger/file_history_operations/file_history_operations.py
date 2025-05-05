@@ -40,17 +40,18 @@ def rename(directory):
     功能：实现“文件重命名”操作
     """
     config_dict = load_config()  # 重命名时加载已保存的规则
+    selected_rule = config_dict['rules'][config_dict['selected_index']]
     if not config_dict['rules']:  # 若规则为空，则结束本函数
         logging.info('规则为空，请先前往规则设置写入规则！')
         return -1
     logging.info(
         f'当前活跃的规则为“规则{config_dict['selected_index'] + 1}”，'
-        f'规则种类：{config_dict['rules'][config_dict['selected_index']]['type']}')
+        f'规则种类：{selected_rule['type']}')
 
     old_name_list = get_files_in_directory(directory)  # old_file_names列表将包含该目录下所有文件的文件名（包含扩展名）
     if not old_name_list:  # 判断文件夹是否为空，为空则返回0
         return 0
-    new_name_list = get_new_name_list(config_dict, old_name_list)  # 生成新文件名
+    new_name_list = get_new_name_list(selected_rule, old_name_list)  # 生成新文件名
 
     logging.info('开始文件重命名……')
     rename_files(directory, old_name_list, new_name_list)  # 执行重命名操作
@@ -149,24 +150,23 @@ def rename_files(directory, old_name_list, new_name_list, with_record_history=Tr
         logging.info('未追加新的重命名记录，因为所有文件新旧文件名都相同')
 
 
-def get_new_name_list(config_dict, old_name_list):
+def get_new_name_list(selected_rule, old_name_list):
     """
     功能：根据已加载的规则生成新文件名
-    参数 config_dict：规则配置文件根字典
+    参数 selected_rule：当前激活的规则
     参数 old_name_list：旧文件名列表
     返回：新文件名列表
     """
-    selected = config_dict['selected_index']
-    rule_type = config_dict['rules'][selected]['type']
+    rule_type = selected_rule['type']
 
     if rule_type == 1:
-        new_name_list = use_type_1(config_dict, old_name_list)
+        new_name_list = use_type_1(selected_rule, old_name_list)
     elif rule_type == 2:
-        new_name_list = use_type_2(config_dict, old_name_list)
+        new_name_list = use_type_2(selected_rule, old_name_list)
     elif rule_type == 3:
-        new_name_list = use_type_3(config_dict, old_name_list)
+        new_name_list = use_type_3(selected_rule, old_name_list)
     elif rule_type == 4:
-        new_name_list = use_type_4(config_dict, old_name_list)
+        new_name_list = use_type_4(selected_rule, old_name_list)
 
     logging.info('已生成新文件名列表')
     return new_name_list

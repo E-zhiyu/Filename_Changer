@@ -9,15 +9,14 @@ from FilenameChanger.rename_rules.rule_manager import *
 """
 
 
-def use_type_1(config_dict, old_name_list):
+def use_type_1(selected_rule, old_name_list):
     """
     功能：应用类型一的规则
-    参数 config_dict：配置文件根字典
+    参数 selected_rule：当前激活的规则
     参数 old_name_list：旧文件名列表
     返回：生成的新文件名列表
     """
-    selected_index = config_dict['selected_index']
-    split_char = config_dict['rules'][selected_index]['split_char']
+    split_char = selected_rule['split_char']
     old_filename_list = []  # 文件名列表
     old_ext_list = []  # 扩展名列表
     for file in old_name_list:
@@ -50,15 +49,14 @@ def use_type_1(config_dict, old_name_list):
     return new_name_list
 
 
-def use_type_2(config_dict, old_name_list):
+def use_type_2(selected_rule, old_name_list):
     """
     功能：应用类型二的规则
-    参数 config_dict：配置文件根字典
+    参数 selected_rule：当前激活的规则
     参数 old_name_list：旧文件名列表
     返回：生成的新文件名列表
     """
-    selected_index = config_dict['selected_index']
-    new_ext = config_dict['rules'][selected_index]['new_ext']
+    new_ext = selected_rule['new_ext']
 
     name_list = []  # 文件名（排除扩展名）列表
     for file in old_name_list:
@@ -73,17 +71,16 @@ def use_type_2(config_dict, old_name_list):
     return new_name_list
 
 
-def use_type_3(config_dict, old_name_list):
+def use_type_3(selected_rule, old_name_list):
     """
     功能：应用类型三的规则
-    参数 config_dict：配置文件根字典
+    参数 当前激活的规则：配置文件根字典
     参数 old_name_list：旧文件名列表
     返回：生成的新文件名列表
     """
-    selected_index = config_dict['selected_index']
-    target_str = config_dict['rules'][selected_index]['target_str']  # 待替换的字符串
-    new_str = config_dict['rules'][selected_index]['new_str']  # 新字符串
-    use_re = config_dict['rules'][selected_index].get('use_re', False)  # 判断是否使用正则表达式
+    target_str = selected_rule['target_str']  # 待替换的字符串
+    new_str = selected_rule['new_str']  # 新字符串
+    use_re = selected_rule.get('use_re', False)  # 判断是否使用正则表达式
 
     # 分离文件名和扩展名
     old_file_name_list = []  # 文件名（排除扩展名）列表
@@ -108,20 +105,19 @@ def use_type_3(config_dict, old_name_list):
     return new_name_list
 
 
-def use_type_4(config_dict, old_name_list):
+def use_type_4(selected_rule, old_name_list):
     """
     功能：应用类型四的规则
-    参数 config_dict：配置文件根字典
+    参数 当前激活的规则：配置文件根字典
     参数 old_name_list：旧文件名列表
     返回：生成的新文件名列表
     """
-    selected_index = config_dict['selected_index']
-    split_char = config_dict['rules'][selected_index]['split_char']
-    position = config_dict['rules'][selected_index]['position']
+    split_char = selected_rule['split_char']
+    position = selected_rule['position']
     local_date = time.strftime(f'%Y{split_char}%m{split_char}%d', time.localtime(time.time()))
 
     try:
-        y, m, d = config_dict['rules'][selected_index]['date'].split(' ')
+        y, m, d = selected_rule['date'].split(' ')
         customize_date = f'{y}{split_char}{m}{split_char}{d}'
     except (AttributeError, ValueError):  # 处理自定义日期为空的情况
         customize_date = ''
