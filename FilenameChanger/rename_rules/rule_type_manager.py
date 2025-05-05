@@ -1,5 +1,6 @@
 # FilenameChanger/rename_rules/rule_type_manager.py
 import re
+import time
 
 from FilenameChanger.rename_rules.rule_manager import *
 
@@ -83,6 +84,7 @@ def use_type_3(config_dict, old_name_list):
     target_str = config_dict['rules'][selected_index]['target_str']  # 待替换的字符串
     new_str = config_dict['rules'][selected_index]['new_str']  # 新字符串
 
+    # 分离文件名和扩展名
     old_file_name_list = []  # 文件名（排除扩展名）列表
     old_file_ext_list = []  # 文件扩展名列表
     for file in old_name_list:
@@ -95,11 +97,7 @@ def use_type_3(config_dict, old_name_list):
 
     new_name_list = []
     for file_name, ext in zip(old_file_name_list, old_file_ext_list):
-        try:
-            f, b = file_name.split(target_str, 2)
-            new_name = f'{f}{new_str}{b}{ext}'
-        except ValueError:  # 处理无法拆分的情况
-            new_name = f'{file_name}{ext}'
+        new_name = f'{re.sub(target_str, new_str, file_name)}.{ext}'
         new_name_list.append(new_name)
 
     return new_name_list

@@ -1,7 +1,5 @@
 # rename_rules/rule_manager.py
 import json
-import os
-import time
 from json import JSONDecodeError
 
 from FilenameChanger import config_path

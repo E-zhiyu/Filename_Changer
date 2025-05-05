@@ -16,19 +16,15 @@ from FilenameChanger.log.log_recorder import *
 rule_help_md = """\
 ## 1.交换分隔符前后内容
 功能：交换指定分隔符或字符串前后的内容，不包括文件扩展名
-应用场景：音乐文件交换歌手和歌曲名的位置
 
 ## 2.修改扩展名
 功能：将目标文件夹内文件的扩展名修改为用户自定义的扩展名，不影响文件内容
-应用场景：发布资源时混淆文件后缀名防止检测为违规文件而被删除
 
 ## 3.修改特定字符串
-功能：将文件名中的特定字符串修改为用户指定的字符串，只修改一处
-应用场景：快速修改文件名的格式
+功能：将文件名中所有匹配的字符串修改为用户指定的字符串，匹配字符串支持正则表达式
 
 ## 4.添加或删除日期
 功能：为没有日期的文件名添加日期，已有日期的文件名则移除日期，可自定义日期填充内容
-应用场景：批量标注文件日期
 """
 
 
@@ -346,7 +342,7 @@ class ruleInputInterface(MessageBoxBase):
         self.yesButton.setEnabled(False)  # 初始将确认按钮设置为禁用状态，防止什么都没输入就点击确认
 
         """选择规则种类"""
-        all_rule_type = ('1.交换分隔符前后内容', '2.修改后缀名', '3.修改特定字符串', '4.添加或删除日期')
+        all_rule_type = ('1.交换分隔符前后内容', '2.修改后缀名', '3.修改特定字符串（支持正则）', '4.添加或删除日期')
         self.ruleTypeComboBox = ComboBox()
         self.ruleTypeLabel = SubtitleLabel(text='规则种类', parent=self.widget)
         self.ruleTypeLayout = QHBoxLayout()
@@ -354,7 +350,8 @@ class ruleInputInterface(MessageBoxBase):
         self.ruleTypeComboBox.addItems(all_rule_type)
         self.ruleTypeComboBox.setPlaceholderText('请选择一个规则类型')  # 设置提示文本
         self.ruleTypeComboBox.setCurrentIndex(-1)  # 设置初始为未选中任何选项
-        self.ruleTypeComboBox.setFixedWidth(200)
+        self.ruleTypeComboBox.setMinimumWidth(200)
+        self.ruleTypeComboBox.setMaximumWidth(350)
 
         self.ruleTypeLayout.addWidget(self.ruleTypeLabel)
         self.ruleTypeLayout.addWidget(self.ruleTypeComboBox)
@@ -489,22 +486,21 @@ class ruleInputInterface(MessageBoxBase):
             new_height = self.base_height + 2 * 40
             self.widget.setMinimumHeight(new_height)
 
-            """原字符串输入"""
+            """匹配字符串输入"""
             oldStrLayout = QHBoxLayout()
             oldStrLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
             self.new_layout_list.append(oldStrLayout)
 
             # 文本标签
-            oldStrLabel = SubtitleLabel(text='原字符串', parent=self)
+            oldStrLabel = SubtitleLabel(text='匹配字符串', parent=self)
             oldStrLayout.addWidget(oldStrLabel)
 
             # 输入框
             oldStrLineEdit = LineEdit()
-            oldStrLineEdit.setPlaceholderText('请输入原字符串（必填）')
+            oldStrLineEdit.setPlaceholderText('请输入匹配字符串（必填）')
             oldStrLineEdit.setFixedWidth(200)
             oldStrLayout.addWidget(oldStrLineEdit)
             self.new_control['oldStrLineEdit'] = oldStrLineEdit
-            oldStrLineEdit.setValidator(validator)  # 设置限制器
 
             # 将旧字符串相关布局添加到主布局
             self.viewLayout.addLayout(oldStrLayout)
@@ -682,14 +678,6 @@ class RuleListInterface(QFrame):
         self.btnLayout.addWidget(self.activateRuleBtn, 0)
         self.btnLayout.addWidget(self.delRuleBtn, 0)
         self.widgetVLayout.addLayout(self.btnLayout, 0)  # 将按钮布局器合并至总容器的布局器
-
-        """搜索框"""
-        """self.searchLineEdit = SearchLineEdit()  # 实例化搜索框
-
-        self.searchLineEdit.setFixedWidth(300)
-        self.searchLineEdit.setPlaceholderText('搜索规则名称')  # 设置输入提示语
-
-        self.widgetVLayout.addWidget(self.searchLineEdit, 0)  # 将搜索框添加至总容器布局器"""
 
         """规则卡片展示区域"""
         self.ruleScrollArea = SmoothScrollArea(self.totalWidget)  # 创建平滑滚动区域
