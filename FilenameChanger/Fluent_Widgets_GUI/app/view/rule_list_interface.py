@@ -225,8 +225,8 @@ class InfoDialog(MessageBoxBase):
             self.splitCharLayout.addWidget(self.splitCharContentLabel)
             self.viewLayout.addLayout(self.splitCharLayout)
         elif rule['type'] == 5:
-            # 新名称
-            newNameLabel = SubtitleLabel(text='新名称：', parent=self.widget)
+            # 新文件名
+            newNameLabel = SubtitleLabel(text='新文件名：', parent=self.widget)
             newNameContentLabel = BodyLabel(text=rule['new_name'], parent=self.widget)
             newNameLayout = QHBoxLayout()
 
@@ -470,31 +470,50 @@ class RuleInputInterface(MessageBoxBase):
 
     def validate(self):
         """重写验证输入数据的方法"""
-        self.must_filled_text_list.clear()  # 先清除上一次待检测的内容
+        flag = True  # 待返回的布尔值
 
         """将需要检测的文本框的内容存放至列表"""
-        self.must_filled_text_list.append(self.ruleNameLineEdit.text())
-        if self.new_rule_type == 1:
-            self.must_filled_text_list.append(self.new_control['splitCharLineEdit'].text())
-        elif self.new_rule_type == 2:
-            self.must_filled_text_list.append(self.new_control['extLineEdit'].text())
-        elif self.new_rule_type == 3:
-            self.must_filled_text_list.append(self.new_control['oldStrLineEdit'].text())
-            self.must_filled_text_list.append(self.new_control['newStrLineEdit'].text())
-        elif self.new_rule_type == 4:
-            self.must_filled_text_list.append(self.new_control['splitCharLineEdit'].text())
-            if self.new_control['customDateBtn'].isChecked():
-                self.must_filled_text_list.append(self.new_control['customDateLineEdit'].text())
-        elif self.new_rule_type == 5:
-            self.must_filled_text_list.append(self.new_control['newNameLineEdit'].text())
+        if not self.ruleNameLineEdit.text():
+            self.errorInfoLabel.setText('未输入规则名称！')
+            flag = False
 
-        """对列表中的元素进行检测，为空则不通过"""
-        for text in self.must_filled_text_list:
-            if not text:
-                self.errorInfoLabel.setHidden(False)
-                return False
-        else:
-            return True
+        if self.new_rule_type == 1:
+            if not self.new_control['splitCharLineEdit'].text():
+                self.errorInfoLabel.setText('未输入分隔符！')
+                flag = False
+
+        elif self.new_rule_type == 2:
+            if not self.new_control['extLineEdit'].text():
+                self.errorInfoLabel.setText('未输入新扩展名！')
+                flag = False
+
+        elif self.new_rule_type == 3:
+            if not self.new_control['oldStrLineEdit'].text():
+                self.errorInfoLabel.setText('未输入匹配字符串！')
+                flag = False
+
+            if not self.new_control['newStrLineEdit'].text():
+                self.errorInfoLabel.setText('未输入新字符串！')
+                flag = False
+
+        elif self.new_rule_type == 4:
+            if not self.new_control['splitCharLineEdit'].text():
+                self.errorInfoLabel.setText('未输入分隔符！')
+                flag = False
+            if self.new_control['customDateBtn'].isChecked():
+                if not self.new_control['customDateLineEdit'].text():
+                    self.errorInfoLabel.setText('未输入自定义日期！')
+                    flag = False
+
+        elif self.new_rule_type == 5:
+            if not self.new_control['newNameLineEdit'].text():
+                self.errorInfoLabel.setText('未输入新文件名！')
+                flag = False
+
+        if not flag:
+            self.errorInfoLabel.setHidden(False)
+
+        return flag
 
     def refreshLayout(self):
         """选择的规则类型改变时改变窗口布局"""
