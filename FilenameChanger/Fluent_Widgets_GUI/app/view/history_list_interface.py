@@ -10,7 +10,7 @@ from FilenameChanger.log.log_recorder import *
 
 
 class InfoWindow(MessageBoxBase):
-    """记录详情界面"""
+    """历史记录详情界面"""
 
     def __init__(self, history_dict, parent=None):
         super().__init__(parent=parent)
@@ -74,14 +74,15 @@ class InfoWindow(MessageBoxBase):
             self.infoLayout.addSpacing(15)
 
         # 展示重命名出错的文件
-        errorLabel = SubtitleLabel(text='出错的文件', parent=self.widget)
-        setFont(errorLabel, 20)
-        self.infoLayout.addWidget(errorLabel)
-
-        for error_file in self.error_files:
-            errorLabel = BodyLabel(text=error_file, parent=self.infoWidget)
-
+        if self.error_files:  # 有出错的文件才会显示
+            errorLabel = SubtitleLabel(text='出错的文件', parent=self.widget)
+            setFont(errorLabel, 20)
             self.infoLayout.addWidget(errorLabel)
+
+            for error_file in self.error_files:
+                errorLabel = BodyLabel(text=error_file, parent=self.infoWidget)
+
+                self.infoLayout.addWidget(errorLabel)
 
 
 class HistoryCard(CardWidget):
