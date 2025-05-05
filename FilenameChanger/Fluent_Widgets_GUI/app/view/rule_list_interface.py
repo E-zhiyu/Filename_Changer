@@ -25,6 +25,9 @@ rule_help_md = """\
 
 ## 4.添加或删除日期
 功能：为没有日期的文件名添加日期，已有日期的文件名则移除日期，可自定义日期填充内容
+
+## 5.重命名并编号
+功能：将所有文件重命名为同一名称并编号
 """
 
 
@@ -221,6 +224,70 @@ class InfoDialog(MessageBoxBase):
             self.splitCharLayout.addWidget(self.splitCharLabel)
             self.splitCharLayout.addWidget(self.splitCharContentLabel)
             self.viewLayout.addLayout(self.splitCharLayout)
+        elif rule['type'] == 5:
+            # 新名称
+            newNameLabel = SubtitleLabel(text='新名称：', parent=self.widget)
+            newNameContentLabel = BodyLabel(text=rule['new_name'], parent=self.widget)
+            newNameLayout = QHBoxLayout()
+
+            newNameLayout.setSpacing(0)
+            newNameLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+            newNameLayout.addWidget(newNameLabel)
+            newNameLayout.addWidget(newNameContentLabel)
+
+            self.viewLayout.addLayout(newNameLayout)
+
+            # 编号样式
+            numTypeLabel = SubtitleLabel(text='编号样式：', parent=self.widget)
+            numTypeContentLabel = BodyLabel(text=rule['num_type'], parent=self.widget)
+            numTypeLayout = QHBoxLayout()
+
+            numTypeLayout.setSpacing(0)
+            numTypeLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+            numTypeLayout.addWidget(numTypeLabel)
+            numTypeLayout.addWidget(numTypeContentLabel)
+
+            self.viewLayout.addLayout(numTypeLayout)
+
+            # 起始编号
+            startNumLabel = SubtitleLabel(text='起始编号：', parent=self.widget)
+            startNumContentLabel = BodyLabel(text=str(rule['start_num']), parent=self.widget)
+            startNumLayout = QHBoxLayout()
+
+            startNumLayout.setSpacing(0)
+            startNumLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+            startNumLayout.addWidget(startNumLabel)
+            startNumLayout.addWidget(startNumContentLabel)
+
+            self.viewLayout.addLayout(startNumLayout)
+
+            # 步长
+            stepLengthLabel = SubtitleLabel(text='步长：', parent=self.widget)
+            stepLengthContentLabel = BodyLabel(text=str(rule['step_length']), parent=self.widget)
+            stepLengthLayout = QHBoxLayout()
+
+            stepLengthLayout.setSpacing(0)
+            stepLengthLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+            stepLengthLayout.addWidget(stepLengthLabel)
+            stepLengthLayout.addWidget(stepLengthContentLabel)
+
+            self.viewLayout.addLayout(stepLengthLayout)
+
+            # 位置
+            if rule['position'] == 'head':
+                pos = '文件名首'
+            elif rule['position'] == 'tail':
+                pos = '文件名尾'
+            posLabel = SubtitleLabel(text='位置：', parent=self.widget)
+            posContentLabel = BodyLabel(text=pos, parent=self.widget)
+            posLayout = QHBoxLayout()
+
+            posLayout.setSpacing(0)
+            posLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+            posLayout.addWidget(posLabel)
+            posLayout.addWidget(posContentLabel)
+
+            self.viewLayout.addLayout(posLayout)
 
 
 class RuleCard(CardWidget):
@@ -343,12 +410,11 @@ class RuleInputInterface(MessageBoxBase):
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
+        self.num_types = None
         self.errorInfoLabel = BodyLabel(text='你还有必填的选项未填写！')  # 提示错误信息的标签
 
         """基本设置"""
         self.widget.setMinimumWidth(450)  # 设置对话框最小宽度
-        self.base_height = 250
-        self.widget.setMinimumHeight(self.base_height)  # 设置基本高度
 
         self.yesButton.setText('确认')  # 修改按钮文本
         self.cancelButton.setText('取消')
@@ -358,7 +424,8 @@ class RuleInputInterface(MessageBoxBase):
         self.yesButton.setEnabled(False)  # 初始将确认按钮设置为禁用状态，防止什么都没输入就点击确认
 
         """选择规则种类"""
-        all_rule_type = ('1.交换分隔符前后内容', '2.修改后缀名', '3.修改特定字符串', '4.添加或删除日期')
+        all_rule_type = (
+            '1.交换分隔符前后内容', '2.修改后缀名', '3.修改特定字符串', '4.添加或删除日期', '5.重命名并编号')
         self.ruleTypeComboBox = ComboBox()
         self.ruleTypeLabel = SubtitleLabel(text='规则种类', parent=self.widget)
         self.ruleTypeLayout = QHBoxLayout()
@@ -418,6 +485,8 @@ class RuleInputInterface(MessageBoxBase):
             self.must_filled_text_list.append(self.new_control['splitCharLineEdit'].text())
             if self.new_control['customDateBtn'].isChecked():
                 self.must_filled_text_list.append(self.new_control['customDateLineEdit'].text())
+        elif self.new_rule_type == 5:
+            self.must_filled_text_list.append(self.new_control['newNameLineEdit'].text())
 
         """对列表中的元素进行检测，为空则不通过"""
         for text in self.must_filled_text_list:
@@ -434,8 +503,8 @@ class RuleInputInterface(MessageBoxBase):
         self.new_control.clear()
 
         """创建输入框限制器，防止输入文件名不能存在的字符"""
-        regex = QRegularExpression(r'[^\/:*?"<>|]+')  # 限制器内容
-        validator = QRegularExpressionValidator(regex)  # 限制器对象
+        char_regex = QRegularExpression(r'[^\/:*?"<>|]+')  # 限制器内容
+        char_validator = QRegularExpressionValidator(char_regex)  # 限制器对象
 
         """删除旧的控件"""
         for layout in self.new_layout_list:
@@ -447,11 +516,6 @@ class RuleInputInterface(MessageBoxBase):
         self.new_layout_list.clear()
 
         if self.new_rule_type == 1:
-
-            """设置新的窗口高度"""
-            new_height = self.base_height + 1 * 40
-            self.widget.setMinimumHeight(new_height)
-
             """分隔符输入"""
             splitCharLayout = QHBoxLayout()
             splitCharLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
@@ -467,16 +531,12 @@ class RuleInputInterface(MessageBoxBase):
             splitCharLineEdit.setFixedWidth(170)
             splitCharLayout.addWidget(splitCharLineEdit)
             self.new_control['splitCharLineEdit'] = splitCharLineEdit
-            splitCharLineEdit.setValidator(validator)  # 设置限制器
+            splitCharLineEdit.setValidator(char_validator)  # 设置限制器
 
             # 将新控件的水平布局添加到主布局
             self.viewLayout.addLayout(splitCharLayout)
 
         elif self.new_rule_type == 2:
-            """设置新的窗口高度"""
-            new_height = self.base_height + 1 * 40
-            self.widget.setMinimumHeight(new_height)
-
             """新扩展名输入"""
             extLayout = QHBoxLayout()
             extLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
@@ -492,16 +552,12 @@ class RuleInputInterface(MessageBoxBase):
             extLineEdit.setFixedWidth(200)
             extLayout.addWidget(extLineEdit)
             self.new_control['extLineEdit'] = extLineEdit
-            extLineEdit.setValidator(validator)  # 设置限制器
+            extLineEdit.setValidator(char_validator)  # 设置限制器
 
             # 将新布局添加至主布局
             self.viewLayout.addLayout(extLayout)
 
         elif self.new_rule_type == 3:
-            """设置新的窗口高度"""
-            new_height = self.base_height + 2 * 40
-            self.widget.setMinimumHeight(new_height)
-
             """匹配字符串输入"""
             oldStrLayout = QHBoxLayout()
             oldStrInputLayout = QVBoxLayout()
@@ -544,16 +600,12 @@ class RuleInputInterface(MessageBoxBase):
             newStrLineEdit.setFixedWidth(200)
             newStrLayout.addWidget(newStrLineEdit)
             self.new_control['newStrLineEdit'] = newStrLineEdit
-            newStrLineEdit.setValidator(validator)  # 设置限制器
+            newStrLineEdit.setValidator(char_validator)  # 设置限制器
 
             # 将旧字符串相关布局添加到主布局
             self.viewLayout.addLayout(newStrLayout)
 
         elif self.new_rule_type == 4:
-            """设置新的窗口高度"""
-            new_height = self.base_height + 4 * 40
-            self.widget.setMinimumHeight(new_height)
-
             """日期填充选择"""
             dateLayout = QHBoxLayout()
             self.new_layout_list.append(dateLayout)
@@ -643,10 +695,116 @@ class RuleInputInterface(MessageBoxBase):
             splitCharLineEdit.setFixedWidth(250)
             splitCharLayout.addWidget(splitCharLineEdit)
             self.new_control['splitCharLineEdit'] = splitCharLineEdit
-            splitCharLineEdit.setValidator(validator)  # 设置限制器
+            splitCharLineEdit.setValidator(char_validator)  # 设置限制器
 
             # 将日期分隔符输入的布局添加至主布局
             self.viewLayout.addLayout(splitCharLayout)
+
+        elif self.new_rule_type == 5:
+            """新文件名输入"""
+            newNameLayout = QHBoxLayout()
+            self.new_layout_list.append(newNameLayout)
+
+            # 文本标签
+            newNameLabel = SubtitleLabel(text='新文件名', parent=self)
+            newNameLayout.addWidget(newNameLabel)
+
+            # 输入框
+            newNameLineEdit = LineEdit()
+            newNameLineEdit.setPlaceholderText('请输入新文件名（必填）')
+            newNameLineEdit.setFixedWidth(200)
+            newNameLayout.addWidget(newNameLineEdit)
+            self.new_control['newNameLineEdit'] = newNameLineEdit
+            newNameLineEdit.setValidator(char_validator)
+
+            # 将新水平布局添加至主布局
+            self.viewLayout.addLayout(newNameLayout)
+
+            """编号样式选择"""
+            numTypeLayout = QHBoxLayout()
+            self.new_layout_list.append(numTypeLayout)
+
+            # 文本标签
+            numTypeLabel = SubtitleLabel(text='编号样式', parent=self)
+            numTypeLayout.addWidget(numTypeLabel)
+
+            # 下拉选择框
+            numTypeComboBox = ComboBox()
+            numTypeComboBox.setFixedWidth(60)
+            self.num_types = ('1.', '1-', '1_', '(1)', '[1]', '{1}')
+            numTypeComboBox.addItems(self.num_types)
+            numTypeLayout.addWidget(numTypeComboBox)
+            self.new_control['numTypeComboBox'] = numTypeComboBox
+
+            # 将水平布局添加至主布局
+            self.viewLayout.addLayout(numTypeLayout)
+
+            """起始编号输入"""
+            startNumLayout = QHBoxLayout()
+            self.new_layout_list.append(startNumLayout)
+
+            # 文本标签
+            startNumLabel = SubtitleLabel(text='起始编号', parent=self)
+            startNumLayout.addWidget(startNumLabel)
+
+            # 输入框
+            startNumLineEdit = LineEdit()
+            startNumLineEdit.setPlaceholderText('输入起始编号')
+            startNumLineEdit.setFixedWidth(125)
+            startNumLayout.addWidget(startNumLineEdit)
+            self.new_control['startNumLineEdit'] = startNumLineEdit
+
+            num_regex = QRegularExpression(r'\d+')  # 限制只能输入数字
+            num_validator = QRegularExpressionValidator(num_regex)
+            startNumLineEdit.setValidator(num_validator)
+
+            self.viewLayout.addLayout(startNumLayout)
+
+            """步长输入"""
+            stepLengthLayout = QHBoxLayout()
+            self.new_layout_list.append(stepLengthLayout)
+
+            # 文本标签
+            stepLengthLabel = SubtitleLabel(text='步长', parent=self)
+            stepLengthLayout.addWidget(stepLengthLabel)
+
+            # 输入框
+            stepLengthLineEdit = LineEdit()
+            stepLengthLineEdit.setPlaceholderText('输入步长')
+            stepLengthLineEdit.setFixedWidth(125)
+            stepLengthLayout.addWidget(stepLengthLineEdit)
+            self.new_control['stepLengthLineEdit'] = stepLengthLineEdit
+
+            step_regex = QRegularExpression(r'^[^0]\d*$')  # 限制不能以0开头并且只能输入数字
+            step_validator = QRegularExpressionValidator(step_regex)
+            stepLengthLineEdit.setValidator(step_validator)
+
+            self.viewLayout.addLayout(stepLengthLayout)
+
+            """位置选择"""
+            posLayout = QHBoxLayout()
+            self.new_layout_list.append(posLayout)
+
+            # 文本标签
+            posLabel = SubtitleLabel(text='编号插入位置', parent=self)
+            posLayout.addWidget(posLabel, 1, Qt.AlignmentFlag.AlignLeft)
+
+            # 单选按钮
+            headBtn = RadioButton('文件名首')
+            tailBtn = RadioButton('文件名尾')
+            posBtnGroup = QButtonGroup(self)  # 创建一个按钮组，组内的单选按钮是互斥的
+            posBtnGroup.addButton(headBtn)
+            posBtnGroup.addButton(tailBtn)
+
+            headBtn.setChecked(True)  # 设置默认选中的按钮
+
+            posLayout.addWidget(headBtn, 0, Qt.AlignmentFlag.AlignRight)
+            self.new_control['headBtn'] = headBtn
+            posLayout.addWidget(tailBtn, 0, Qt.AlignmentFlag.AlignRight)
+            self.new_control['tailBtn'] = tailBtn
+
+            # 将日期位置输入布局添加至主布局
+            self.viewLayout.addLayout(posLayout)
 
         """验证不通过时的警告文本框"""
         setFont(self.errorInfoLabel, 15)
@@ -901,6 +1059,22 @@ class RuleListInterface(QFrame):
                 reviseRuleWindow.new_control['sysDateBtn'].setChecked(False)
             else:
                 reviseRuleWindow.new_control['sysDateBtn'].setChecked(True)
+        elif type == 5:
+            new_name = rule['new_name']
+            num_type = rule['num_type']
+            start_num = str(rule['start_num'])
+            step_length = str(rule['step_length'])
+            position = rule['position']
+
+            if position == 'head':
+                reviseRuleWindow.new_control['headBtn'].setChecked(True)
+            elif position == 'tail':
+                reviseRuleWindow.new_control['tailBtn'].setChecked(True)
+
+            reviseRuleWindow.new_control['newNameLineEdit'].setText(new_name)
+            reviseRuleWindow.new_control['numTypeComboBox'].setCurrentIndex(reviseRuleWindow.num_types.index(num_type))
+            reviseRuleWindow.new_control['startNumLineEdit'].setText(start_num)
+            reviseRuleWindow.new_control['stepLengthLineEdit'].setText(step_length)
 
         reviseRuleWindow.submit_data.connect(
             lambda: revise_rule(self.rule_dict, revised_rule, index))  # 将发射的信号传递给信号处理函数

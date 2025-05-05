@@ -115,10 +115,14 @@ def switch_rule(config_dict, index):
 
 def analise_rule(addRuleWindow):
     """
-    功能：解析用户添加规则时输入的规则参数
+    功能：解析用户输入的规则参数
     参数 addRuleWindow：添加规则的窗口
     返回：解析的规则字典
     """
+    logging.info(f'规则类型：{addRuleWindow.new_rule_type}')
+    logging.info(f'名称：{addRuleWindow.ruleNameLineEdit.text()}')
+    logging.info(f'描述：{addRuleWindow.ruleDescLineEdit.text()}')
+
     if addRuleWindow.new_rule_type == 1:
         rule = {
             'type': 1,
@@ -126,9 +130,6 @@ def analise_rule(addRuleWindow):
             'desc': addRuleWindow.ruleDescLineEdit.text(),
             'split_char': addRuleWindow.new_control['splitCharLineEdit'].text()
         }
-        logging.info('规则类型：1')
-        logging.info(f'名称：{addRuleWindow.ruleNameLineEdit.text()}')
-        logging.info(f'描述：{addRuleWindow.ruleDescLineEdit.text()}')
         logging.info(f'分隔符：{addRuleWindow.new_control["splitCharLineEdit"].text()}')
     elif addRuleWindow.new_rule_type == 2:
         rule = {
@@ -137,9 +138,6 @@ def analise_rule(addRuleWindow):
             'desc': addRuleWindow.ruleDescLineEdit.text(),
             'new_ext': addRuleWindow.new_control['extLineEdit'].text()
         }
-        logging.info('规则类型：2')
-        logging.info(f'名称：{addRuleWindow.ruleNameLineEdit.text()}')
-        logging.info(f'描述：{addRuleWindow.ruleDescLineEdit.text()}')
         logging.info(f'新扩展名：{addRuleWindow.new_control["extLineEdit"].text()}')
     elif addRuleWindow.new_rule_type == 3:
         rule = {
@@ -150,9 +148,6 @@ def analise_rule(addRuleWindow):
             'use_re': addRuleWindow.new_control['useReCheckBox'].isChecked(),
             'new_str': addRuleWindow.new_control['newStrLineEdit'].text()
         }
-        logging.info('规则类型：3')
-        logging.info(f'名称：{addRuleWindow.ruleNameLineEdit.text()}')
-        logging.info(f'描述：{addRuleWindow.ruleDescLineEdit.text()}')
         logging.info(f'匹配字符串：{addRuleWindow.new_control["oldStrLineEdit"].text()}')
         logging.info(f'使用正则表达式：{addRuleWindow.new_control['useReCheckBox'].isChecked()}')
         logging.info(f'新字符串：{addRuleWindow.new_control["newStrLineEdit"].text()}')
@@ -163,9 +158,6 @@ def analise_rule(addRuleWindow):
             'desc': addRuleWindow.ruleDescLineEdit.text(),
             'split_char': addRuleWindow.new_control['splitCharLineEdit'].text()
         }
-        logging.info('规则类型：4')
-        logging.info(f'名称：{addRuleWindow.ruleNameLineEdit.text()}')
-        logging.info(f'描述：{addRuleWindow.ruleDescLineEdit.text()}')
         logging.info(f'分隔符：{addRuleWindow.new_control["splitCharLineEdit"].text()}')
 
         if addRuleWindow.new_control['headBtn'].isChecked():
@@ -181,5 +173,34 @@ def analise_rule(addRuleWindow):
         else:
             rule['date'] = addRuleWindow.new_control['customDateLineEdit'].text()
             logging.info(f'日期：{addRuleWindow.new_control["customDateLineEdit"].text()}')
+    elif addRuleWindow.new_rule_type == 5:
+        rule = {
+            'type': 5,
+            'name': addRuleWindow.ruleNameLineEdit.text(),
+            'desc': addRuleWindow.ruleDescLineEdit.text(),
+            'new_name': addRuleWindow.new_control['newNameLineEdit'].text(),
+            'num_type': addRuleWindow.new_control['numTypeComboBox'].text(),
+        }
+        logging.info(f'新文件名：{addRuleWindow.new_control['newNameLineEdit'].text()}')
+        logging.info(f'编号样式：{addRuleWindow.new_control['numTypeComboBox'].text()}')
+
+        if not addRuleWindow.new_control['startNumLineEdit'].text():
+            rule['start_num'] = 1
+        else:
+            rule['start_num'] = int(addRuleWindow.new_control['startNumLineEdit'].text())
+        logging.info(f'起始编号：{rule['start_num']}')
+
+        if not addRuleWindow.new_control['stepLengthLineEdit'].text():
+            rule['step_length'] = 1
+        else:
+            rule['step_length'] = int(addRuleWindow.new_control['stepLengthLineEdit'].text())
+        logging.info(f'步长：{rule['step_length']}')
+
+        if addRuleWindow.new_control['headBtn'].isChecked():
+            rule['position'] = 'head'
+            logging.info(f'位置：头部')
+        elif addRuleWindow.new_control['tailBtn'].isChecked():
+            rule['position'] = 'tail'
+            logging.info(f'位置：尾部')
 
     return rule

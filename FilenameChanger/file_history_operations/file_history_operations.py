@@ -167,6 +167,8 @@ def get_new_name_list(selected_rule, old_name_list):
         new_name_list = use_type_3(selected_rule, old_name_list)
     elif rule_type == 4:
         new_name_list = use_type_4(selected_rule, old_name_list)
+    elif rule_type == 5:
+        new_name_list = use_type_5(selected_rule, old_name_list)
 
     logging.info('已生成新文件名列表')
     return new_name_list

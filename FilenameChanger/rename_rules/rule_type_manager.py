@@ -11,7 +11,7 @@ from FilenameChanger.rename_rules.rule_manager import *
 
 def use_type_1(selected_rule, old_name_list):
     """
-    功能：应用类型一的规则
+    功能：应用类型一的规则（交换分隔符前后内容）
     参数 selected_rule：当前激活的规则
     参数 old_name_list：旧文件名列表
     返回：生成的新文件名列表
@@ -20,10 +20,7 @@ def use_type_1(selected_rule, old_name_list):
     old_filename_list = []  # 文件名列表
     old_ext_list = []  # 扩展名列表
     for file in old_name_list:
-        try:
-            signal_name, signal_ext = os.path.splitext(file)  # 分离文件名和扩展名
-        except ValueError:
-            signal_ext = ''  # 处理没有扩展名的文件
+        signal_name, signal_ext = os.path.splitext(file)  # 分离文件名和扩展名
 
         old_filename_list.append(signal_name)
         old_ext_list.append(signal_ext)
@@ -51,7 +48,7 @@ def use_type_1(selected_rule, old_name_list):
 
 def use_type_2(selected_rule, old_name_list):
     """
-    功能：应用类型二的规则
+    功能：应用类型二的规则（扩展名替换）
     参数 selected_rule：当前激活的规则
     参数 old_name_list：旧文件名列表
     返回：生成的新文件名列表
@@ -60,7 +57,7 @@ def use_type_2(selected_rule, old_name_list):
 
     name_list = []  # 文件名（排除扩展名）列表
     for file in old_name_list:
-        signal_name = os.path.splitext(file)[0]  # 此规则不需要获取原来的扩展名
+        signal_name = os.path.splitext(file)[0]
         name_list.append(signal_name)
 
     new_name_list = []
@@ -73,7 +70,7 @@ def use_type_2(selected_rule, old_name_list):
 
 def use_type_3(selected_rule, old_name_list):
     """
-    功能：应用类型三的规则
+    功能：应用类型三的规则（字符串替换）
     参数 当前激活的规则：配置文件根字典
     参数 old_name_list：旧文件名列表
     返回：生成的新文件名列表
@@ -86,10 +83,8 @@ def use_type_3(selected_rule, old_name_list):
     old_file_name_list = []  # 文件名（排除扩展名）列表
     old_file_ext_list = []  # 文件扩展名列表
     for file in old_name_list:
-        try:
-            name, ext = os.path.splitext(file)
-        except ValueError:
-            ext = ''  # 处理没有扩展名的文件
+        name, ext = os.path.splitext(file)
+
         old_file_name_list.append(name)
         old_file_ext_list.append(ext)
 
@@ -107,7 +102,7 @@ def use_type_3(selected_rule, old_name_list):
 
 def use_type_4(selected_rule, old_name_list):
     """
-    功能：应用类型四的规则
+    功能：应用类型四的规则（添加或删除日期）
     参数 当前激活的规则：配置文件根字典
     参数 old_name_list：旧文件名列表
     返回：生成的新文件名列表
@@ -173,5 +168,59 @@ def use_type_4(selected_rule, old_name_list):
                     new_name = f'{file_name}{local_date}{ext}'
                     logging.info('已将当前系统日期添加至文件名尾部')
                 new_name_list.append(new_name)
+
+    return new_name_list
+
+
+def use_type_5(selected_rule, old_name_list):
+    """
+    功能：应用类型五的规则（重命名并编号）
+    参数 当前激活的规则：配置文件根字典
+    参数 old_name_list：旧文件名列表
+    返回：生成的新文件名列表
+    """
+    new_file_name = selected_rule['new_name']
+    num_type = selected_rule['num_type']
+    position = selected_rule['position']
+    number = selected_rule['start_num']
+    step_length = selected_rule['step_length']
+
+    new_name_list = []
+
+    for old_name in old_name_list:
+        # 分离文件名和扩展名
+        ext = os.path.splitext(old_name)[1]
+
+        # 生成编号
+        if position == 'head':
+            if num_type == '1.':
+                serial_number = f'{number}.'
+            elif num_type == '1-':
+                serial_number = f'{number}-'
+            elif num_type == '1_':
+                serial_number = f'{number}_'
+        elif position == 'tail':
+            if num_type == '1.':
+                serial_number = f'.{number}'
+            elif num_type == '1-':
+                serial_number = f'-{number}'
+            elif num_type == '1_':
+                serial_number = f'_{number}'
+
+        if num_type == '(1)':
+            serial_number = f'({number})'
+        elif num_type == '[1]':
+            serial_number = f'[{number}]'
+        elif num_type == '{1}':
+            serial_number = '{' + str(number) + '}'
+
+        # 将编号合并至文件名
+        if position == 'head':
+            new_name = f'{serial_number}{new_file_name}{ext}'
+        elif position == 'tail':
+            new_name = f'{new_file_name}{serial_number}{ext}'
+
+        new_name_list.append(new_name)
+        number += step_length
 
     return new_name_list
