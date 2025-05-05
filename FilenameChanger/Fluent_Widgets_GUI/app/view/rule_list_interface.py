@@ -150,6 +150,22 @@ class InfoDialog(MessageBoxBase):
             self.targetStrLayout.addWidget(self.targetStrContentLabel)
             self.viewLayout.addLayout(self.targetStrLayout)
 
+            # 是否启用正则表达式
+            self.useReLabel = SubtitleLabel(text='使用正则表达式：', parent=self.widget)
+            if rule['use_re']:
+                use_re = '是'
+            else:
+                use_re = '否'
+            self.useReContentLabel = BodyLabel(text=use_re, parent=self.widget)
+
+            self.useReLayout = QHBoxLayout()
+            self.useReLayout.setSpacing(0)
+            self.useReLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+
+            self.useReLayout.addWidget(self.useReLabel)
+            self.useReLayout.addWidget(self.useReContentLabel)
+            self.viewLayout.addLayout(self.useReLayout)
+
             # 新字符串
             self.newStrLabel = SubtitleLabel(text='新字符串：', parent=self.widget)
             self.newStrContentLabel = BodyLabel(text=(rule['new_str']), parent=self.widget)
@@ -342,7 +358,7 @@ class RuleInputInterface(MessageBoxBase):
         self.yesButton.setEnabled(False)  # 初始将确认按钮设置为禁用状态，防止什么都没输入就点击确认
 
         """选择规则种类"""
-        all_rule_type = ('1.交换分隔符前后内容', '2.修改后缀名', '3.修改特定字符串（支持正则）', '4.添加或删除日期')
+        all_rule_type = ('1.交换分隔符前后内容', '2.修改后缀名', '3.修改特定字符串', '4.添加或删除日期')
         self.ruleTypeComboBox = ComboBox()
         self.ruleTypeLabel = SubtitleLabel(text='规则种类', parent=self.widget)
         self.ruleTypeLayout = QHBoxLayout()
