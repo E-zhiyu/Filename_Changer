@@ -147,6 +147,7 @@ def analise_rule(addRuleWindow):
             'name': addRuleWindow.ruleNameLineEdit.text(),
             'desc': addRuleWindow.ruleDescLineEdit.text(),
             'target_str': addRuleWindow.new_control['oldStrLineEdit'].text(),
+            'use_re': addRuleWindow.new_control['useReCheckBox'].isChecked(),
             'new_str': addRuleWindow.new_control['newStrLineEdit'].text()
         }
         logging.info('规则类型：3')

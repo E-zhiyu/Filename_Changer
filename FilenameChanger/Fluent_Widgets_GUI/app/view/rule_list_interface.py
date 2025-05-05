@@ -1,11 +1,11 @@
-from PyQt6.QtGui import QPalette, QRegularExpressionValidator, QAction, QCursor
-from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QApplication, QButtonGroup, QLayout, QDialog
+from PyQt6.QtGui import QRegularExpressionValidator
+from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QButtonGroup
 from PyQt6.QtCore import Qt, pyqtSignal, QRegularExpression, QPoint
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, PushButton, FluentIcon,
-                                                               CardWidget, SearchLineEdit, TransparentToolButton,
-                                                               SmoothScrollArea, IconWidget, InfoBarIcon, MessageBox,
-                                                               ComboBox, MessageBoxBase, LineEdit, RadioButton,
+                                                               CardWidget, TransparentToolButton, SmoothScrollArea,
+                                                               IconWidget, InfoBarIcon, MessageBox, ComboBox,
+                                                               MessageBoxBase, LineEdit, RadioButton, CheckBox,
                                                                RoundMenu, Action, BodyLabel, TextBrowser)
 
 from FilenameChanger.rename_rules.rule_manager import (load_config, switch_rule, del_rules, save_new_rule, analise_rule,
@@ -317,7 +317,7 @@ class RuleCard(CardWidget):
         menu.exec(pos, ani=True)
 
 
-class ruleInputInterface(MessageBoxBase):
+class RuleInputInterface(MessageBoxBase):
     """规则参数输入窗口"""
 
     """定义发送给外部变量的信号"""
@@ -403,7 +403,7 @@ class ruleInputInterface(MessageBoxBase):
             if self.new_control['customDateBtn'].isChecked():
                 self.must_filled_text_list.append(self.new_control['customDateLineEdit'].text())
 
-        """对列表中的内容进行检测，为空则不通过"""
+        """对列表中的元素进行检测，为空则不通过"""
         for text in self.must_filled_text_list:
             if not text:
                 self.errorInfoLabel.setHidden(False)
@@ -488,8 +488,10 @@ class ruleInputInterface(MessageBoxBase):
 
             """匹配字符串输入"""
             oldStrLayout = QHBoxLayout()
+            oldStrInputLayout = QVBoxLayout()
             oldStrLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
             self.new_layout_list.append(oldStrLayout)
+            self.new_layout_list.append(oldStrInputLayout)
 
             # 文本标签
             oldStrLabel = SubtitleLabel(text='匹配字符串', parent=self)
@@ -499,10 +501,16 @@ class ruleInputInterface(MessageBoxBase):
             oldStrLineEdit = LineEdit()
             oldStrLineEdit.setPlaceholderText('请输入匹配字符串（必填）')
             oldStrLineEdit.setFixedWidth(200)
-            oldStrLayout.addWidget(oldStrLineEdit)
+            oldStrInputLayout.addWidget(oldStrLineEdit)
             self.new_control['oldStrLineEdit'] = oldStrLineEdit
 
+            # 正则表达式复选框
+            useReCheckBox = CheckBox('使用正则表达式', parent=self)
+            oldStrInputLayout.addWidget(useReCheckBox)
+            self.new_control['useReCheckBox'] = useReCheckBox
+
             # 将旧字符串相关布局添加到主布局
+            oldStrLayout.addLayout(oldStrInputLayout)
             self.viewLayout.addLayout(oldStrLayout)
 
             """新字符串输入"""
@@ -813,11 +821,11 @@ class RuleListInterface(QFrame):
         def add_rule_callback():
             """添加规则"""
             logging.info('进行操作：添加规则')
-            addRuleWindow = ruleInputInterface(self)
+            addRuleWindow = RuleInputInterface(self)
             addRuleWindow.submit_data.connect(lambda: save_new_rule(self.rule_dict, rule))  # 将发射的信号传递给信号处理函数
             if addRuleWindow.exec():
                 logging.info('用户确认添加规则')
-                rule = analise_rule(addRuleWindow)  # 解析输入的内容
+                rule = analise_rule(addRuleWindow)  # 解析添加规则时输入的内容
                 addRuleWindow.submit_data.emit(rule)  # 发送规则种类、名称和描述的信号
                 self.initRuleViewArea()  # （添加规则）刷新规则卡片布局
             else:
@@ -834,7 +842,7 @@ class RuleListInterface(QFrame):
     def reviseRule(self, rule, index):
         """修改规则"""
         logging.info('进行操作：修改规则')
-        reviseRuleWindow = ruleInputInterface(self)
+        reviseRuleWindow = RuleInputInterface(self)
 
         # 设置输入窗口的基本信息
         type = rule['type']
@@ -859,6 +867,7 @@ class RuleListInterface(QFrame):
             new_str = rule['new_str']
 
             reviseRuleWindow.new_control['oldStrLineEdit'].setText(target_str)
+            reviseRuleWindow.new_control['useReCheckBox'].setChecked(rule.get('use_re', False))
             reviseRuleWindow.new_control['newStrLineEdit'].setText(new_str)
         elif type == 4:
             split_char = rule['split_char']

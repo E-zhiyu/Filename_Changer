@@ -83,6 +83,7 @@ def use_type_3(config_dict, old_name_list):
     selected_index = config_dict['selected_index']
     target_str = config_dict['rules'][selected_index]['target_str']  # 待替换的字符串
     new_str = config_dict['rules'][selected_index]['new_str']  # 新字符串
+    use_re = config_dict['rules'][selected_index].get('use_re', False)  # 判断是否使用正则表达式
 
     # 分离文件名和扩展名
     old_file_name_list = []  # 文件名（排除扩展名）列表
@@ -97,7 +98,11 @@ def use_type_3(config_dict, old_name_list):
 
     new_name_list = []
     for file_name, ext in zip(old_file_name_list, old_file_ext_list):
-        new_name = f'{re.sub(target_str, new_str, file_name)}.{ext}'
+        if use_re:
+            new_name = f'{re.sub(target_str, new_str, file_name)}{ext}'
+        else:
+            new_name = f'{file_name.replace(target_str, new_str)}{ext}'
+
         new_name_list.append(new_name)
 
     return new_name_list
