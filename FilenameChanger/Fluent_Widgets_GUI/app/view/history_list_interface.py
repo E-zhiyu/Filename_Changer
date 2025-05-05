@@ -16,6 +16,7 @@ class InfoWindow(MessageBoxBase):
         super().__init__(parent=parent)
         self.old_name_list = history_dict['old_name_list']
         self.new_name_list = history_dict['new_name_list']
+        self.error_files = history_dict['error_files']
         self.directory = history_dict['directory']
         self.time = history_dict.get('time', '未知时间')  # 由于老版本没有time关键字，所以用get方法防止KeyError
 
@@ -59,6 +60,11 @@ class InfoWindow(MessageBoxBase):
 
     def initInfoView(self):
         """初始化详情展示区域"""
+        # 展示成功重命名的文件
+        successLabel = SubtitleLabel(text='成功重命名的文件', parent=self.widget)
+        setFont(successLabel, 20)
+        self.infoLayout.addWidget(successLabel)
+
         for index in range(len(self.old_name_list)):
             oldNameLabel = BodyLabel(text=f'原名：{self.old_name_list[index]}', parent=self.infoWidget)
             newNameLabel = BodyLabel(text=f'新名：{self.new_name_list[index]}', parent=self.infoWidget)
@@ -66,6 +72,16 @@ class InfoWindow(MessageBoxBase):
             self.infoLayout.addWidget(oldNameLabel)
             self.infoLayout.addWidget(newNameLabel)
             self.infoLayout.addSpacing(15)
+
+        # 展示重命名出错的文件
+        errorLabel = SubtitleLabel(text='出错的文件', parent=self.widget)
+        setFont(errorLabel, 20)
+        self.infoLayout.addWidget(errorLabel)
+
+        for error_file in self.error_files:
+            errorLabel = BodyLabel(text=error_file, parent=self.infoWidget)
+
+            self.infoLayout.addWidget(errorLabel)
 
 
 class HistoryCard(CardWidget):

@@ -118,19 +118,24 @@ def rename_files(directory, old_name_list, new_name_list, with_record_history=Tr
     history_list = load_history()
 
     """文件重命名，并记录到历史记录文件"""
-    new_record_dict = {'directory': directory, 'old_name_list': [], 'new_name_list': []}
+    new_record_dict = {'directory': directory, 'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                       'old_name_list': [], 'new_name_list': [], 'error_files': []}
     for old_name, new_name in zip(old_name_list, new_name_list):
         if old_name == new_name:
             logging.info(f'【未更改】{old_name}')
+            new_record_dict['error_files'].append(f'【前后文件名相同】{old_name}')
         else:
             try:
                 os.rename(os.path.join(directory, old_name), os.path.join(directory, new_name))
             except FileNotFoundError:
-                logging.error(f'【错误】文件“{old_name}”不存在！')
+                logging.error(f'【错误】文件“{old_name}”不存在')
+                new_record_dict['error_files'].append(f'【文件不存在】{old_name}')
+            except FileExistsError:
+                logging.error(f'【错误】文件“{old_name}”重命名后将导致重名')
+                new_record_dict['error_files'].append(f'【文件重名】{old_name}')
             else:
                 logging.info(f'【成功】{old_name} -> {new_name}')
                 if with_record_history:
-                    new_record_dict['time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')  # 获取重命名的系统时间
                     new_record_dict['old_name_list'].append(old_name)
                     new_record_dict['new_name_list'].append(new_name)
 

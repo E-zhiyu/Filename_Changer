@@ -153,7 +153,8 @@ def analise_rule(addRuleWindow):
         logging.info('规则类型：3')
         logging.info(f'名称：{addRuleWindow.ruleNameLineEdit.text()}')
         logging.info(f'描述：{addRuleWindow.ruleDescLineEdit.text()}')
-        logging.info(f'原字符串：{addRuleWindow.new_control["oldStrLineEdit"].text()}')
+        logging.info(f'匹配字符串：{addRuleWindow.new_control["oldStrLineEdit"].text()}')
+        logging.info(f'使用正则表达式：{addRuleWindow.new_control['useReCheckBox'].isChecked()}')
         logging.info(f'新字符串：{addRuleWindow.new_control["newStrLineEdit"].text()}')
     elif addRuleWindow.new_rule_type == 4:
         rule = {
