@@ -78,6 +78,15 @@ class InfoDialog(MessageBoxBase):
 
         self.viewLayout.addWidget(self.titleLabel, 0, Qt.AlignmentFlag.AlignCenter)
 
+        """规则详情滚动区域"""
+        self.scrollArea = SmoothScrollArea(parent=self)
+        self.scrollAreaWidget = QWidget(self.scrollArea)
+        self.scrollArea.setWidget(self.scrollAreaWidget)
+        self.scrollLayout = QVBoxLayout(self.scrollAreaWidget)
+
+        self.scrollArea.setWidgetResizable(True)
+        self.viewLayout.addWidget(self.scrollArea)
+
         """显示规则通用信息"""
         # 规则种类
         self.typeLabel = SubtitleLabel(text='种类：', parent=self.widget)
@@ -89,7 +98,7 @@ class InfoDialog(MessageBoxBase):
 
         self.typeLayout.addWidget(self.typeLabel)
         self.typeLayout.addWidget(self.typeContentLabel)
-        self.viewLayout.addLayout(self.typeLayout)
+        self.scrollLayout.addLayout(self.typeLayout)
 
         # 规则名称
         self.nameLabel = SubtitleLabel(text='名称：', parent=self.widget)
@@ -101,7 +110,7 @@ class InfoDialog(MessageBoxBase):
 
         self.nameLayout.addWidget(self.nameLabel)
         self.nameLayout.addWidget(self.nameContentLabel)
-        self.viewLayout.addLayout(self.nameLayout)
+        self.scrollLayout.addLayout(self.nameLayout)
 
         # 规则描述
         self.descLabel = SubtitleLabel(text='规则描述：', parent=self.widget)
@@ -113,7 +122,7 @@ class InfoDialog(MessageBoxBase):
 
         self.descLayout.addWidget(self.descLabel)
         self.descLayout.addWidget(self.descContentLabel)
-        self.viewLayout.addLayout(self.descLayout)
+        self.scrollLayout.addLayout(self.descLayout)
 
         """规则关键功能显示"""
         if rule['type'] == 1:
@@ -127,7 +136,7 @@ class InfoDialog(MessageBoxBase):
 
             self.splitCharLayout.addWidget(self.splitCharLabel)
             self.splitCharLayout.addWidget(self.splitCharContentLabel)
-            self.viewLayout.addLayout(self.splitCharLayout)
+            self.scrollLayout.addLayout(self.splitCharLayout)
         elif rule['type'] == 2:
             # 新扩展名
             self.extLabel = SubtitleLabel(text='新扩展名：', parent=self.widget)
@@ -139,7 +148,7 @@ class InfoDialog(MessageBoxBase):
 
             self.extLayout.addWidget(self.extLabel)
             self.extLayout.addWidget(self.extContentLabel)
-            self.viewLayout.addLayout(self.extLayout)
+            self.scrollLayout.addLayout(self.extLayout)
         elif rule['type'] == 3:
             # 目标字符串
             self.targetStrLabel = SubtitleLabel(text='原字符串：', parent=self.widget)
@@ -151,7 +160,7 @@ class InfoDialog(MessageBoxBase):
 
             self.targetStrLayout.addWidget(self.targetStrLabel)
             self.targetStrLayout.addWidget(self.targetStrContentLabel)
-            self.viewLayout.addLayout(self.targetStrLayout)
+            self.scrollLayout.addLayout(self.targetStrLayout)
 
             # 是否启用正则表达式
             self.useReLabel = SubtitleLabel(text='使用正则表达式：', parent=self.widget)
@@ -167,7 +176,7 @@ class InfoDialog(MessageBoxBase):
 
             self.useReLayout.addWidget(self.useReLabel)
             self.useReLayout.addWidget(self.useReContentLabel)
-            self.viewLayout.addLayout(self.useReLayout)
+            self.scrollLayout.addLayout(self.useReLayout)
 
             # 新字符串
             self.newStrLabel = SubtitleLabel(text='新字符串：', parent=self.widget)
@@ -179,7 +188,7 @@ class InfoDialog(MessageBoxBase):
 
             self.newStrLayout.addWidget(self.newStrLabel)
             self.newStrLayout.addWidget(self.newStrContentLabel)
-            self.viewLayout.addLayout(self.newStrLayout)
+            self.scrollLayout.addLayout(self.newStrLayout)
         elif rule['type'] == 4:
             # 日期
             self.dateLabel = SubtitleLabel(text='填充日期：', parent=self.widget)
@@ -195,7 +204,7 @@ class InfoDialog(MessageBoxBase):
 
             self.dateLayout.addWidget(self.dateLabel)
             self.dateLayout.addWidget(self.dateContentLabel)
-            self.viewLayout.addLayout(self.dateLayout)
+            self.scrollLayout.addLayout(self.dateLayout)
 
             # 填充位置
             self.posLabel = SubtitleLabel(text='填充位置：', parent=self.widget)
@@ -211,7 +220,7 @@ class InfoDialog(MessageBoxBase):
 
             self.posLayout.addWidget(self.posLabel)
             self.posLayout.addWidget(self.posContentLabel)
-            self.viewLayout.addLayout(self.posLayout)
+            self.scrollLayout.addLayout(self.posLayout)
 
             # 分隔符
             self.splitCharLabel = SubtitleLabel(text='分隔符：', parent=self.widget)
@@ -223,7 +232,7 @@ class InfoDialog(MessageBoxBase):
 
             self.splitCharLayout.addWidget(self.splitCharLabel)
             self.splitCharLayout.addWidget(self.splitCharContentLabel)
-            self.viewLayout.addLayout(self.splitCharLayout)
+            self.scrollLayout.addLayout(self.splitCharLayout)
         elif rule['type'] == 5:
             # 新文件名
             newNameLabel = SubtitleLabel(text='新文件名：', parent=self.widget)
@@ -235,7 +244,7 @@ class InfoDialog(MessageBoxBase):
             newNameLayout.addWidget(newNameLabel)
             newNameLayout.addWidget(newNameContentLabel)
 
-            self.viewLayout.addLayout(newNameLayout)
+            self.scrollLayout.addLayout(newNameLayout)
 
             # 编号样式
             numTypeLabel = SubtitleLabel(text='编号样式：', parent=self.widget)
@@ -247,7 +256,7 @@ class InfoDialog(MessageBoxBase):
             numTypeLayout.addWidget(numTypeLabel)
             numTypeLayout.addWidget(numTypeContentLabel)
 
-            self.viewLayout.addLayout(numTypeLayout)
+            self.scrollLayout.addLayout(numTypeLayout)
 
             # 起始编号
             startNumLabel = SubtitleLabel(text='起始编号：', parent=self.widget)
@@ -259,7 +268,7 @@ class InfoDialog(MessageBoxBase):
             startNumLayout.addWidget(startNumLabel)
             startNumLayout.addWidget(startNumContentLabel)
 
-            self.viewLayout.addLayout(startNumLayout)
+            self.scrollLayout.addLayout(startNumLayout)
 
             # 步长
             stepLengthLabel = SubtitleLabel(text='步长：', parent=self.widget)
@@ -271,7 +280,7 @@ class InfoDialog(MessageBoxBase):
             stepLengthLayout.addWidget(stepLengthLabel)
             stepLengthLayout.addWidget(stepLengthContentLabel)
 
-            self.viewLayout.addLayout(stepLengthLayout)
+            self.scrollLayout.addLayout(stepLengthLayout)
 
             # 位置
             if rule['position'] == 'head':
@@ -287,7 +296,7 @@ class InfoDialog(MessageBoxBase):
             posLayout.addWidget(posLabel)
             posLayout.addWidget(posContentLabel)
 
-            self.viewLayout.addLayout(posLayout)
+            self.scrollLayout.addLayout(posLayout)
 
 
 class RuleCard(CardWidget):
