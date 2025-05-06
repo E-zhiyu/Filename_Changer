@@ -479,50 +479,55 @@ class RuleInputInterface(MessageBoxBase):
 
     def validate(self):
         """重写验证输入数据的方法"""
-        flag = True  # 待返回的布尔值
 
         """将需要检测的文本框的内容存放至列表"""
         if not self.ruleNameLineEdit.text():
             self.errorInfoLabel.setText('未输入规则名称！')
-            flag = False
+            self.errorInfoLabel.setHidden(False)
+            return False
 
         if self.new_rule_type == 1:
             if not self.new_control['splitCharLineEdit'].text():
                 self.errorInfoLabel.setText('未输入分隔符！')
-                flag = False
+                self.errorInfoLabel.setHidden(False)
+                return False
 
         elif self.new_rule_type == 2:
             if not self.new_control['extLineEdit'].text():
                 self.errorInfoLabel.setText('未输入新扩展名！')
-                flag = False
+                self.errorInfoLabel.setHidden(False)
+                return False
 
         elif self.new_rule_type == 3:
             if not self.new_control['oldStrLineEdit'].text():
                 self.errorInfoLabel.setText('未输入匹配字符串！')
-                flag = False
+                self.errorInfoLabel.setHidden(False)
+                return False
 
             if not self.new_control['newStrLineEdit'].text():
                 self.errorInfoLabel.setText('未输入新字符串！')
-                flag = False
+                self.errorInfoLabel.setHidden(False)
+                return False
 
         elif self.new_rule_type == 4:
             if not self.new_control['splitCharLineEdit'].text():
                 self.errorInfoLabel.setText('未输入分隔符！')
-                flag = False
+                self.errorInfoLabel.setHidden(False)
+                return False
+
             if self.new_control['customDateBtn'].isChecked():
                 if not self.new_control['customDateLineEdit'].text():
                     self.errorInfoLabel.setText('未输入自定义日期！')
-                    flag = False
+                    self.errorInfoLabel.setHidden(False)
+                    return False
 
         elif self.new_rule_type == 5:
             if not self.new_control['newNameLineEdit'].text():
                 self.errorInfoLabel.setText('未输入新文件名！')
-                flag = False
+                self.errorInfoLabel.setHidden(False)
+                return False
 
-        if not flag:
-            self.errorInfoLabel.setHidden(False)
-
-        return flag
+        return True
 
     def refreshLayout(self):
         """选择的规则类型改变时改变窗口布局"""
