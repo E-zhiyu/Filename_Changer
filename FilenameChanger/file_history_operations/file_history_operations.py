@@ -140,9 +140,9 @@ def rename_files(directory, old_name_list, new_name_list, with_record_history=Tr
                     new_record_dict['old_name_list'].append(old_name)
                     new_record_dict['new_name_list'].append(new_name)
 
-    """将重命名记录保存至文件中"""
+    """将重命名历史记录保存至文件中"""
     if new_record_dict['new_name_list'] and with_record_history:  # 只有新旧文件名不相同且启用了记录功能才会记录重命名历史
-        history_list.append(new_record_dict)
+        history_list.insert(0, new_record_dict)
         with open(history_file_path, 'w', encoding='utf-8') as f:
             json.dump(history_list, f, ensure_ascii=False, indent=4)
             logging.info('新增的历史记录已追加至文件中')
@@ -211,7 +211,7 @@ def cancel_rename_operation():
         return 0
 
     # 加载上一次的重命名记录
-    last_history_dict = history_list.pop()
+    last_history_dict = history_list.pop(0)
     old_name_list = last_history_dict['old_name_list']  # 加载旧文件名列表
     new_name_list = last_history_dict['new_name_list']  # 加载新文件名列表
     directory = last_history_dict['directory']  # 加载目标文件夹路径
