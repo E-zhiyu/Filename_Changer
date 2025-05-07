@@ -554,6 +554,11 @@ class RuleInputInterface(MessageBoxBase):
             layout.deleteLater()
         self.new_layout_list.clear()
 
+        """消除规则名称和描述"""
+        self.ruleNameLineEdit.setText('')
+        self.ruleDescLineEdit.setText('')
+
+        """添加新的布局"""
         if self.new_rule_type == 1:
             """分隔符输入"""
             splitCharLayout = QHBoxLayout()
