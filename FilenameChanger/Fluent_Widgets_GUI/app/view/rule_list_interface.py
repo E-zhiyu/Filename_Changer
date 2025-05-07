@@ -192,10 +192,16 @@ class InfoDialog(MessageBoxBase):
         elif rule['type'] == 4:
             # 日期
             self.dateLabel = SubtitleLabel(text='填充日期：', parent=self.widget)
-            if rule['date']:
+            if rule['date_type'] == 0:
+                date = '系统日期'
+            elif rule['date_type'] == 1:
+                date = '文件创建日期'
+            elif rule['date_type'] == 2:
+                date = '文件修改日期'
+            elif rule['date_type'] == 3:
+                date = '文件访问日期'
+            elif rule['date_type'] == 4:
                 date = rule['date']
-            else:
-                date = '动态填充系统日期'
             self.dateContentLabel = BodyLabel(text=date, parent=self.widget)
 
             self.dateLayout = QHBoxLayout()
@@ -515,7 +521,7 @@ class RuleInputInterface(MessageBoxBase):
                 self.errorInfoLabel.setHidden(False)
                 return False
 
-            if self.new_control['customDateBtn'].isChecked():
+            if self.new_control['dateTypeComboBox'].currentIndex() == 4:
                 if not self.new_control['customDateLineEdit'].text():
                     self.errorInfoLabel.setText('未输入自定义日期！')
                     self.errorInfoLabel.setHidden(False)
@@ -641,51 +647,52 @@ class RuleInputInterface(MessageBoxBase):
         elif self.new_rule_type == 4:
             """日期填充选择"""
             dateLayout = QHBoxLayout()
+            dateTypeLayout = QVBoxLayout()  # 日期种类下拉框和自定义日期输入框的布局器
             self.new_layout_list.append(dateLayout)
+            self.new_layout_list.append(dateTypeLayout)
+
+            dateTypeLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
             # 文本标签
             dateLabel = SubtitleLabel(text='填充的日期', parent=self)
             dateLayout.addWidget(dateLabel)
 
-            # 单选按钮，选择填充系统日期还是自定义日期
-            radioLayout = QVBoxLayout()  # 垂直布局两个单选按钮
-            radioLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
-            self.new_layout_list.append(radioLayout)
+            # 日期种类下拉框
+            dateTypeComboBox = ComboBox()
+            date_type = ('系统日期', '文件创建日期', '文件修改日期', '文件访问日期', '自定义日期')
+            dateTypeComboBox.addItems(date_type)
+            dateTypeComboBox.setFixedWidth(150)
 
-            sysDateBtn = RadioButton('动态填充系统日期')
-            dateBtnGroup = QButtonGroup(self)  # 创建按钮组
-            sysDateBtn.setChecked(True)  # 默认填充重命名时的系统日期
-            dateBtnGroup.addButton(sysDateBtn)
-
-            radioLayout.addWidget(sysDateBtn)
-            self.new_control['sysDateBtn'] = sysDateBtn
+            dateTypeLayout.addWidget(dateTypeComboBox)
+            self.new_control['dateTypeComboBox'] = dateTypeComboBox
 
             # 自定义填充日期
-            customDateBtn = RadioButton('自定义')
-            dateBtnGroup.addButton(customDateBtn)
+            customDateLineEdit = LineEdit()
+            customDateLineEdit.setPlaceholderText('年月日用空格隔开')
+            customDateLineEdit.setFixedWidth(150)
+            customDateLineEdit.setVisible(False)  # 默认为不可见，只有下拉框选择自定义才会显示
 
-            customDateLayout = QHBoxLayout()  # 输入框和自定义日期按钮的水平布局
-            customDateLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
-            self.new_layout_list.append(customDateLayout)
+            dateTypeLayout.addWidget(customDateLineEdit)
+            self.new_control['customDateLineEdit'] = customDateLineEdit
 
-            dateLineEdit = LineEdit()
-            dateLineEdit.setPlaceholderText('年月日用空格隔开')
-            dateLineEdit.setFixedWidth(150)
+            def setLineEditVisible(comboBox, dateLineEdit):
+                """根据下拉框选择的内容修改日期输入框的可见性"""
+                if comboBox.currentIndex() == 4:
+                    dateLineEdit.setVisible(True)
+                else:
+                    dateLineEdit.setVisible(False)
+
+            dateTypeComboBox.currentIndexChanged.connect(
+                lambda: setLineEditVisible(self.new_control['dateTypeComboBox'],
+                                           self.new_control['customDateLineEdit']))
 
             # 为自定义日期输入框添加日期格式限制
             format_regex = QRegularExpression(r'\d{1,4} \d{1,2} \d{1,2}')
             date_validator = QRegularExpressionValidator(format_regex)
-            dateLineEdit.setValidator(date_validator)  # 设置输入的格式限制
-
-            customDateLayout.addWidget(customDateBtn)
-            self.new_control['customDateBtn'] = customDateBtn
-            customDateLayout.addWidget(dateLineEdit, 0, Qt.AlignmentFlag.AlignLeft)
-            self.new_control['customDateLineEdit'] = dateLineEdit
-            radioLayout.addLayout(customDateLayout)
-
-            dateLayout.addLayout(radioLayout)
+            customDateLineEdit.setValidator(date_validator)  # 设置输入的格式限制
 
             # 将日期输入布局添加至主布局
+            dateLayout.addLayout(dateTypeLayout)
             self.viewLayout.addLayout(dateLayout)
 
             """填充位置选择"""
@@ -719,13 +726,13 @@ class RuleInputInterface(MessageBoxBase):
             self.new_layout_list.append(splitCharLayout)
 
             # 文本标签
-            splitCharLabel = SubtitleLabel(text='日期分隔符', parent=self)
+            splitCharLabel = SubtitleLabel(text='年月日分隔符', parent=self)
             splitCharLayout.addWidget(splitCharLabel)
 
             # 输入框
             splitCharLineEdit = LineEdit()
-            splitCharLineEdit.setPlaceholderText('请输入年月日间的分隔符（必填）')
-            splitCharLineEdit.setFixedWidth(250)
+            splitCharLineEdit.setPlaceholderText('请输入分隔符（必填）')
+            splitCharLineEdit.setFixedWidth(200)
             splitCharLayout.addWidget(splitCharLineEdit)
             self.new_control['splitCharLineEdit'] = splitCharLineEdit
             splitCharLineEdit.setValidator(char_validator)  # 设置限制器
@@ -1079,19 +1086,17 @@ class RuleListInterface(QFrame):
         elif type == 4:
             split_char = rule['split_char']
             position = rule['position']
-            date = rule['date']
+            customize_date = rule.get('date', '')
+            date_type = rule.get('date_type', 4 if customize_date else 0)
 
             reviseRuleWindow.new_control['splitCharLineEdit'].setText(split_char)
             if position == 'head':
                 reviseRuleWindow.new_control['headBtn'].setChecked(True)
             elif position == 'tail':
                 reviseRuleWindow.new_control['tailBtn'].setChecked(True)
-            reviseRuleWindow.new_control['customDateLineEdit'].setText(date)
-            if date:
-                reviseRuleWindow.new_control['customDateBtn'].setChecked(True)
-                reviseRuleWindow.new_control['sysDateBtn'].setChecked(False)
-            else:
-                reviseRuleWindow.new_control['sysDateBtn'].setChecked(True)
+
+            reviseRuleWindow.new_control['dateTypeComboBox'].setCurrentIndex(date_type)
+            reviseRuleWindow.new_control['customDateLineEdit'].setText(customize_date)
         elif type == 5:
             new_name = rule['new_name']
             num_type = rule['num_type']

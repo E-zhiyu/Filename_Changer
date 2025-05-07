@@ -156,9 +156,11 @@ def analise_rule(addRuleWindow):
             'type': 4,
             'name': addRuleWindow.ruleNameLineEdit.text(),
             'desc': addRuleWindow.ruleDescLineEdit.text(),
-            'split_char': addRuleWindow.new_control['splitCharLineEdit'].text()
+            'split_char': addRuleWindow.new_control['splitCharLineEdit'].text(),
+            'date_type': addRuleWindow.new_control['dateTypeComboBox'].currentIndex(),
         }
         logging.info(f'分隔符：{addRuleWindow.new_control["splitCharLineEdit"].text()}')
+        logging.info(f'日期种类：{addRuleWindow.new_control["dateTypeComboBox"].text()}')
 
         if addRuleWindow.new_control['headBtn'].isChecked():
             rule['position'] = 'head'
@@ -167,12 +169,10 @@ def analise_rule(addRuleWindow):
             rule['position'] = 'tail'
             logging.info(f'位置：尾部')
 
-        if addRuleWindow.new_control['sysDateBtn'].isChecked():
-            rule['date'] = None
-            logging.info('日期：动态填充系统日期')
-        else:
+        if addRuleWindow.new_control['dateTypeComboBox'].currentIndex() == 4:
             rule['date'] = addRuleWindow.new_control['customDateLineEdit'].text()
             logging.info(f'日期：{addRuleWindow.new_control["customDateLineEdit"].text()}')
+
     elif addRuleWindow.new_rule_type == 5:
         rule = {
             'type': 5,

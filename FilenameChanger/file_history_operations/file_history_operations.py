@@ -13,6 +13,8 @@ from FilenameChanger.rename_rules.rule_type_manager import *
 def is_directory_usable(directory):
     """
     功能：判断文件夹路径是否有效
+    参数 directory：目标文件夹路径
+    返回：去除引号后的路径和响应代码
     """
     if directory:
         # 去除前后双引号
@@ -33,33 +35,6 @@ def is_directory_usable(directory):
     else:
         logging.info('用户清空输入框的路径')
         return None, -1
-
-
-def rename(directory):
-    """
-    功能：实现“文件重命名”操作
-    """
-    config_dict = load_config()  # 重命名时加载已保存的规则
-    selected_rule = config_dict['rules'][config_dict['selected_index']]
-    if not config_dict['rules']:  # 若规则为空，则结束本函数
-        logging.info('规则为空，请先前往规则设置写入规则！')
-        return -1
-    logging.info(
-        f'当前活跃的规则为“规则{config_dict['selected_index'] + 1}”，'
-        f'规则种类：{selected_rule['type']}')
-
-    old_name_list = get_files_in_directory(directory)  # old_file_names列表将包含该目录下所有文件的文件名（包含扩展名）
-    if not old_name_list:  # 判断文件夹是否为空，为空则返回0
-        return 0
-    new_name_list = get_new_name_list(selected_rule, old_name_list)  # 生成新文件名
-
-    logging.info('开始文件重命名……')
-    rename_files(directory, old_name_list, new_name_list)  # 执行重命名操作
-
-    if old_name_list == new_name_list:  # 判断重命名前后文件名是否完全相同
-        return -2
-    else:
-        return 1
 
 
 def hidden_or_protected(directory):
@@ -108,6 +83,33 @@ def get_files_in_directory(directory):
         return old_name
 
 
+def rename(directory):
+    """
+    功能：实现“文件重命名”操作
+    """
+    config_dict = load_config()  # 重命名时加载已保存的规则
+    selected_rule = config_dict['rules'][config_dict['selected_index']]
+    if not config_dict['rules']:  # 若规则为空，则结束本函数
+        logging.info('规则为空，请先前往规则设置写入规则！')
+        return -1
+    logging.info(
+        f'当前活跃的规则为“规则{config_dict['selected_index'] + 1}”，'
+        f'规则种类：{selected_rule['type']}')
+
+    old_name_list = get_files_in_directory(directory)  # old_file_names列表将包含该目录下所有文件的文件名（包含扩展名）
+    if not old_name_list:  # 判断文件夹是否为空，为空则返回0
+        return 0
+    new_name_list = get_new_name_list(selected_rule, old_name_list, directory)  # 生成新文件名
+
+    logging.info('开始文件重命名……')
+    rename_files(directory, old_name_list, new_name_list)  # 执行重命名操作
+
+    if old_name_list == new_name_list:  # 判断重命名前后文件名是否完全相同
+        return -2
+    else:
+        return 1
+
+
 def rename_files(directory, old_name_list, new_name_list, with_record_history=True):
     """
     功能：为单个文件重命名并显示结果
@@ -150,7 +152,7 @@ def rename_files(directory, old_name_list, new_name_list, with_record_history=Tr
         logging.info('未追加新的重命名记录，因为所有文件新旧文件名都相同')
 
 
-def get_new_name_list(selected_rule, old_name_list):
+def get_new_name_list(selected_rule, old_name_list, directory):
     """
     功能：根据已加载的规则生成新文件名
     参数 selected_rule：当前激活的规则
@@ -166,7 +168,7 @@ def get_new_name_list(selected_rule, old_name_list):
     elif rule_type == 3:
         new_name_list = use_type_3(selected_rule, old_name_list)
     elif rule_type == 4:
-        new_name_list = use_type_4(selected_rule, old_name_list)
+        new_name_list = use_type_4(selected_rule, old_name_list, directory)
     elif rule_type == 5:
         new_name_list = use_type_5(selected_rule, old_name_list)
 

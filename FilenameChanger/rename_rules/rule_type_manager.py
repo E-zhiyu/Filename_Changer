@@ -100,31 +100,68 @@ def use_type_3(selected_rule, old_name_list):
     return new_name_list
 
 
-def use_type_4(selected_rule, old_name_list):
+def get_file_time(file_path, time_type, split_char):
+    """
+    功能：获取文件日期
+    参数 file_path：文件路径
+    参数 time_type：需要返回的时间类型
+    返回：创建时间、修改时间和访问时间三者之一
+    """
+    if time_type == 0:
+        date = time.time()
+    elif time_type == 1:
+        date = os.path.getctime(file_path)
+    elif time_type == 2:
+        date = os.path.getmtime(file_path)
+    elif time_type == 3:
+        date = os.path.getatime(file_path)
+
+    return time.strftime(f'%Y{split_char}%m{split_char}%d', time.localtime(date))
+
+
+def use_type_4(selected_rule, old_name_list, directory):
     """
     功能：应用类型四的规则（添加或删除日期）
-    参数 当前激活的规则：配置文件根字典
+    参数 selected_rule：当前激活的规则
     参数 old_name_list：旧文件名列表
+    参数 directory：目标文件夹路径
+    参数 time_type：待填充的日期种类
     返回：生成的新文件名列表
     """
     split_char = selected_rule['split_char']
     position = selected_rule['position']
-    local_date = time.strftime(f'%Y{split_char}%m{split_char}%d', time.localtime(time.time()))
 
     try:
         y, m, d = selected_rule['date'].split(' ')
         customize_date = f'{y}{split_char}{m}{split_char}{d}'
-    except (AttributeError, ValueError):  # 处理自定义日期为空的情况
+    except (KeyError, AttributeError, ValueError):  # 处理自定义日期为空的情况
         customize_date = ''
+
+    time_type = selected_rule.get('date_type', 4 if customize_date else 0)
+    if time_type == 0:
+        logging.info('待填充的日期：系统日期')
+    elif time_type == 1:
+        logging.info('待填充的日期：文件创建日期')
+    elif time_type == 2:
+        logging.info('待填充的日期：文件修改日期')
+    elif time_type == 3:
+        logging.info('待填充的日期：文件访问日期')
+    elif time_type == 4:
+        logging.info('待填充的日期：自定义日期')
 
     new_name_list = []
 
     """遍历文件名列表，循环对单个文件名进行操作"""
     for old_name in old_name_list:
-        try:
-            file_name, ext = os.path.splitext(old_name)
-        except ValueError:
-            ext = ''  # 处理没有扩展名的文件（不用处理没有文件名的文件，因为这种文件不会被扫描进列表）
+        # 获取文件日期
+        if time_type != 4:
+            file_date = get_file_time(os.path.join(directory, old_name), time_type, split_char)
+            logging.info(f'已获取日期：“{file_date}”')
+        else:
+            file_date = customize_date
+
+        # 分离文件名和扩展名
+        file_name, ext = os.path.splitext(old_name)
 
         """判断是否含有日期"""
         logging.info(f'判断文件“{old_name}”是否含有日期')
@@ -152,7 +189,7 @@ def use_type_4(selected_rule, old_name_list):
             new_name_list.append(new_name)
         else:
             """添加日期操作"""
-            if customize_date:  # 判断自定义日期是否为空
+            if time_type == 4:  # 判断自定义日期是否为空
                 if position == 'head':
                     new_name = f'{customize_date}{file_name}{ext}'
                     logging.info(f'已将日期：“{customize_date}”添加至文件名头部')
@@ -162,11 +199,11 @@ def use_type_4(selected_rule, old_name_list):
                 new_name_list.append(new_name)
             else:
                 if position == 'head':
-                    new_name = f'{local_date}{file_name}{ext}'
-                    logging.info('已将当前系统日期添加至文件名头部')
+                    new_name = f'{file_date}{file_name}{ext}'
+                    logging.info(f'已将{file_date}添加至文件名头部')
                 elif position == 'tail':
-                    new_name = f'{file_name}{local_date}{ext}'
-                    logging.info('已将当前系统日期添加至文件名尾部')
+                    new_name = f'{file_name}{file_date}{ext}'
+                    logging.info(f'已将{file_date}添加至文件名尾部')
                 new_name_list.append(new_name)
 
     return new_name_list
