@@ -1,3 +1,5 @@
+import re
+
 from PyQt6.QtGui import QRegularExpressionValidator
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QButtonGroup
 from PyQt6.QtCore import Qt, pyqtSignal, QRegularExpression, QPoint
@@ -15,19 +17,19 @@ from FilenameChanger.log.log_recorder import *
 
 rule_help_md = """\
 ## 1.交换分隔符前后内容
-功能：交换指定分隔符或字符串前后的内容，不包括文件扩展名
+- 功能：交换指定分隔符或字符串前后的内容，不包括文件扩展名
 
 ## 2.修改扩展名
-功能：将目标文件夹内文件的扩展名修改为用户自定义的扩展名，不影响文件内容
+- 功能：将目标文件夹内文件的扩展名修改为用户自定义的扩展名，不影响文件内容
 
 ## 3.修改特定字符串
-功能：将文件名中所有匹配的字符串修改为用户指定的字符串，匹配字符串支持正则表达式
+- 功能：将文件名中所有匹配的字符串修改为用户指定的字符串，匹配字符串支持正则表达式
 
-## 4.添加或删除日期
-功能：为没有日期的文件名添加日期，已有日期的文件名则移除日期，可自定义日期填充内容
+## 4.日期替换
+- 功能：将文件名中的日期替换为指定日期，支持自定义日期留空以删除日期，若文件名存在多个日期则会全部替换为空串后再增加指定日期
 
 ## 5.重命名并编号
-功能：将所有文件重命名为同一名称并编号
+- 功能：将所有文件重命名为同一名称并编号
 """
 
 
@@ -439,8 +441,7 @@ class RuleInputInterface(MessageBoxBase):
         self.yesButton.setEnabled(False)  # 初始将确认按钮设置为禁用状态，防止什么都没输入就点击确认
 
         """选择规则种类"""
-        all_rule_type = (
-            '1.交换分隔符前后内容', '2.修改后缀名', '3.修改特定字符串', '4.添加或删除日期', '5.重命名并编号')
+        all_rule_type = ('1.交换分隔符前后内容', '2.修改后缀名', '3.修改特定字符串', '4.日期替换', '5.重命名并编号')
         self.ruleTypeComboBox = ComboBox()
         self.ruleTypeLabel = SubtitleLabel(text='规则种类', parent=self.widget)
         self.ruleTypeLayout = QHBoxLayout()
@@ -516,16 +517,20 @@ class RuleInputInterface(MessageBoxBase):
                 return False
 
         elif self.new_rule_type == 4:
-            if not self.new_control['splitCharLineEdit'].text():
+            if self.new_control['dateTypeComboBox'].currentIndex() == 4:
+                if (self.new_control['customDateLineEdit'].text()
+                        and not re.findall(r'[-_ ]?\d{4} ?\d{1,2} ?\d{1,2}[-_ ]?',
+                                           self.new_control['customDateLineEdit'].text())):
+                    self.errorInfoLabel.setText('自定义日期格式无效！')
+                    self.errorInfoLabel.setHidden(False)
+                    return False
+
+            if not self.new_control['splitCharLineEdit'].text() \
+                    and not (self.new_control['dateTypeComboBox'].currentIndex() == 4  # 选择自定义日期且日期输入框为空可以让分隔符为空
+                             and not self.new_control['customDateLineEdit'].text()):
                 self.errorInfoLabel.setText('未输入分隔符！')
                 self.errorInfoLabel.setHidden(False)
                 return False
-
-            if self.new_control['dateTypeComboBox'].currentIndex() == 4:
-                if not self.new_control['customDateLineEdit'].text():
-                    self.errorInfoLabel.setText('未输入自定义日期！')
-                    self.errorInfoLabel.setHidden(False)
-                    return False
 
         elif self.new_rule_type == 5:
             if not self.new_control['newNameLineEdit'].text():

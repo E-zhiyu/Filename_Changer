@@ -160,38 +160,31 @@ def use_type_4(selected_rule, old_name_list, directory):
         else:
             file_date = customize_date
 
-        # 分离文件名和扩展名
-        file_name, ext = os.path.splitext(old_name)
+        file_name, ext = os.path.splitext(old_name)  # 分离文件名和扩展名
+        date_re = r'[-_ ]?\d{4}[-_ 年]?\d{1,2}[-_ 月]?\d{1,2}[-_ 日]?'  #日期匹配的模式串
 
-        """判断是否含有日期"""
-        logging.info(f'判断文件“{old_name}”是否含有日期……')
-        date_type_re = r'[-_ ]?\d{4}[-_ 年]?\d{1,2}[-_ 月]?\d{1,2}[-_ 日]?'
+        """删除文件名中的日期"""
+        logging.info('文件名含有日期，已将其删除')
+        date_removed_name = re.sub(date_re, '', file_name)
 
-        if re.findall(date_type_re, file_name):
-            """删除日期操作"""
-            logging.info('文件名含有日期')
-            new_name = re.sub(date_type_re, '', file_name) + ext
-            logging.info('已删除文件名中的日期')
+        """添加指定日期"""
+        logging.info('文件名不含日期')
+        if time_type == 4:  # 判断自定义日期是否为空
+            if position == 'head':
+                new_name = f'{customize_date}{split_char}{date_removed_name}{ext}'
+                logging.info(f'已将日期：“{customize_date}”添加至文件名头部')
+            elif position == 'tail':
+                new_name = f'{date_removed_name}{split_char}{customize_date}{ext}'
+                logging.info(f'已将日期：“{customize_date}”添加至文件名尾部')
             new_name_list.append(new_name)
         else:
-            """添加日期操作"""
-            logging.info('文件名不含日期')
-            if time_type == 4:  # 判断自定义日期是否为空
-                if position == 'head':
-                    new_name = f'{customize_date}{split_char}{file_name}{ext}'
-                    logging.info(f'已将日期：“{customize_date}”添加至文件名头部')
-                elif position == 'tail':
-                    new_name = f'{file_name}{split_char}{customize_date}{ext}'
-                    logging.info(f'已将日期：“{customize_date}”添加至文件名尾部')
-                new_name_list.append(new_name)
-            else:
-                if position == 'head':
-                    new_name = f'{file_date}{split_char}{file_name}{ext}'
-                    logging.info(f'已将{file_date}添加至文件名头部')
-                elif position == 'tail':
-                    new_name = f'{file_name}{split_char}{file_date}{ext}'
-                    logging.info(f'已将{file_date}添加至文件名尾部')
-                new_name_list.append(new_name)
+            if position == 'head':
+                new_name = f'{file_date}{split_char}{date_removed_name}{ext}'
+                logging.info(f'已将{file_date}添加至文件名头部')
+            elif position == 'tail':
+                new_name = f'{date_removed_name}{split_char}{file_date}{ext}'
+                logging.info(f'已将{file_date}添加至文件名尾部')
+            new_name_list.append(new_name)
 
     return new_name_list
 
