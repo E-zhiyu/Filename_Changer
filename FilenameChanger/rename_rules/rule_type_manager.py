@@ -125,7 +125,6 @@ def use_type_4(selected_rule, old_name_list, directory):
     参数 selected_rule：当前激活的规则
     参数 old_name_list：旧文件名列表
     参数 directory：目标文件夹路径
-    参数 time_type：待填充的日期种类
     返回：生成的新文件名列表
     """
     split_char = selected_rule['split_char']
@@ -164,18 +163,22 @@ def use_type_4(selected_rule, old_name_list, directory):
         date_re = r'[-_ ]?\d{4}[-_ 年]?\d{1,2}[-_ 月]?\d{1,2}[-_ 日]?'  #日期匹配的模式串
 
         """删除文件名中的日期"""
-        logging.info('文件名含有日期，已将其删除')
         date_removed_name = re.sub(date_re, '', file_name)
+        if re.findall(date_re, file_name):
+            logging.info('文件名含有日期，已将其删除')
+        else:
+            logging.info('文件名不含日期')
 
         """添加指定日期"""
-        logging.info('文件名不含日期')
         if time_type == 4:  # 判断自定义日期是否为空
             if position == 'head':
                 new_name = f'{customize_date}{split_char}{date_removed_name}{ext}'
-                logging.info(f'已将日期：“{customize_date}”添加至文件名头部')
+                if customize_date:
+                    logging.info(f'已将日期：“{customize_date}”添加至文件名头部')
             elif position == 'tail':
                 new_name = f'{date_removed_name}{split_char}{customize_date}{ext}'
-                logging.info(f'已将日期：“{customize_date}”添加至文件名尾部')
+                if customize_date:
+                    logging.info(f'已将日期：“{customize_date}”添加至文件名尾部')
             new_name_list.append(new_name)
         else:
             if position == 'head':

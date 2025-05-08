@@ -157,6 +157,7 @@ def get_new_name_list(selected_rule, old_name_list, directory):
     功能：根据已加载的规则生成新文件名
     参数 selected_rule：当前激活的规则
     参数 old_name_list：旧文件名列表
+    参数 directory：目标文件夹路径
     返回：新文件名列表
     """
     rule_type = selected_rule['type']
