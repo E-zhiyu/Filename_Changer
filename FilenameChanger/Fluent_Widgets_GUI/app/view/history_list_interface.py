@@ -124,8 +124,7 @@ class HistoryCard(CardWidget):
 
         self.cardLayout.addWidget(self.openFolderBtn, 0, Qt.AlignmentFlag.AlignRight)
 
-        openFolder = lambda: os.startfile(self.directoryLabel.text())
-        self.openFolderBtn.clicked.connect(openFolder)
+        self.openFolderBtn.clicked.connect(self.openFolder)
 
         """卡片详情按钮"""
         self.infoBtn = TransparentToolButton(FluentIcon.INFO)
@@ -162,6 +161,16 @@ class HistoryCard(CardWidget):
         """显示记录详情"""
         infoWindow = InfoWindow(self.history_dict, self.parentInterface)
         infoWindow.exec()
+
+    def openFolder(self):
+        """打开该记录对应的文件夹"""
+        try:
+            os.startfile(self.directoryLabel.text())
+        except FileNotFoundError:
+            errorWindow = MessageBox('失败', '文件夹不存在', parent=self.parentInterface)
+            errorWindow.yesButton.setText('确定')
+            errorWindow.cancelButton.setHidden(True)
+            errorWindow.exec()
 
 
 class HistoryListInterface(QFrame):
