@@ -163,7 +163,7 @@ def use_type_4(selected_rule, old_name_list, directory):
             file_date = customize_date
 
         file_name, ext = os.path.splitext(old_name)  # 分离文件名和扩展名
-        date_re = r'[-_ ]?\d{4}[-_ 年]?\d{1,2}[-_ 月]?\d{1,2}[-_ 日]?'  # 日期匹配的模式串
+        date_re = r'[-_ ]?\d{4}[-_ 年]?\d{1,2}[-_ 月]?\d{1,2}日?[-_ ]?'  # 日期匹配的模式串
 
         """删除文件名中的日期"""
         date_removed_name = re.sub(date_re, '', file_name)
