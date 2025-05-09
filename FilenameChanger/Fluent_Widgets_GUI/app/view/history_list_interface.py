@@ -1,3 +1,5 @@
+import os
+
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFrame, QWidget, QHBoxLayout, QVBoxLayout
 
@@ -116,6 +118,14 @@ class HistoryCard(CardWidget):
         self.labelLayout.addWidget(self.timeLabel)
         self.labelLayout.addWidget(self.directoryLabel)
         self.cardLayout.addLayout(self.labelLayout)
+
+        """打开文件夹按钮"""
+        self.openFolderBtn = PushButton(FluentIcon.FOLDER, '打开文件夹', self)
+
+        self.cardLayout.addWidget(self.openFolderBtn, 0, Qt.AlignmentFlag.AlignRight)
+
+        openFolder = lambda: os.startfile(self.directoryLabel.text())
+        self.openFolderBtn.clicked.connect(openFolder)
 
         """卡片详情按钮"""
         self.infoBtn = TransparentToolButton(FluentIcon.INFO)
