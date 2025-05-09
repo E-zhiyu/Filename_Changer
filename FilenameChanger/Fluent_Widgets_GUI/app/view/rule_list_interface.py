@@ -511,11 +511,6 @@ class RuleInputInterface(MessageBoxBase):
                 self.errorInfoLabel.setHidden(False)
                 return False
 
-            if not self.new_control['newStrLineEdit'].text():
-                self.errorInfoLabel.setText('未输入新字符串！')
-                self.errorInfoLabel.setHidden(False)
-                return False
-
         elif self.new_rule_type == 4:
             if self.new_control['dateTypeComboBox'].currentIndex() == 4:
                 if (self.new_control['customDateLineEdit'].text()
@@ -638,7 +633,7 @@ class RuleInputInterface(MessageBoxBase):
 
             # 输入框
             newStrLineEdit = LineEdit()
-            newStrLineEdit.setPlaceholderText('请输入新字符串（必填）')
+            newStrLineEdit.setPlaceholderText('请输入新字符串')
             newStrLineEdit.setFixedWidth(200)
             newStrLayout.addWidget(newStrLineEdit)
             self.new_control['newStrLineEdit'] = newStrLineEdit
