@@ -168,9 +168,9 @@ def use_type_4(selected_rule, old_name_list, directory):
         """删除文件名中的日期"""
         date_removed_name = re.sub(date_re, '', file_name)
         if re.findall(date_re, file_name):
-            logging.info('文件名含有日期，已将其删除')
+            logging.info(f'{file_name}含有日期，已将其删除')
         else:
-            logging.info('文件名不含日期')
+            logging.info(f'{file_name}不含日期')
 
         """添加指定日期"""
         if time_type == 4:  # 判断该规则是否填充自定义日期
