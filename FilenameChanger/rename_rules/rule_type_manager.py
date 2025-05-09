@@ -108,15 +108,24 @@ def get_file_time(file_path, time_type, split_char):
     返回：创建时间、修改时间和访问时间三者之一
     """
     if time_type == 0:
+        logging.info('待填充的日期：系统日期')
         date = time.time()
     elif time_type == 1:
+        logging.info('待填充的日期：文件创建日期')
         date = os.path.getctime(file_path)
     elif time_type == 2:
+        logging.info('待填充的日期：文件修改日期')
         date = os.path.getmtime(file_path)
     elif time_type == 3:
+        logging.info('待填充的日期：文件访问日期')
         date = os.path.getatime(file_path)
 
-    return time.strftime(f'%Y{split_char}%m{split_char}%d', time.localtime(date))
+    if split_char == '年月日':
+        format_date = time.strftime('%Y年%m月%d日', time.localtime(date))
+    else:
+        format_date = time.strftime(f'%Y{split_char}%m{split_char}%d', time.localtime(date))
+
+    return format_date
 
 
 def use_type_4(selected_rule, old_name_list, directory):
@@ -127,26 +136,19 @@ def use_type_4(selected_rule, old_name_list, directory):
     参数 directory：目标文件夹路径
     返回：生成的新文件名列表
     """
-    split_char = selected_rule['split_char']
+    split_char = selected_rule['split_char'] if selected_rule['split_char'] != '空格' else ' '
     position = selected_rule['position']
 
     try:
         y, m, d = selected_rule['date'].split(' ')
-        customize_date = f'{y}{split_char}{m}{split_char}{d}'
+        if split_char == '年月日':
+            customize_date = f'{y}年{m}月{d}日'
+        else:
+            customize_date = f'{y}{split_char}{m}{split_char}{d}'
     except (KeyError, AttributeError, ValueError):  # 处理自定义日期为空的情况
         customize_date = ''
 
-    time_type = selected_rule.get('date_type', 4 if customize_date else 0)
-    if time_type == 0:
-        logging.info('待填充的日期：系统日期')
-    elif time_type == 1:
-        logging.info('待填充的日期：文件创建日期')
-    elif time_type == 2:
-        logging.info('待填充的日期：文件修改日期')
-    elif time_type == 3:
-        logging.info('待填充的日期：文件访问日期')
-    elif time_type == 4:
-        logging.info('待填充的日期：自定义日期')
+    time_type = selected_rule.get('date_type', 4 if customize_date else 0)  # 处理v2.1.0及更旧版本的规则
 
     new_name_list = []
 
@@ -157,10 +159,11 @@ def use_type_4(selected_rule, old_name_list, directory):
             file_date = get_file_time(os.path.join(directory, old_name), time_type, split_char)
             logging.info(f'已获取日期：“{file_date}”')
         else:
+            logging.info('待填充的日期：自定义日期')
             file_date = customize_date
 
         file_name, ext = os.path.splitext(old_name)  # 分离文件名和扩展名
-        date_re = r'[-_ ]?\d{4}[-_ 年]?\d{1,2}[-_ 月]?\d{1,2}[-_ 日]?'  #日期匹配的模式串
+        date_re = r'[-_ ]?\d{4}[-_ 年]?\d{1,2}[-_ 月]?\d{1,2}[-_ 日]?'  # 日期匹配的模式串
 
         """删除文件名中的日期"""
         date_removed_name = re.sub(date_re, '', file_name)
@@ -170,22 +173,26 @@ def use_type_4(selected_rule, old_name_list, directory):
             logging.info('文件名不含日期')
 
         """添加指定日期"""
-        if time_type == 4:  # 判断自定义日期是否为空
+        if time_type == 4:  # 判断该规则是否填充自定义日期
             if position == 'head':
-                new_name = f'{customize_date}{split_char}{date_removed_name}{ext}'
+                new_name = f'{customize_date}{split_char}{date_removed_name}{ext}' if split_char != '年月日' \
+                    else f'{customize_date}-{date_removed_name}{ext}'
                 if customize_date:
                     logging.info(f'已将日期：“{customize_date}”添加至文件名头部')
             elif position == 'tail':
-                new_name = f'{date_removed_name}{split_char}{customize_date}{ext}'
+                new_name = f'{date_removed_name}{split_char}{customize_date}{ext}' if split_char != '年月日' \
+                    else f'{date_removed_name}-{customize_date}{ext}'
                 if customize_date:
                     logging.info(f'已将日期：“{customize_date}”添加至文件名尾部')
             new_name_list.append(new_name)
         else:
             if position == 'head':
-                new_name = f'{file_date}{split_char}{date_removed_name}{ext}'
+                new_name = f'{file_date}{split_char}{date_removed_name}{ext}' if split_char != '年月日' \
+                    else f'{file_date}-{date_removed_name}{ext}'
                 logging.info(f'已将{file_date}添加至文件名头部')
             elif position == 'tail':
-                new_name = f'{date_removed_name}{split_char}{file_date}{ext}'
+                new_name = f'{date_removed_name}{split_char}{file_date}{ext}' if split_char != '年月日' \
+                    else f'{date_removed_name}-{file_date}{ext}'
                 logging.info(f'已将{file_date}添加至文件名尾部')
             new_name_list.append(new_name)
 

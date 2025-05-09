@@ -525,13 +525,6 @@ class RuleInputInterface(MessageBoxBase):
                     self.errorInfoLabel.setHidden(False)
                     return False
 
-            if not self.new_control['splitCharLineEdit'].text() \
-                    and not (self.new_control['dateTypeComboBox'].currentIndex() == 4  # 选择自定义日期且日期输入框为空可以让分隔符为空
-                             and not self.new_control['customDateLineEdit'].text()):
-                self.errorInfoLabel.setText('未输入分隔符！')
-                self.errorInfoLabel.setHidden(False)
-                return False
-
         elif self.new_rule_type == 5:
             if not self.new_control['newNameLineEdit'].text():
                 self.errorInfoLabel.setText('未输入新文件名！')
@@ -685,7 +678,7 @@ class RuleInputInterface(MessageBoxBase):
             dateTypeLayout.addWidget(customDateLineEdit)
             self.new_control['customDateLineEdit'] = customDateLineEdit
 
-            def setLineEditVisible(comboBox, dateLineEdit):
+            def setDateLineEditVisible(comboBox, dateLineEdit):
                 """根据下拉框选择的内容修改日期输入框的可见性"""
                 if comboBox.currentIndex() == 4:
                     dateLineEdit.setVisible(True)
@@ -693,8 +686,8 @@ class RuleInputInterface(MessageBoxBase):
                     dateLineEdit.setVisible(False)
 
             dateTypeComboBox.currentIndexChanged.connect(
-                lambda: setLineEditVisible(self.new_control['dateTypeComboBox'],
-                                           self.new_control['customDateLineEdit']))
+                lambda: setDateLineEditVisible(self.new_control['dateTypeComboBox'],
+                                               self.new_control['customDateLineEdit']))
 
             # 为自定义日期输入框添加日期格式限制
             format_regex = QRegularExpression(r'\d{1,4} \d{1,2} \d{1,2}')
@@ -730,24 +723,47 @@ class RuleInputInterface(MessageBoxBase):
             # 将日期位置输入布局添加至主布局
             self.viewLayout.addLayout(posLayout)
 
-            """日期分隔符输入"""
+            """日期分隔符选择"""
             splitCharLayout = QHBoxLayout()
-            splitCharLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
             self.new_layout_list.append(splitCharLayout)
+            splitCharInputLayout = QVBoxLayout()
+            self.new_layout_list.append(splitCharInputLayout)
 
             # 文本标签
             splitCharLabel = SubtitleLabel(text='年月日分隔符', parent=self)
             splitCharLayout.addWidget(splitCharLabel)
 
-            # 输入框
-            splitCharLineEdit = LineEdit()
-            splitCharLineEdit.setPlaceholderText('请输入分隔符（必填）')
-            splitCharLineEdit.setFixedWidth(200)
-            splitCharLayout.addWidget(splitCharLineEdit)
-            self.new_control['splitCharLineEdit'] = splitCharLineEdit
-            splitCharLineEdit.setValidator(char_validator)  # 设置限制器
+            # 下拉框
+            self.split_char_type = ('-', '_', '空格', '年月日', '自定义')
+            splitCharComboBox = ComboBox()
+            splitCharComboBox.addItems(self.split_char_type)
+            splitCharComboBox.setFixedWidth(110)
+            splitCharInputLayout.addWidget(splitCharComboBox)
+            self.new_control['splitCharComboBox'] = splitCharComboBox
+
+            # 自定义分隔符输入框
+            customSplitCharLineEdit = LineEdit()
+            splitCharInputLayout.addWidget(customSplitCharLineEdit, 0)
+            self.new_control['customSplitCharLineEdit'] = customSplitCharLineEdit
+
+            customSplitCharLineEdit.setFixedWidth(110)
+            customSplitCharLineEdit.setPlaceholderText('请输入分隔符')
+            customSplitCharLineEdit.setValidator(char_validator)
+            customSplitCharLineEdit.setVisible(False)  # 默认不显示，当选择自定义分隔符才显示
+
+            def setSplitCharLineEditVisible(comboBox, dateLineEdit):
+                """根据下拉框选择的内容修改分隔符输入框的可见性"""
+                if comboBox.currentIndex() == 4:
+                    dateLineEdit.setVisible(True)
+                else:
+                    dateLineEdit.setVisible(False)
+
+            splitCharComboBox.currentIndexChanged.connect(
+                lambda: setSplitCharLineEditVisible(self.new_control['splitCharComboBox'],
+                                                    self.new_control['customSplitCharLineEdit']))
 
             # 将日期分隔符输入的布局添加至主布局
+            splitCharLayout.addLayout(splitCharInputLayout)
             self.viewLayout.addLayout(splitCharLayout)
 
         elif self.new_rule_type == 5:
@@ -1099,7 +1115,13 @@ class RuleListInterface(QFrame):
             customize_date = rule.get('date', '')
             date_type = rule.get('date_type', 4 if customize_date else 0)
 
-            reviseRuleWindow.new_control['splitCharLineEdit'].setText(split_char)
+            if split_char in reviseRuleWindow.split_char_type:
+                reviseRuleWindow.new_control['splitCharComboBox'].setCurrentIndex(
+                    reviseRuleWindow.split_char_type.index(split_char))
+            else:
+                reviseRuleWindow.new_control['splitCharComboBox'].setCurrentIndex(4)
+                reviseRuleWindow.new_control['customSplitCharLineEdit'].setText(split_char)
+
             if position == 'head':
                 reviseRuleWindow.new_control['headBtn'].setChecked(True)
             elif position == 'tail':

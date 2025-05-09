@@ -156,10 +156,8 @@ def analise_rule(addRuleWindow):
             'type': 4,
             'name': addRuleWindow.ruleNameLineEdit.text(),
             'desc': addRuleWindow.ruleDescLineEdit.text(),
-            'split_char': addRuleWindow.new_control['splitCharLineEdit'].text(),
             'date_type': addRuleWindow.new_control['dateTypeComboBox'].currentIndex(),
         }
-        logging.info(f'分隔符：{addRuleWindow.new_control["splitCharLineEdit"].text()}')
         logging.info(f'日期种类：{addRuleWindow.new_control["dateTypeComboBox"].text()}')
 
         if addRuleWindow.new_control['headBtn'].isChecked():
@@ -172,6 +170,12 @@ def analise_rule(addRuleWindow):
         if addRuleWindow.new_control['dateTypeComboBox'].currentIndex() == 4:
             rule['date'] = addRuleWindow.new_control['customDateLineEdit'].text()
             logging.info(f'日期：{addRuleWindow.new_control["customDateLineEdit"].text()}')
+
+        if addRuleWindow.new_control['splitCharComboBox'].currentIndex() != 4:
+            rule['split_char'] = addRuleWindow.new_control['splitCharComboBox'].text()
+        else:
+            rule['split_char'] = addRuleWindow.new_control['customSplitCharLineEdit'].text()
+        logging.info(f'分隔符：{rule["split_char"]}')
 
     elif addRuleWindow.new_rule_type == 5:
         rule = {
