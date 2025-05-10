@@ -4,7 +4,6 @@ dist
 build
 filenamechanger.egg-info
 FilenameChanger/logs
-FilenameChanger/test.py
 FilenameChanger/rename_history
 app/
 TodoList.md
