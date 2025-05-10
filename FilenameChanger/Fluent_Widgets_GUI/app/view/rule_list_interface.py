@@ -71,6 +71,7 @@ class InfoDialog(MessageBoxBase):
         super().__init__(parent)
         """基本设置"""
         self.widget.setMinimumWidth(400)  # 设置最小窗口宽度
+        self.widget.setMaximumHeight(550)
 
         self.yesButton.setText('确认')
         self.cancelButton.setHidden(True)
