@@ -155,9 +155,10 @@ class InfoDialog(MessageBoxBase):
             self.extLayout.addWidget(self.extContentLabel)
             self.scrollLayout.addLayout(self.extLayout)
         elif rule['type'] == 3:
-            # 目标字符串
-            self.targetStrLabel = SubtitleLabel(text='原字符串：', parent=self.widget)
-            self.targetStrContentLabel = BodyLabel(text=(rule['target_str']), parent=self.widget)
+            # 匹配字符串
+            self.targetStrLabel = SubtitleLabel(text='匹配字符串：', parent=self.widget)
+            target_str_content = rule['target_str'] if not re.match(r' +', rule['target_str']) else '<空格>'
+            self.targetStrContentLabel = BodyLabel(text=target_str_content, parent=self.widget)
 
             self.targetStrLayout = QHBoxLayout()
             self.targetStrLayout.setSpacing(0)
@@ -185,7 +186,11 @@ class InfoDialog(MessageBoxBase):
 
             # 新字符串
             self.newStrLabel = SubtitleLabel(text='新字符串：', parent=self.widget)
-            self.newStrContentLabel = BodyLabel(text=(rule['new_str']), parent=self.widget)
+            if rule['new_str']:
+                new_str_content = rule['new_str'] if not re.match(r' +', rule['new_str']) else '<空格>'
+            else:
+                new_str_content = '<空>'
+            self.newStrContentLabel = BodyLabel(text=new_str_content, parent=self.widget)
 
             self.newStrLayout = QHBoxLayout()
             self.newStrLayout.setSpacing(0)
@@ -206,7 +211,7 @@ class InfoDialog(MessageBoxBase):
             elif rule['date_type'] == 3:
                 date = '文件访问日期'
             elif rule['date_type'] == 4:
-                date = rule['date']
+                date = rule['date'] if rule['date'] else '<空>'
             self.dateContentLabel = BodyLabel(text=date, parent=self.widget)
 
             self.dateLayout = QHBoxLayout()
@@ -235,7 +240,11 @@ class InfoDialog(MessageBoxBase):
 
             # 分隔符
             self.splitCharLabel = SubtitleLabel(text='分隔符：', parent=self.widget)
-            self.splitCharContentLabel = BodyLabel(text=(rule['split_char']), parent=self.widget)
+            if rule['split_char']:
+                split_char_content = rule['split_char'] if not re.match(r' +', rule['split_char']) else '<空格>'
+            else:
+                split_char_content = '<空>'
+            self.splitCharContentLabel = BodyLabel(text=split_char_content, parent=self.widget)
 
             self.splitCharLayout = QHBoxLayout()
             self.splitCharLayout.setSpacing(0)
