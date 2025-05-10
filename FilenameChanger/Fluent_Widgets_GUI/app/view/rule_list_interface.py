@@ -224,7 +224,7 @@ class InfoDialog(MessageBoxBase):
             self.scrollLayout.addLayout(self.dateLayout)
 
             # 填充位置
-            if rule['date']:  #只有当填充日期不为空时才显示
+            if date != '<空>':  # 只有当填充日期不为空时才显示
                 self.posLabel = SubtitleLabel(text='填充位置：', parent=self.widget)
                 if rule['position'] == 'head':
                     pos = '文件名首'
