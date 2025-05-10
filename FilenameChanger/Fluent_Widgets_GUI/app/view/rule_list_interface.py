@@ -224,20 +224,21 @@ class InfoDialog(MessageBoxBase):
             self.scrollLayout.addLayout(self.dateLayout)
 
             # 填充位置
-            self.posLabel = SubtitleLabel(text='填充位置：', parent=self.widget)
-            if rule['position'] == 'head':
-                pos = '文件名首'
-            elif rule['position'] == 'tail':
-                pos = '文件名尾'
-            self.posContentLabel = BodyLabel(text=pos, parent=self.widget)
+            if rule['date']:  #只有当填充日期不为空时才显示
+                self.posLabel = SubtitleLabel(text='填充位置：', parent=self.widget)
+                if rule['position'] == 'head':
+                    pos = '文件名首'
+                elif rule['position'] == 'tail':
+                    pos = '文件名尾'
+                self.posContentLabel = BodyLabel(text=pos, parent=self.widget)
 
-            self.posLayout = QHBoxLayout()
-            self.posLayout.setSpacing(0)
-            self.posLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+                self.posLayout = QHBoxLayout()
+                self.posLayout.setSpacing(0)
+                self.posLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
-            self.posLayout.addWidget(self.posLabel)
-            self.posLayout.addWidget(self.posContentLabel)
-            self.scrollLayout.addLayout(self.posLayout)
+                self.posLayout.addWidget(self.posLabel)
+                self.posLayout.addWidget(self.posContentLabel)
+                self.scrollLayout.addLayout(self.posLayout)
 
             # 分隔符
             self.splitCharLabel = SubtitleLabel(text='分隔符：', parent=self.widget)
