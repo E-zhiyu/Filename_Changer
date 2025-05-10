@@ -103,6 +103,9 @@ def rename(directory):
     new_name_list = get_new_name_list(selected_rule, old_name_list, directory)  # 生成新文件名
 
     logging.info('开始文件重命名……')
+    if not new_name_list:
+        logging.fatal('严重错误：新文件名列表为空')
+        return -3
     rename_files(directory, old_name_list, new_name_list)  # 执行重命名操作
 
     if old_name_list == new_name_list:  # 判断重命名前后文件名是否完全相同

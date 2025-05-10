@@ -1,5 +1,6 @@
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QFileDialog
 from PyQt6.QtCore import Qt, pyqtSignal
+from pyexpat.errors import messages
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, BodyLabel, setFont, LineEdit, FluentIcon,
                                                                PrimaryPushButton,
@@ -145,6 +146,9 @@ class HomeInterface(QFrame):
                 elif flag == -2:
                     message = '所有文件的新旧文件名都相同\n（本次重命名不会产生新的重命名记录）'
                     title = '失败'
+                elif flag == -3:  # 调试用
+                    message = '新文件名列表为空，请检查代码逻辑！'
+                    title = '严重错误'
                 message_window = MessageBox(title=title, content=message, parent=self)
                 message_window.cancelButton.hide()
                 message_window.buttonLayout.insertStretch(1)
