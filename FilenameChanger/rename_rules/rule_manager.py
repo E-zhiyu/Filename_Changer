@@ -172,10 +172,15 @@ def analise_rule(addRuleWindow):
             logging.info(f'日期：{addRuleWindow.new_control["customDateLineEdit"].text()}')
 
         if addRuleWindow.new_control['splitCharComboBox'].currentIndex() != 4:
-            rule['split_char'] = addRuleWindow.new_control['splitCharComboBox'].text()
+            if rule['date']:
+                rule['split_char'] = addRuleWindow.new_control['splitCharComboBox'].text()
+            else:
+                rule['split_char'] = ''  #如果自定义日期为空，则强制将分隔符置为空
         else:
             rule['split_char'] = addRuleWindow.new_control['customSplitCharLineEdit'].text()
-        logging.info(f'分隔符：{rule["split_char"]}')
+
+
+        logging.info(f'分隔符：{rule["split_char"] if rule["split_char"] else '无'}')
 
     elif addRuleWindow.new_rule_type == 5:
         rule = {

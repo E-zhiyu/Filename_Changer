@@ -522,7 +522,7 @@ class RuleInputInterface(MessageBoxBase):
         self.ruleDescLayout = QHBoxLayout()
 
         self.ruleDescLineEdit.setPlaceholderText('请输入规则描述')
-        self.ruleDescLineEdit.setFixedWidth(250)
+        self.ruleDescLineEdit.setFixedWidth(200)
         self.ruleDescLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
         self.ruleDescLayout.addWidget(self.ruleDescLabel)
@@ -610,7 +610,7 @@ class RuleInputInterface(MessageBoxBase):
             # 输入框
             splitCharLineEdit = LineEdit()
             splitCharLineEdit.setPlaceholderText('请输入分隔符（必填）')
-            splitCharLineEdit.setFixedWidth(170)
+            splitCharLineEdit.setFixedWidth(200)
             splitCharLayout.addWidget(splitCharLineEdit)
             self.new_control['splitCharLineEdit'] = splitCharLineEdit
             splitCharLineEdit.setValidator(char_validator)  # 设置限制器
