@@ -76,15 +76,14 @@ class InfoWindow(MessageBoxBase):
             self.infoLayout.addWidget(newNameLabel)
             self.infoLayout.addSpacing(15)
 
-        # 展示重命名出错的文件
-        if self.error_files:  # 有出错的文件才会显示
-            errorLabel = SubtitleLabel(text='出错的文件', parent=self.widget)
+        # 展示未重命名的文件
+        if self.error_files:
+            errorLabel = SubtitleLabel(text='未重命名的文件', parent=self.widget)
             setFont(errorLabel, 20)
             self.infoLayout.addWidget(errorLabel)
 
             for error_file in self.error_files:
                 errorLabel = BodyLabel(text=error_file, parent=self.infoWidget)
-
                 self.infoLayout.addWidget(errorLabel)
 
 
@@ -103,7 +102,6 @@ class HistoryCard(CardWidget):
         """基本布局设置"""
         self.setFixedHeight(75)
         self.cardLayout = QHBoxLayout()  # 卡片主布局（水平）
-
         self.setLayout(self.cardLayout)
 
         """卡片信息显示"""
@@ -122,16 +120,13 @@ class HistoryCard(CardWidget):
 
         """打开文件夹按钮"""
         self.openFolderBtn = PushButton(FluentIcon.FOLDER, '打开文件夹', self)
-
         self.cardLayout.addWidget(self.openFolderBtn, 0, Qt.AlignmentFlag.AlignRight)
 
         self.openFolderBtn.clicked.connect(self.openFolder)
 
         """卡片详情按钮"""
         self.infoBtn = TransparentToolButton(FluentIcon.INFO)
-
         self.infoBtn.setFixedSize(32, 32)
-
         self.cardLayout.addWidget(self.infoBtn)
 
         self.infoBtn.clicked.connect(self.showInfo)
@@ -143,17 +138,17 @@ class HistoryCard(CardWidget):
 
         self.selected = isSelected
 
-        if not isSelected:
+        if isSelected:
             self.setStyleSheet("""
                 QWidget {
-                    background: transparent;
+                    background: #ff009faa;
                     border-radius: 5px;
                 }
             """)
         else:
             self.setStyleSheet("""
                 QWidget {
-                    background: #ff009faa;
+                    background: transparent;
                     border-radius: 5px;
                 }
             """)
