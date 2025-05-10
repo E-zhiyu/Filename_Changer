@@ -207,4 +207,27 @@ def analise_rule(addRuleWindow):
             rule['position'] = 'tail'
             logging.info(f'位置：尾部')
 
+    elif addRuleWindow.new_rule_type == 6:
+        rule = {
+            'type': 6,
+            'name': addRuleWindow.ruleNameLineEdit.text(),
+            'desc': addRuleWindow.ruleDescLineEdit.text(),
+            'action_scope': addRuleWindow.new_control['actionScopeGroup'].checkedId(),
+            'function': addRuleWindow.new_control['functionGroup'].checkedId()
+        }
+
+        if rule['action_scope'] == 1:
+            logging.info('作用域：仅文件名')
+        elif rule['action_scope'] == 2:
+            logging.info('作用域：仅扩展名')
+        elif rule['action_scope'] == 3:
+            logging.info('作用域：全部')
+
+        if rule['function'] == 1:
+            logging.info('模式：全部大写')
+        elif rule['function'] == 2:
+            logging.info('模式：全部小写')
+        elif rule['function'] == 3:
+            logging.info('模式：首字母大写')
+
     return rule

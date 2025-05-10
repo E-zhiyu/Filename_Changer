@@ -5,7 +5,7 @@ import time
 from FilenameChanger.rename_rules.rule_manager import *
 
 """
-根据规则种类采用不同写入和读取方式的模块
+规则调用模块
 """
 
 
@@ -71,7 +71,7 @@ def use_type_2(selected_rule, old_name_list):
 def use_type_3(selected_rule, old_name_list):
     """
     功能：应用类型三的规则（字符串替换）
-    参数 当前激活的规则：配置文件根字典
+    参数 selected_rule：当前激活的规则
     参数 old_name_list：旧文件名列表
     返回：生成的新文件名列表
     """
@@ -202,7 +202,7 @@ def use_type_4(selected_rule, old_name_list, directory):
 def use_type_5(selected_rule, old_name_list):
     """
     功能：应用类型五的规则（重命名并编号）
-    参数 当前激活的规则：配置文件根字典
+    参数 selected_rule：当前激活的规则
     参数 old_name_list：旧文件名列表
     返回：生成的新文件名列表
     """
@@ -249,5 +249,51 @@ def use_type_5(selected_rule, old_name_list):
 
         new_name_list.append(new_name)
         number += step_length
+
+    return new_name_list
+
+
+def use_type_6(selected_rule, old_name_list):
+    """
+    功能：应用类型六的规则（字母大小写转换）
+    参数 selected_rule：当前激活的规则
+    参数 old_name_list：旧文件名列表
+    返回：生成的新文件名列表
+    """
+    action_scope = selected_rule['action_scope']
+    function = selected_rule['function']
+
+    if action_scope == 1:
+        modify_name = True
+        modify_ext = False
+    elif action_scope == 2:
+        modify_name = False
+        modify_ext = True
+    elif action_scope == 3:
+        modify_name = True
+        modify_ext = True
+
+    new_name_list = []
+    for file in old_name_list:
+        file_name, ext = os.path.splitext(file)
+
+        if modify_name:
+            if function == 1:
+                file_name = file_name.upper()
+            elif function == 2:
+                file_name = file_name.lower()
+            elif function == 3:
+                file_name = file_name.title()
+
+        if modify_ext:
+            if function == 1:
+                ext = ext.upper()
+            elif function == 2:
+                ext = ext.lower()
+            elif function == 3:
+                ext = ext.title()
+
+        new_name = f'{file_name}{ext}'
+        new_name_list.append(new_name)
 
     return new_name_list

@@ -177,6 +177,8 @@ def get_new_name_list(selected_rule, old_name_list, directory):
         new_name_list = use_type_4(selected_rule, old_name_list, directory)
     elif rule_type == 5:
         new_name_list = use_type_5(selected_rule, old_name_list)
+    elif rule_type == 6:
+        new_name_list = use_type_6(selected_rule, old_name_list)
 
     logging.info('已生成新文件名列表')
     return new_name_list

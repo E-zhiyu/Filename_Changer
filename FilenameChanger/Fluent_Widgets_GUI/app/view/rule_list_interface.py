@@ -30,6 +30,9 @@ rule_help_md = """\
 
 ## 5.重命名并编号
 - 功能：将所有文件重命名为同一名称并编号
+
+## 6.字母大小写转换
+- 功能：对文件名中的英文字母进行大小写转换，支持全部大写或小写以及首字母大写，可选择仅修改文件名、仅修改扩展名和修改全部
 """
 
 
@@ -306,6 +309,41 @@ class InfoDialog(MessageBoxBase):
 
             self.scrollLayout.addLayout(posLayout)
 
+        elif rule['type'] == 6:
+            # 作用域
+            actionScopeLabel = SubtitleLabel(text='作用域：', parent=self.widget)
+            if rule['action_scope'] == 1:
+                action_scope_content = '仅文件名'
+            elif rule['action_scope'] == 2:
+                action_scope_content = '仅扩展名'
+            elif rule['action_scope'] == 3:
+                action_scope_content = '全部'
+            actionScopeContentLabel = BodyLabel(text=action_scope_content, parent=self.widget)
+
+            actionScopeLayout = QHBoxLayout()
+            actionScopeLayout.setSpacing(0)
+            actionScopeLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+            actionScopeLayout.addWidget(actionScopeLabel)
+            actionScopeLayout.addWidget(actionScopeContentLabel)
+            self.scrollLayout.addLayout(actionScopeLayout)
+
+            # 功能
+            functionLabel = SubtitleLabel(text='功能：', parent=self.widget)
+            if rule['function'] == 1:
+                function_content = '全部大写'
+            elif rule['function'] == 2:
+                function_content = '全部小写'
+            elif rule['function'] == 3:
+                function_content = '首字母大写'
+            functionContentLabel = BodyLabel(text=function_content, parent=self.widget)
+
+            functionLayout = QHBoxLayout()
+            functionLayout.setSpacing(0)
+            functionLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+            functionLayout.addWidget(functionLabel)
+            functionLayout.addWidget(functionContentLabel)
+            self.scrollLayout.addLayout(functionLayout)
+
 
 class RuleCard(CardWidget):
     """定义规则卡片"""
@@ -441,7 +479,14 @@ class RuleInputInterface(MessageBoxBase):
         self.yesButton.setEnabled(False)  # 初始将确认按钮设置为禁用状态，防止什么都没输入就点击确认
 
         """选择规则种类"""
-        all_rule_type = ('1.交换分隔符前后内容', '2.修改后缀名', '3.修改特定字符串', '4.日期替换', '5.重命名并编号')
+        all_rule_type = (
+            '1.交换分隔符前后内容',
+            '2.修改后缀名',
+            '3.修改特定字符串',
+            '4.日期替换',
+            '5.重命名并编号',
+            '6.字母大小写转换'
+        )
         self.ruleTypeComboBox = ComboBox()
         self.ruleTypeLabel = SubtitleLabel(text='规则种类', parent=self.widget)
         self.ruleTypeLayout = QHBoxLayout()
@@ -531,7 +576,7 @@ class RuleInputInterface(MessageBoxBase):
     def refreshLayout(self):
         """选择的规则类型改变时改变窗口布局"""
         self.yesButton.setEnabled(True)  # 一旦选择了规则类型就将该按钮设置为可用
-        self.new_rule_type = int(self.ruleTypeComboBox.currentText()[:1])
+        self.new_rule_type = self.ruleTypeComboBox.currentIndex() + 1
         self.new_control.clear()
 
         """创建输入框限制器，防止输入文件名不能存在的字符"""
@@ -867,6 +912,69 @@ class RuleInputInterface(MessageBoxBase):
             # 将日期位置输入布局添加至主布局
             self.viewLayout.addLayout(posLayout)
 
+        elif self.new_rule_type == 6:
+            """作用域选择"""
+            actionScopeLayout = QHBoxLayout()
+            self.new_layout_list.append(actionScopeLayout)
+
+            # 文本标签
+            actionScopeLabel = SubtitleLabel(text='作用域', parent=self)
+            actionScopeLayout.addWidget(actionScopeLabel)
+
+            # 单选按钮
+            actionScopeBtnLayout = QHBoxLayout()
+            actionScopeBtnLayout.setAlignment(Qt.AlignmentFlag.AlignRight)
+            actionScopeBtnLayout.setSpacing(5)
+            self.new_layout_list.append(actionScopeBtnLayout)
+
+            fileNameBtn = RadioButton('仅文件名')
+            extBtn = RadioButton('仅扩展名')
+            bothBtn = RadioButton('全部')
+            actionScopeGroup = QButtonGroup(self)
+            self.new_control['actionScopeGroup'] = actionScopeGroup
+            actionScopeGroup.addButton(fileNameBtn, 1)
+            actionScopeGroup.addButton(extBtn, 2)
+            actionScopeGroup.addButton(bothBtn, 3)
+            fileNameBtn.setChecked(True)  # 默认选中文件名按钮
+
+            actionScopeBtnLayout.addWidget(fileNameBtn)
+            actionScopeBtnLayout.addWidget(extBtn)
+            actionScopeBtnLayout.addWidget(bothBtn)
+
+            actionScopeLayout.addLayout(actionScopeBtnLayout)
+            self.viewLayout.addLayout(actionScopeLayout)
+
+            """作用模式选择"""
+            functionLayout = QHBoxLayout()
+            self.new_layout_list.append(functionLayout)
+
+            # 文本标签
+            functionLabel = SubtitleLabel(text='模式', parent=self)
+            functionLayout.addWidget(functionLabel)
+
+            # 单选按钮
+            functionBtnLayout = QHBoxLayout()
+            functionBtnLayout.setAlignment(Qt.AlignmentFlag.AlignRight)
+            functionBtnLayout.setSpacing(5)
+            self.new_layout_list.append(functionBtnLayout)
+
+            upperBtn = RadioButton('全部大写')
+            lowerBtn = RadioButton('全部小写')
+            titleBtn = RadioButton('单词首字母大写')
+            functionGroup = QButtonGroup(self)
+            self.new_control['functionGroup'] = functionGroup
+            functionGroup.addButton(upperBtn, 1)
+            functionGroup.addButton(lowerBtn, 2)
+            functionGroup.addButton(titleBtn, 3)
+            upperBtn.setChecked(True)
+
+            functionBtnLayout.addWidget(upperBtn)
+            functionBtnLayout.addWidget(lowerBtn)
+            functionBtnLayout.addWidget(titleBtn)
+
+            functionLayout.addLayout(functionBtnLayout)
+            self.viewLayout.addLayout(functionLayout)
+
         """验证不通过时的警告文本框"""
         setFont(self.errorInfoLabel, 15)
         self.errorInfoLabel.setStyleSheet("color: rgb(255, 100, 100);")
@@ -1079,7 +1187,7 @@ class RuleListInterface(QFrame):
         logging.info('进行操作：修改规则')
         reviseRuleWindow = RuleInputInterface(self)
 
-        # 设置输入窗口的基本信息
+        """设置输入窗口的基本信息"""
         type = rule['type']
         name = rule['name']
         desc = rule['desc']
@@ -1088,7 +1196,7 @@ class RuleListInterface(QFrame):
         reviseRuleWindow.ruleNameLineEdit.setText(name)
         reviseRuleWindow.ruleDescLineEdit.setText(desc)
 
-        # 设置输入窗口的规则关键参数
+        """设置输入窗口的规则关键参数"""
         if type == 1:
             split_char = rule['split_char']
 
@@ -1140,9 +1248,16 @@ class RuleListInterface(QFrame):
             reviseRuleWindow.new_control['numTypeComboBox'].setCurrentIndex(reviseRuleWindow.num_types.index(num_type))
             reviseRuleWindow.new_control['startNumLineEdit'].setText(start_num)
             reviseRuleWindow.new_control['stepLengthLineEdit'].setText(step_length)
+        elif type == 6:
+            action_scope = rule['action_scope']
+            function = rule['function']
 
+            reviseRuleWindow.new_control['actionScopeGroup'].button(action_scope).setChecked(True)
+            reviseRuleWindow.new_control['functionGroup'].button(function).setChecked(True)
+
+        """窗口关闭后执行的操作"""
         reviseRuleWindow.submit_data.connect(
-            lambda: revise_rule(self.rule_dict, revised_rule, index))  # 将发射的信号传递给信号处理函数
+            lambda: revise_rule(self.rule_dict, revised_rule, index))  # 设置信号传值连接到的函数
 
         if reviseRuleWindow.exec():  # 显示窗口
             logging.info('用户确认修改规则')
