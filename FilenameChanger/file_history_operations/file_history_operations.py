@@ -1,4 +1,5 @@
 # file_history_operations/file_history_operations.py
+import logging
 import platform  # 判断系统类型
 import stat  # 判断文件属性
 
@@ -136,6 +137,9 @@ def rename_files(directory, old_name_list, new_name_list, with_record_history=Tr
             except FileExistsError:
                 logging.error(f'【错误】文件“{old_name}”重命名后将导致重名')
                 new_record_dict['error_files'].append(f'【文件重名】{old_name}')
+            except PermissionError:
+                logging.error(f'【文件被占用】文件“{old_name}”被其他程序占用')
+                new_record_dict['error_files'].append(f'【文件被占用】{old_name}')
             else:
                 logging.info(f'【成功】{old_name} -> {new_name}')
                 if with_record_history:
@@ -143,7 +147,8 @@ def rename_files(directory, old_name_list, new_name_list, with_record_history=Tr
                     new_record_dict['new_name_list'].append(new_name)
 
     """将重命名历史记录保存至文件中"""
-    if new_record_dict['new_name_list'] and with_record_history:  # 只有新旧文件名不相同且启用了记录功能才会记录重命名历史
+    if (new_record_dict['new_name_list'] or new_record_dict['error_files']
+            and with_record_history):
         history_list.insert(0, new_record_dict)
         with open(history_file_path, 'w', encoding='utf-8') as f:
             json.dump(history_list, f, ensure_ascii=False, indent=4)

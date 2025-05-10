@@ -63,9 +63,10 @@ class InfoWindow(MessageBoxBase):
     def initInfoView(self):
         """初始化详情展示区域"""
         # 展示成功重命名的文件
-        successLabel = SubtitleLabel(text='成功重命名的文件', parent=self.widget)
-        setFont(successLabel, 20)
-        self.infoLayout.addWidget(successLabel)
+        if self.new_name_list:
+            successLabel = SubtitleLabel(text='成功重命名的文件', parent=self.widget)
+            setFont(successLabel, 20)
+            self.infoLayout.addWidget(successLabel)
 
         for index in range(len(self.old_name_list)):
             oldNameLabel = BodyLabel(text=f'原名：{self.old_name_list[index]}', parent=self.infoWidget)
