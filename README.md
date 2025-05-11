@@ -30,13 +30,6 @@
 5. 重命名为同一文件名并编号，可自定义起始编号和正整步长
 6. 调整英文字母大小写
 
-## 安装和使用
-
-以下方法选择其一：
-
-1. 使用git克隆该仓库，运行主文件夹内的main.py
-2. 从Release下载已打包好的程序
-
 ## 使用的开源项目
 
 GUI界面：[QFluentWidgets](https://github.com/zhiyiYo/PyQt-Fluent-Widgets)
