@@ -243,7 +243,8 @@ class InfoInterface(QFrame):
         self.widgetLayout.addWidget(self.authorLabel, 0, Qt.AlignmentFlag.AlignCenter)
 
         """项目地址"""
-        self.urlBtn = HyperlinkButton(url='https://github.com/E-zhiyu/Filename_Changer', text='查看源代码')
+        self.urlBtn = HyperlinkButton(icon=FluentIcon.LINK, url='https://github.com/E-zhiyu/Filename_Changer',
+                                      text='查看源代码')
 
         self.widgetLayout.addWidget(self.urlBtn, 0, Qt.AlignmentFlag.AlignCenter)
 
