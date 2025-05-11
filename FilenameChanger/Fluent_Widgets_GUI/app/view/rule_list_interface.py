@@ -70,7 +70,7 @@ class InfoDialog(MessageBoxBase):
     def __init__(self, rule, parent=None):
         super().__init__(parent)
         """基本设置"""
-        self.widget.setMinimumWidth(400)  # 设置最小窗口宽度
+        self.widget.setFixedWidth(450)
         self.widget.setMaximumHeight(550)
 
         self.yesButton.setText('确认')
