@@ -135,14 +135,31 @@ class InfoDialog(MessageBoxBase):
             # 分隔符
             self.splitCharLabel = SubtitleLabel(text='分隔符：', parent=self.widget)
             self.splitCharContentLabel = BodyLabel(text=(rule['split_char']), parent=self.widget)
-
             self.splitCharLayout = QHBoxLayout()
+
             self.splitCharLayout.setSpacing(0)
             self.splitCharLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
             self.splitCharLayout.addWidget(self.splitCharLabel)
             self.splitCharLayout.addWidget(self.splitCharContentLabel)
             self.scrollLayout.addLayout(self.splitCharLayout)
+
+            # 是否使用正则表达式
+            enable_re = rule.get('enable_re', False)
+
+            self.enableReLabel = SubtitleLabel(text='使用正则表达式：', parent=self.widget)
+            if enable_re:
+                self.enableReContentLabel = BodyLabel(text='是', parent=self.widget)
+            else:
+                self.enableReContentLabel = BodyLabel(text='否', parent=self.widget)
+            self.enableReLayout = QHBoxLayout()
+
+            self.enableReLayout.setSpacing(0)
+            self.enableReLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+
+            self.enableReLayout.addWidget(self.enableReLabel)
+            self.enableReLayout.addWidget(self.enableReContentLabel)
+            self.scrollLayout.addLayout(self.enableReLayout)
         elif rule['type'] == 2:
             # 新扩展名
             self.extLabel = SubtitleLabel(text='新扩展名：', parent=self.widget)
@@ -611,8 +628,10 @@ class RuleInputInterface(MessageBoxBase):
         if self.new_rule_type == 1:
             """分隔符输入"""
             splitCharLayout = QHBoxLayout()
-            splitCharLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
             self.new_layout_list.append(splitCharLayout)
+            splitCharInputLayout = QVBoxLayout()
+            self.new_layout_list.append(splitCharInputLayout)
+            splitCharLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
             # 文本标签
             splitCharLabel = SubtitleLabel(text='分隔符', parent=self)
@@ -622,11 +641,17 @@ class RuleInputInterface(MessageBoxBase):
             splitCharLineEdit = LineEdit()
             splitCharLineEdit.setPlaceholderText('请输入分隔符（必填）')
             splitCharLineEdit.setFixedWidth(200)
-            splitCharLayout.addWidget(splitCharLineEdit)
+            splitCharInputLayout.addWidget(splitCharLineEdit)
             self.new_control['splitCharLineEdit'] = splitCharLineEdit
             splitCharLineEdit.setValidator(char_validator)  # 设置限制器
 
+            # 启用正则表达式复选框
+            enableReCheckBox = CheckBox(text='使用正则表达式', parent=self.widget)
+            self.new_control['enableReCheckBox'] = enableReCheckBox
+            splitCharInputLayout.addWidget(enableReCheckBox)
+
             # 将新控件的水平布局添加到主布局
+            splitCharLayout.addLayout(splitCharInputLayout)
             self.viewLayout.addLayout(splitCharLayout)
 
         elif self.new_rule_type == 2:
@@ -1210,8 +1235,12 @@ class RuleListInterface(QFrame):
         """设置输入窗口的规则关键参数"""
         if type == 1:
             split_char = rule['split_char']
+            enable_re = rule.get('enable_re', False)
 
             reviseRuleWindow.new_control['splitCharLineEdit'].setText(split_char)
+
+            if enable_re:
+                reviseRuleWindow.new_control['enableReCheckBox'].setChecked(True)
         elif type == 2:
             new_ext = rule['new_ext']
 

@@ -128,9 +128,14 @@ def analise_rule(addRuleWindow):
             'type': 1,
             'name': addRuleWindow.ruleNameLineEdit.text(),
             'desc': addRuleWindow.ruleDescLineEdit.text(),
-            'split_char': addRuleWindow.new_control['splitCharLineEdit'].text()
+            'split_char': addRuleWindow.new_control['splitCharLineEdit'].text(),
+            'enable_re':addRuleWindow.new_control['enableReCheckBox'].isChecked()
         }
         logging.info(f'分隔符：{addRuleWindow.new_control["splitCharLineEdit"].text()}')
+        if rule['enable_re']:
+            logging.info('使用正则表达式：是')
+        else:
+            logging.info('使用正则表达式：否')
     elif addRuleWindow.new_rule_type == 2:
         rule = {
             'type': 2,

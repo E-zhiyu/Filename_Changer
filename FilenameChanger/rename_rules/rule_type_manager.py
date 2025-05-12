@@ -17,31 +17,32 @@ def use_type_1(selected_rule, old_name_list):
     返回：生成的新文件名列表
     """
     split_char = selected_rule['split_char']
-    old_filename_list = []  # 文件名列表
-    old_ext_list = []  # 扩展名列表
-    for file in old_name_list:
-        signal_name, signal_ext = os.path.splitext(file)  # 分离文件名和扩展名
+    enable_re = selected_rule.get('enable_re', False)
 
-        old_filename_list.append(signal_name)
-        old_ext_list.append(signal_ext)
-
-    front = []  # 前半部分文件名
-    behind = []  # 后半部分文件名
-    for signal_name in old_filename_list:
-        parts = signal_name.split(split_char, maxsplit=1)  # 将拆分的两个部分存放至列表parts中
-        f = parts[0]
-        b = parts[1] if len(parts) > 1 else ''  # 默认第二部分为空，用于处理无法拆分的文件名
-        front.append(f)
-        behind.append(b)
     new_name_list = []
-    for f, b, e in zip(front, behind, old_ext_list):
-        f = f.strip()  # 去除前后空格
-        if b:
-            b = b.strip()  # 去除前后空格
-            new = f'{b} {split_char} {f}{e}'  # 将f,b前后调换生成新文件名
+    for file in old_name_list:
+        file_name, ext = os.path.splitext(file)  # 分离文件名和扩展名
+
+        if enable_re:
+            parts = re.split(split_char, file_name, maxsplit=1)
+            if len(parts) == 2:
+                result = re.findall(split_char, file_name)[0]
         else:
-            new = f'{f}{e}'  # 若没有第二部分文件名则保持原状
-        new_name_list.append(new)  # 将新名字并入新文件名列表
+            parts = file_name.split(split_char, maxsplit=1)
+        front = parts[0]
+        behind = parts[1] if len(parts) > 1 else ''  # 默认第二部分为空，用于处理无法拆分的文件名
+
+        front = front.strip()  # 去除前后空格
+        if behind:
+            behind = behind.strip()  # 去除前后空格
+
+            if enable_re:
+                new_name = f'{behind} {result} {front}{ext}'
+            else:
+                new_name = f'{behind} {split_char} {front}{ext}'  # 将f,b前后调换生成新文件名
+        else:
+            new_name = f'{front}{ext}'  # 若没有第二部分文件名则保持原状
+        new_name_list.append(new_name)  # 将新名字并入新文件名列表
 
     return new_name_list
 
