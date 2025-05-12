@@ -36,6 +36,41 @@ rule_help_md = """\
 """
 
 
+class SpaceAwareLineEdit(LineEdit):
+    """使空格更明显的文本框"""
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        setFont(self,13)  #防止空格符显示异常
+        self.textChanged.connect(self.visualize_spaces)
+        self._actual_text = ""
+
+    def visualize_spaces(self, text):
+        # 保存光标位置
+        cursor_pos = self.cursorPosition()
+
+        # 计算实际文本（去掉可视化字符）
+        if "␣" in text:
+            self._actual_text = text.replace("␣", " ")
+        else:
+            self._actual_text = text
+
+        # 可视化显示
+        visualized = self._actual_text.replace(" ", "␣")
+
+        # 阻止信号循环
+        self.blockSignals(True)
+        self.setText(visualized)
+        self.blockSignals(False)
+
+        # 恢复光标位置
+        self.setCursorPosition(cursor_pos)
+
+    def text(self):
+        """重写text()方法返回实际文本"""
+        return self._actual_text
+
+
 class RuleHelpWindow(MessageBoxBase):
     """显示规则说明的窗口"""
 
@@ -638,7 +673,7 @@ class RuleInputInterface(MessageBoxBase):
             splitCharLayout.addWidget(splitCharLabel)
 
             # 输入框
-            splitCharLineEdit = LineEdit()
+            splitCharLineEdit = SpaceAwareLineEdit()
             splitCharLineEdit.setPlaceholderText('请输入分隔符（必填）')
             splitCharLineEdit.setFixedWidth(200)
             splitCharInputLayout.addWidget(splitCharLineEdit)
@@ -688,7 +723,7 @@ class RuleInputInterface(MessageBoxBase):
             oldStrLayout.addWidget(oldStrLabel)
 
             # 输入框
-            oldStrLineEdit = LineEdit()
+            oldStrLineEdit = SpaceAwareLineEdit()
             oldStrLineEdit.setPlaceholderText('请输入匹配字符串（必填）')
             oldStrLineEdit.setFixedWidth(200)
             oldStrInputLayout.addWidget(oldStrLineEdit)
@@ -818,7 +853,7 @@ class RuleInputInterface(MessageBoxBase):
             self.new_control['splitCharComboBox'] = splitCharComboBox
 
             # 自定义分隔符输入框
-            customSplitCharLineEdit = LineEdit()
+            customSplitCharLineEdit = SpaceAwareLineEdit()
             splitCharInputLayout.addWidget(customSplitCharLineEdit, 0)
             self.new_control['customSplitCharLineEdit'] = customSplitCharLineEdit
 
