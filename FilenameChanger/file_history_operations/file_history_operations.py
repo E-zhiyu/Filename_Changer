@@ -64,7 +64,7 @@ def hidden_or_protected(directory):
     return False
 
 
-def get_files_in_directory(directory):
+def scan_files(directory):
     """
     功能：扫描目标路径的所有文件名
     参数 directory：目标路径
@@ -84,10 +84,14 @@ def get_files_in_directory(directory):
         return old_name
 
 
-def rename(directory):
+def rename(directory, file_list):
     """
     功能：实现“文件重命名”操作
     """
+    if not file_list:
+        logging.info(f'文件夹：“{directory}”为空')
+        return 0
+
     config_dict = load_config()  # 重命名时加载已保存的规则
     selected_rule = config_dict['rules'][config_dict['selected_index']]
     if not config_dict['rules']:  # 若规则为空，则结束本函数
@@ -97,18 +101,15 @@ def rename(directory):
         f'当前活跃的规则为“规则{config_dict['selected_index'] + 1}”，'
         f'规则种类：{selected_rule['type']}')
 
-    old_name_list = get_files_in_directory(directory)  # old_file_names列表将包含该目录下所有文件的文件名（包含扩展名）
-    if not old_name_list:  # 判断文件夹是否为空，为空则返回0
-        return 0
-    new_name_list = get_new_name_list(selected_rule, old_name_list, directory)  # 生成新文件名
+    new_name_list = get_new_name_list(selected_rule, file_list, directory)  # 生成新文件名
 
     logging.info('开始文件重命名……')
     if not new_name_list:
         logging.fatal('严重错误：新文件名列表为空')
         return -3
-    rename_files(directory, old_name_list, new_name_list)  # 执行重命名操作
+    rename_files(directory, file_list, new_name_list)  # 执行重命名操作
 
-    if old_name_list == new_name_list:  # 判断重命名前后文件名是否完全相同
+    if file_list == new_name_list:  # 判断重命名前后文件名是否完全相同
         return -2
     else:
         return 1

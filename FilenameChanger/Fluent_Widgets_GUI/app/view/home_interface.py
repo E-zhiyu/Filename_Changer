@@ -1,13 +1,159 @@
-from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QFileDialog
+from operator import index
+
+from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QFileDialog, QSizePolicy
 from PyQt6.QtCore import Qt, pyqtSignal
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, BodyLabel, setFont, LineEdit, FluentIcon,
-                                                               PrimaryPushButton,
-                                                               MessageBox, ToolButton)
-from FilenameChanger.file_history_operations.file_history_operations import (is_directory_usable, rename,
-                                                                             cancel_rename_operation)
+                                                               PrimaryPushButton, SmoothScrollArea, MessageBox,
+                                                               ToolButton, CardWidget, CheckBox, MessageBoxBase)
 
+from FilenameChanger.file_history_operations.file_history_operations import (is_directory_usable, rename,
+                                                                             cancel_rename_operation, scan_files)
 from FilenameChanger.log.log_recorder import *
+
+
+class FileCard(CardWidget):
+    """文件卡片"""
+    selectSignal = pyqtSignal()
+
+    def __init__(self, file_name, selected: bool, index: int, parent=None):
+        super().__init__(parent)
+        self.parent = parent
+        self.file_name = file_name
+        self.index = index
+
+        """基本设置"""
+        self.setFixedHeight(37)
+
+        self.viewLayout = QHBoxLayout()
+        self.setLayout(self.viewLayout)
+        self.viewLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.viewLayout.setSpacing(0)
+
+        """是否选中复选框"""
+        self.selectedCheckBox = CheckBox()
+        self.selectedCheckBox.setFixedWidth(10)
+        if selected:
+            self.selectedCheckBox.setChecked(True)  # 默认所有文件都是选中状态
+        self.viewLayout.addWidget(self.selectedCheckBox)
+        self.selectedCheckBox.stateChanged.connect(self.selectFile)
+
+        """文件名文本标签"""
+        filenameLabel = BodyLabel(self.file_name, self)
+        self.viewLayout.addWidget(filenameLabel)
+
+    def selectFile(self):
+        """切换文件的选中状态"""
+        if self.selectedCheckBox.checkState() == Qt.CheckState.Checked:
+            if self.file_name not in self.parent.selected_file_list:  # 只有文件名不在选中列表时才添加
+                self.parent.selected_file_list.append(self.file_name)
+        else:
+            try:
+                self.parent.selected_file_list.remove(self.file_name)
+            except ValueError:
+                print(f'{self.file_name}不在选中列表中')  # 仅用于调试
+
+        self.selectSignal.emit()
+
+    def switchSelected(self):
+        """切换文件选中状态"""
+        if self.selectedCheckBox.isChecked():
+            self.selectedCheckBox.setChecked(False)
+        else:
+            self.selectedCheckBox.setChecked(True)
+
+    def setCardChecked(self, checked: bool):
+        """设置文件选中状态"""
+        if checked:
+            self.selectedCheckBox.setChecked(True)
+        else:
+            self.selectedCheckBox.setChecked(False)
+
+
+class SelectAllCheckBox(CheckBox):
+    """文件列表的全选复选框"""
+
+    def nextCheckState(self):  # 未选中和半选中时点击切换为选中，选中时点击切换为未选中
+        if self.checkState() == Qt.CheckState.Unchecked:
+            self.setCheckState(Qt.CheckState.Checked)
+        elif self.checkState() == Qt.CheckState.PartiallyChecked:
+            self.setCheckState(Qt.CheckState.Checked)
+        else:
+            self.setCheckState(Qt.CheckState.Unchecked)
+
+
+class FileListInterface(MessageBoxBase):
+    """文件列表界面"""
+
+    def __init__(self, scan_file_list, selected_file_list, parent=None):
+        super().__init__(parent)
+        self.widget.setFixedHeight(700)
+        self.widget.setFixedWidth(600)
+
+        self.scan_file_list = scan_file_list
+        self.selected_file_list = selected_file_list
+        self.file_card_list = []
+        self.yesButton.setText('确定')
+        self.cancelButton.setText('取消')
+
+        """标题标签"""
+        self.titleLabel = SubtitleLabel(text='文件列表', parent=self.widget)
+        self.viewLayout.addWidget(self.titleLabel)
+
+        """全选复选框"""
+        self.selectAllCheckBox = SelectAllCheckBox('全选')
+        self.selectAllCheckBox.setTristate(True)  # 复选框启用三态
+        self.setCheckBoxState()
+
+        self.selectAllCheckBox.stateChanged.connect(self.selectAllFile)
+
+        self.viewLayout.addWidget(self.selectAllCheckBox)
+
+        """文件展示区域"""
+        self.fileScrollArea = SmoothScrollArea()
+        self.fileWidget = QWidget(self)
+        self.fileScrollArea.setWidget(self.fileWidget)
+        self.fileScrollArea.setWidgetResizable(True)
+
+        self.fileViewLayout = QVBoxLayout(self.fileWidget)
+        self.fileViewLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
+
+        self.viewLayout.addWidget(self.fileScrollArea)
+
+        self.initView()
+
+    def initView(self):
+        """初始化文件展示"""
+        index = 0
+        for file_name in self.scan_file_list:
+            if file_name in self.selected_file_list:
+                selected = True
+            else:
+                selected = False
+            card = FileCard(file_name, selected, index, self)
+            card.selectSignal.connect(self.setCheckBoxState)
+            self.file_card_list.append(card)
+            card.clicked.connect(lambda card_index=card.index: self.file_card_list[card_index].switchSelected())
+            self.fileViewLayout.addWidget(card)
+            index += 1
+
+    def setCheckBoxState(self):
+        """设置全选复选框的状态"""
+        if sorted(self.scan_file_list) == sorted(self.selected_file_list):
+            self.selectAllCheckBox.setCheckState(Qt.CheckState.Checked)
+        elif self.selected_file_list:
+            self.selectAllCheckBox.setCheckState(Qt.CheckState.PartiallyChecked)
+        else:
+            self.selectAllCheckBox.setCheckState(Qt.CheckState.Unchecked)
+
+    def selectAllFile(self):
+        """文件全选或全不选"""
+        if self.selectAllCheckBox.checkState() == Qt.CheckState.Checked:
+            for card in self.file_card_list:
+                card.setCardChecked(True)
+        elif self.selectAllCheckBox.checkState() == Qt.CheckState.Unchecked:
+            for card in self.file_card_list:
+                card.setCardChecked(False)
 
 
 class HomeInterface(QFrame):
@@ -16,9 +162,11 @@ class HomeInterface(QFrame):
     # 定义触发历史记录列表刷新布局方法的信号
     refreshView_signal = pyqtSignal()
 
-    def __init__(self, text: str, parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.setObjectName('HomeInterface')  # 设置全局唯一对象名，否则不能将该界面添加至导航栏
+        self.scan_file = None
+        self.selected_file_list = None
 
         """基本布局设置"""
         self.totalWidget = QWidget(self)  # 创建一个总容器存放所有控件，使得调整窗口大小的时候各控件不会相互分离
@@ -30,33 +178,43 @@ class HomeInterface(QFrame):
         self.interfaceLayout.addWidget(self.totalWidget, 0, Qt.AlignmentFlag.AlignCenter)
 
         """标题标签"""
-        self.label = SubtitleLabel(text, self.totalWidget)
+        self.label = SubtitleLabel(text='文件更名器', parent=self.totalWidget)
         setFont(self.label, 40)
 
-        self.widgetLayout.addWidget(self.label, 1, Qt.AlignmentFlag.AlignCenter)
+        self.widgetLayout.addWidget(self.label, 0, Qt.AlignmentFlag.AlignCenter)
         self.widgetLayout.addSpacing(15)
 
-        """文件夹路径文本框"""
-        self.tipLabel = BodyLabel(self.totalWidget)  # 提示用户是否输入正确的路径
+        """文件夹选择"""
+        # 文本框
         self.folderLineEdit = LineEdit(self.totalWidget)
-        self.folderSelectBtn = ToolButton(FluentIcon.FOLDER)
-
-        self.folderSelectLayout = QHBoxLayout()  # 文件夹选择布局器（水平）
+        self.lineEditAndBtnLayout = QHBoxLayout()  # 文件夹选择布局器（水平）
         self.lineEditLayout = QVBoxLayout()  # 文本框布局器（垂直）
+        self.lineEditLayout.addLayout(self.lineEditAndBtnLayout)
 
-        self.folderLineEdit.setFixedWidth(300)
+        self.lineEditAndBtnLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.folderLineEdit.setFixedWidth(250)
         self.folderLineEdit.setClearButtonEnabled(True)
         self.folderLineEdit.setPlaceholderText('请选择一个文件夹')  # 设置文本框提示文本
+
+        self.lineEditAndBtnLayout.addWidget(self.folderLineEdit)
+
+        # 文件夹浏览按钮
+        self.folderSelectBtn = ToolButton(FluentIcon.FOLDER)
         self.folderSelectBtn.setFixedHeight(34)
+        self.lineEditAndBtnLayout.addWidget(self.folderSelectBtn)
+
+        # 文件查看按钮
+        self.fileListBtn = ToolButton(FluentIcon.ALIGNMENT)
+        self.fileListBtn.setFixedHeight(34)
+        self.lineEditAndBtnLayout.addWidget(self.fileListBtn)
+
+        # 文件夹路径有效性提示标签
+        self.tipLabel = BodyLabel(self.totalWidget)  # 提示用户是否输入正确的路径
         setFont(self.tipLabel, 17)
+        self.lineEditLayout.addWidget(self.tipLabel, 0, Qt.AlignmentFlag.AlignCenter)
 
-        self.folderSelectLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        self.widgetLayout.addLayout(self.lineEditLayout, 1)
-        self.folderSelectLayout.addWidget(self.folderLineEdit)
-        self.folderSelectLayout.addWidget(self.folderSelectBtn)
-        self.lineEditLayout.addLayout(self.folderSelectLayout, 1)
-        self.lineEditLayout.addWidget(self.tipLabel, 1, Qt.AlignmentFlag.AlignCenter)  # 让提示标签以水平居中的方式加入布局
+        # 将整体布局添加至主布局器
+        self.widgetLayout.addLayout(self.lineEditLayout)
         self.widgetLayout.addSpacing(10)
 
         """功能按钮"""
@@ -113,14 +271,21 @@ class HomeInterface(QFrame):
                 self.tipLabel.setStyleSheet("""QLabel{color: rgb(72, 180, 72);
                                               text-shadow: 2px 2px 4px black;}""")
                 self.tipLabel.setText('文件夹路径有效！')
+
+                self.scan_file = scan_files(targetDirectory)
+                self.selected_file_list = list(self.scan_file)
             elif flag == 0:
                 self.renameBtn.setEnabled(False)
                 self.tipLabel.setStyleSheet("""QLabel{color: rgb(255, 100, 100);
                                                 text-shadow: 2px 2px 4px black;}""")
                 self.tipLabel.setText('这不是一个有效的文件夹！')
+
+                self.scan_file.clear()
             elif flag == -1:
                 self.renameBtn.setEnabled(False)
                 self.tipLabel.clear()
+
+                self.scan_file.clear()
 
         self.folderLineEdit.textChanged.connect(dirLineEdit_function)
 
@@ -131,32 +296,31 @@ class HomeInterface(QFrame):
                 logging.info('用户确认重命名')
 
                 targetDirectory = self.folderLineEdit.text().strip('\"')
-                flag = rename(targetDirectory)
+                flag = rename(targetDirectory, self.selected_file_list)
                 # 显示一个消息提示框
                 if flag == 1:
-                    message = '文件重命名完成！'
                     title = '成功'
+                    message = '文件重命名完成！'
+                    self.refreshView_signal.emit()  # 重命名成功才将按钮点击的信号发送出去
                 elif flag == 0:
-                    message = '文件夹不存在或为空！'
+                    message = '文件夹为空！'
                     title = '失败'
                 elif flag == -1:
+                    title = '失败'
                     message = '规则列表为空！请先写入规则！'
-                    title = '失败'
                 elif flag == -2:
-                    message = '所有文件的新旧文件名都相同\n（本次重命名不会产生新的重命名记录）'
                     title = '失败'
-                elif flag == -3:  # 调试用
-                    message = '新文件名列表为空，请检查代码逻辑！'
+                    message = '所有文件的新旧文件名都相同，本次重命名不会产生新的重命名记录'
+                elif flag == -3:  # 仅用于调试
                     title = '严重错误'
+                    message = '新文件名列表为空，请检查代码逻辑！'
+
                 message_window = MessageBox(title=title, content=message, parent=self)
                 message_window.cancelButton.hide()
                 message_window.buttonLayout.insertStretch(1)
                 message_window.yesButton.setText("确认")
                 message_window.exec()
 
-                # 重命名成功才将按钮点击的信号发送出去
-                if flag == 1:
-                    self.refreshView_signal.emit()
             else:
                 logging.info('用户取消重命名')
 
@@ -204,3 +368,13 @@ class HomeInterface(QFrame):
                 self.folderLineEdit.setText(folder_path)
 
         self.folderSelectBtn.clicked.connect(select_folder_callback)
+
+        # 文件列表按钮功能实现
+        def file_list_callback():
+            if self.scan_file:
+                fileListInterface = FileListInterface(self.scan_file, self.selected_file_list, self)
+                fileListInterface.exec()
+                self.selected_file_list = fileListInterface.selected_file_list
+                self.selected_file_list.sort()
+
+        self.fileListBtn.clicked.connect(file_list_callback)
