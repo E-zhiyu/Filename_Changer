@@ -25,7 +25,7 @@ class MainWindow(FluentWindow):
         setTheme(Theme.AUTO)
 
         # 实例化不同的子界面
-        self.homeInterface = HomeInterface('文件更名器', self)
+        self.homeInterface = HomeInterface(self)
         self.ruleListInterface = RuleListInterface('规则列表', self)
         self.historyListInterface = HistoryListInterface('历史记录', self)
         self.infoInterface = InfoInterface(self)
