@@ -1,5 +1,6 @@
 # rename_rules/rule_manager.py
 import json
+import logging
 from json import JSONDecodeError
 
 from FilenameChanger import config_path
@@ -128,10 +129,10 @@ def analise_rule(addRuleWindow):
             'type': 1,
             'name': addRuleWindow.ruleNameLineEdit.text(),
             'desc': addRuleWindow.ruleDescLineEdit.text(),
-            'split_char': addRuleWindow.new_control['splitCharLineEdit'].text(),
-            'enable_re':addRuleWindow.new_control['enableReCheckBox'].isChecked()
+            'split_char': addRuleWindow.splitCharLineEdit.text(),
+            'enable_re':addRuleWindow.enableReCheckBox.isChecked()
         }
-        logging.info(f'分隔符：{addRuleWindow.new_control["splitCharLineEdit"].text()}')
+        logging.info(f'分隔符：{rule['split_char']}')
         if rule['enable_re']:
             logging.info('使用正则表达式：是')
         else:
@@ -141,49 +142,50 @@ def analise_rule(addRuleWindow):
             'type': 2,
             'name': addRuleWindow.ruleNameLineEdit.text(),
             'desc': addRuleWindow.ruleDescLineEdit.text(),
-            'new_ext': addRuleWindow.new_control['extLineEdit'].text()
+            'new_ext': addRuleWindow.extLineEdit.text()
         }
-        logging.info(f'新扩展名：{addRuleWindow.new_control["extLineEdit"].text()}')
+        logging.info(f'新扩展名：{rule['new_ext']}')
     elif addRuleWindow.new_rule_type == 3:
         rule = {
             'type': 3,
             'name': addRuleWindow.ruleNameLineEdit.text(),
             'desc': addRuleWindow.ruleDescLineEdit.text(),
-            'target_str': addRuleWindow.new_control['oldStrLineEdit'].text(),
-            'use_re': addRuleWindow.new_control['useReCheckBox'].isChecked(),
-            'new_str': addRuleWindow.new_control['newStrLineEdit'].text()
+            'target_str': addRuleWindow.oldStrLineEdit.text(),
+            'use_re': addRuleWindow.useReCheckBox.isChecked(),
+            'new_str': addRuleWindow.newStrLineEdit.text()
         }
-        logging.info(f'匹配字符串：{addRuleWindow.new_control["oldStrLineEdit"].text()}')
-        logging.info(f'使用正则表达式：{addRuleWindow.new_control['useReCheckBox'].isChecked()}')
-        logging.info(f'新字符串：{addRuleWindow.new_control["newStrLineEdit"].text()}')
+        logging.info(f'匹配字符串：{rule['target_str']}')
+        if rule['use_re']:
+            logging.info('使用正则表达式：是')
+        else:
+            logging.info('使用正则表达式：否')
+        logging.info(f'新字符串：{rule['new_str']}')
     elif addRuleWindow.new_rule_type == 4:
         rule = {
             'type': 4,
             'name': addRuleWindow.ruleNameLineEdit.text(),
             'desc': addRuleWindow.ruleDescLineEdit.text(),
-            'date_type': addRuleWindow.new_control['dateTypeComboBox'].currentIndex(),
+            'date_type': addRuleWindow.dateTypeComboBox.currentIndex(),
         }
-        logging.info(f'日期种类：{addRuleWindow.new_control["dateTypeComboBox"].text()}')
+        logging.info(f'日期种类：{rule['date_type']}')
 
-        if addRuleWindow.new_control['headBtn'].isChecked():
+        if addRuleWindow.headBtn.isChecked():
             rule['position'] = 'head'
             logging.info(f'位置：头部')
-        elif addRuleWindow.new_control['tailBtn'].isChecked():
+        elif addRuleWindow.tailBtn.isChecked():
             rule['position'] = 'tail'
             logging.info(f'位置：尾部')
 
-        if addRuleWindow.new_control['dateTypeComboBox'].currentIndex() == 4:
-            rule['date'] = addRuleWindow.new_control['customDateLineEdit'].text()
+        if addRuleWindow.dateTypeComboBox.currentIndex() == 4:
+            rule['date'] = addRuleWindow.customDateLineEdit.text()
             if not rule['date']:
                 rule['split_char'] = ''  #如果自定义日期为空，则强制将分隔符置为空
-            logging.info(f'日期：{addRuleWindow.new_control["customDateLineEdit"].text()}')
+            logging.info(f'日期：{rule["date"]}')
 
-        if addRuleWindow.new_control['splitCharComboBox'].currentIndex() != 4:
-            rule['split_char'] = addRuleWindow.new_control['splitCharComboBox'].text()
+        if addRuleWindow.splitCharComboBox.currentIndex() != 4:
+            rule['split_char'] = addRuleWindow.splitCharComboBox.text()
         else:
-            rule['split_char'] = addRuleWindow.new_control['customSplitCharLineEdit'].text()
-
-
+            rule['split_char'] = addRuleWindow.customSplitCharLineEdit.text()
         logging.info(f'分隔符：{rule["split_char"] if rule["split_char"] else '无'}')
 
     elif addRuleWindow.new_rule_type == 5:
@@ -191,28 +193,28 @@ def analise_rule(addRuleWindow):
             'type': 5,
             'name': addRuleWindow.ruleNameLineEdit.text(),
             'desc': addRuleWindow.ruleDescLineEdit.text(),
-            'new_name': addRuleWindow.new_control['newNameLineEdit'].text(),
-            'num_type': addRuleWindow.new_control['numTypeComboBox'].text(),
+            'new_name': addRuleWindow.newNameLineEdit.text(),
+            'num_type': addRuleWindow.numTypeComboBox.text(),
         }
-        logging.info(f'新文件名：{addRuleWindow.new_control['newNameLineEdit'].text()}')
-        logging.info(f'编号样式：{addRuleWindow.new_control['numTypeComboBox'].text()}')
+        logging.info(f'新文件名：{rule["new_name"]}')
+        logging.info(f'编号样式：{rule["num_type"]}')
 
-        if not addRuleWindow.new_control['startNumLineEdit'].text():
+        if not addRuleWindow.startNumLineEdit.text():
             rule['start_num'] = 1
         else:
-            rule['start_num'] = int(addRuleWindow.new_control['startNumLineEdit'].text())
+            rule['start_num'] = int(addRuleWindow.startNumLineEdit.text())
         logging.info(f'起始编号：{rule['start_num']}')
 
-        if not addRuleWindow.new_control['stepLengthLineEdit'].text():
+        if not addRuleWindow.stepLengthLineEdit.text():
             rule['step_length'] = 1
         else:
-            rule['step_length'] = int(addRuleWindow.new_control['stepLengthLineEdit'].text())
+            rule['step_length'] = int(addRuleWindow.stepLengthLineEdit.text())
         logging.info(f'步长：{rule['step_length']}')
 
-        if addRuleWindow.new_control['headBtn'].isChecked():
+        if addRuleWindow.headBtn.isChecked():
             rule['position'] = 'head'
             logging.info(f'位置：头部')
-        elif addRuleWindow.new_control['tailBtn'].isChecked():
+        elif addRuleWindow.tailBtn.isChecked():
             rule['position'] = 'tail'
             logging.info(f'位置：尾部')
 
@@ -221,8 +223,8 @@ def analise_rule(addRuleWindow):
             'type': 6,
             'name': addRuleWindow.ruleNameLineEdit.text(),
             'desc': addRuleWindow.ruleDescLineEdit.text(),
-            'action_scope': addRuleWindow.new_control['actionScopeGroup'].checkedId(),
-            'function': addRuleWindow.new_control['functionGroup'].checkedId()
+            'action_scope': addRuleWindow.actionScopeGroup.checkedId(),
+            'function': addRuleWindow.functionGroup.checkedId()
         }
 
         if rule['action_scope'] == 1:

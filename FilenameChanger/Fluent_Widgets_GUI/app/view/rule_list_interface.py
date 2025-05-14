@@ -41,7 +41,7 @@ class SpaceAwareLineEdit(LineEdit):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        setFont(self,13)  #防止空格符显示异常
+        setFont(self, 13)  # 防止空格符显示异常
         self.textChanged.connect(self.visualize_spaces)
         self._actual_text = ""
 
@@ -523,8 +523,6 @@ class RuleInputInterface(MessageBoxBase):
 
     """定义发送给外部变量的信号"""
     submit_data = pyqtSignal(dict)  # 定义发射字典的信号对象，用于发射所有输入的内容
-    new_control = {}  # 存放新增加的控件，便于外部函数调用
-    must_filled_text_list = []  # 必须填写的文本的列表
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -602,34 +600,33 @@ class RuleInputInterface(MessageBoxBase):
             return False
 
         if self.new_rule_type == 1:
-            if not self.new_control['splitCharLineEdit'].text():
+            if not self.splitCharLineEdit.text():
                 self.errorInfoLabel.setText('未输入分隔符！')
                 self.errorInfoLabel.setHidden(False)
                 return False
 
         elif self.new_rule_type == 2:
-            if not self.new_control['extLineEdit'].text():
+            if not self.extLineEdit.text():
                 self.errorInfoLabel.setText('未输入新扩展名！')
                 self.errorInfoLabel.setHidden(False)
                 return False
 
         elif self.new_rule_type == 3:
-            if not self.new_control['oldStrLineEdit'].text():
+            if not self.oldStrLineEdit.text():
                 self.errorInfoLabel.setText('未输入匹配字符串！')
                 self.errorInfoLabel.setHidden(False)
                 return False
 
         elif self.new_rule_type == 4:
-            if self.new_control['dateTypeComboBox'].currentIndex() == 4:
-                if (self.new_control['customDateLineEdit'].text()
-                        and not re.findall(r'[-_ ]?\d{4} ?\d{1,2} ?\d{1,2}[-_ ]?',
-                                           self.new_control['customDateLineEdit'].text())):
+            if self.dateTypeComboBox.currentIndex() == 4:
+                if (self.customDateLineEdit.text()
+                        and not re.findall(r'[-_ ]?\d{4} ?\d{1,2} ?\d{1,2}[-_ ]?', self.customDateLineEdit.text())):
                     self.errorInfoLabel.setText('自定义日期格式无效！')
                     self.errorInfoLabel.setHidden(False)
                     return False
 
         elif self.new_rule_type == 5:
-            if not self.new_control['newNameLineEdit'].text():
+            if not self.newNameLineEdit.text():
                 self.errorInfoLabel.setText('未输入新文件名！')
                 self.errorInfoLabel.setHidden(False)
                 return False
@@ -640,7 +637,6 @@ class RuleInputInterface(MessageBoxBase):
         """选择的规则类型改变时改变窗口布局"""
         self.yesButton.setEnabled(True)  # 一旦选择了规则类型就将该按钮设置为可用
         self.new_rule_type = self.ruleTypeComboBox.currentIndex() + 1
-        self.new_control.clear()
 
         """创建输入框限制器，防止输入文件名不能存在的字符"""
         char_regex = QRegularExpression(r'[^\\/:*?"<>|]+')  # 限制器内容
@@ -673,17 +669,15 @@ class RuleInputInterface(MessageBoxBase):
             splitCharLayout.addWidget(splitCharLabel)
 
             # 输入框
-            splitCharLineEdit = SpaceAwareLineEdit()
-            splitCharLineEdit.setPlaceholderText('请输入分隔符（必填）')
-            splitCharLineEdit.setFixedWidth(200)
-            splitCharInputLayout.addWidget(splitCharLineEdit)
-            self.new_control['splitCharLineEdit'] = splitCharLineEdit
-            splitCharLineEdit.setValidator(char_validator)  # 设置限制器
+            self.splitCharLineEdit = SpaceAwareLineEdit()
+            self.splitCharLineEdit.setPlaceholderText('请输入分隔符（必填）')
+            self.splitCharLineEdit.setFixedWidth(200)
+            splitCharInputLayout.addWidget(self.splitCharLineEdit)
+            self.splitCharLineEdit.setValidator(char_validator)  # 设置限制器
 
             # 启用正则表达式复选框
-            enableReCheckBox = CheckBox(text='使用正则表达式', parent=self.widget)
-            self.new_control['enableReCheckBox'] = enableReCheckBox
-            splitCharInputLayout.addWidget(enableReCheckBox)
+            self.enableReCheckBox = CheckBox(text='使用正则表达式', parent=self.widget)
+            splitCharInputLayout.addWidget(self.enableReCheckBox)
 
             # 将新控件的水平布局添加到主布局
             splitCharLayout.addLayout(splitCharInputLayout)
@@ -700,12 +694,11 @@ class RuleInputInterface(MessageBoxBase):
             extLayout.addWidget(extLabel)
 
             # 输入框
-            extLineEdit = LineEdit()
-            extLineEdit.setPlaceholderText('请输入新的扩展名（必填）')
-            extLineEdit.setFixedWidth(200)
-            extLayout.addWidget(extLineEdit)
-            self.new_control['extLineEdit'] = extLineEdit
-            extLineEdit.setValidator(char_validator)  # 设置限制器
+            self.extLineEdit = LineEdit()
+            self.extLineEdit.setPlaceholderText('请输入新的扩展名（必填）')
+            self.extLineEdit.setFixedWidth(200)
+            extLayout.addWidget(self.extLineEdit)
+            self.extLineEdit.setValidator(char_validator)  # 设置限制器
 
             # 将新布局添加至主布局
             self.viewLayout.addLayout(extLayout)
@@ -723,16 +716,14 @@ class RuleInputInterface(MessageBoxBase):
             oldStrLayout.addWidget(oldStrLabel)
 
             # 输入框
-            oldStrLineEdit = SpaceAwareLineEdit()
-            oldStrLineEdit.setPlaceholderText('请输入匹配字符串（必填）')
-            oldStrLineEdit.setFixedWidth(200)
-            oldStrInputLayout.addWidget(oldStrLineEdit)
-            self.new_control['oldStrLineEdit'] = oldStrLineEdit
+            self.oldStrLineEdit = SpaceAwareLineEdit()
+            self.oldStrLineEdit.setPlaceholderText('请输入匹配字符串（必填）')
+            self.oldStrLineEdit.setFixedWidth(200)
+            oldStrInputLayout.addWidget(self.oldStrLineEdit)
 
             # 正则表达式复选框
-            useReCheckBox = CheckBox('使用正则表达式', parent=self)
-            oldStrInputLayout.addWidget(useReCheckBox)
-            self.new_control['useReCheckBox'] = useReCheckBox
+            self.useReCheckBox = CheckBox('使用正则表达式', parent=self)
+            oldStrInputLayout.addWidget(self.useReCheckBox)
 
             # 将旧字符串相关布局添加到主布局
             oldStrLayout.addLayout(oldStrInputLayout)
@@ -748,12 +739,11 @@ class RuleInputInterface(MessageBoxBase):
             newStrLayout.addWidget(newStrLabel)
 
             # 输入框
-            newStrLineEdit = LineEdit()
-            newStrLineEdit.setPlaceholderText('请输入新字符串')
-            newStrLineEdit.setFixedWidth(200)
-            newStrLayout.addWidget(newStrLineEdit)
-            self.new_control['newStrLineEdit'] = newStrLineEdit
-            newStrLineEdit.setValidator(char_validator)  # 设置限制器
+            self.newStrLineEdit = LineEdit()
+            self.newStrLineEdit.setPlaceholderText('请输入新字符串')
+            self.newStrLineEdit.setFixedWidth(200)
+            newStrLayout.addWidget(self.newStrLineEdit)
+            self.newStrLineEdit.setValidator(char_validator)  # 设置限制器
 
             # 将旧字符串相关布局添加到主布局
             self.viewLayout.addLayout(newStrLayout)
@@ -772,22 +762,20 @@ class RuleInputInterface(MessageBoxBase):
             dateLayout.addWidget(dateLabel)
 
             # 日期种类下拉框
-            dateTypeComboBox = ComboBox()
+            self.dateTypeComboBox = ComboBox()
             date_type = ('系统日期', '文件创建日期', '文件修改日期', '文件访问日期', '自定义日期')
-            dateTypeComboBox.addItems(date_type)
-            dateTypeComboBox.setFixedWidth(150)
+            self.dateTypeComboBox.addItems(date_type)
+            self.dateTypeComboBox.setFixedWidth(150)
 
-            dateTypeLayout.addWidget(dateTypeComboBox)
-            self.new_control['dateTypeComboBox'] = dateTypeComboBox
+            dateTypeLayout.addWidget(self.dateTypeComboBox)
 
             # 自定义填充日期
-            customDateLineEdit = LineEdit()
-            customDateLineEdit.setPlaceholderText('年月日用空格隔开')
-            customDateLineEdit.setFixedWidth(150)
-            customDateLineEdit.setVisible(False)  # 默认为不可见，只有下拉框选择自定义才会显示
+            self.customDateLineEdit = LineEdit()
+            self.customDateLineEdit.setPlaceholderText('年月日用空格隔开')
+            self.customDateLineEdit.setFixedWidth(150)
+            self.customDateLineEdit.setVisible(False)  # 默认为不可见，只有下拉框选择自定义才会显示
 
-            dateTypeLayout.addWidget(customDateLineEdit)
-            self.new_control['customDateLineEdit'] = customDateLineEdit
+            dateTypeLayout.addWidget(self.customDateLineEdit)
 
             def setDateLineEditVisible(comboBox, dateLineEdit):
                 """根据下拉框选择的内容修改日期输入框的可见性"""
@@ -796,14 +784,13 @@ class RuleInputInterface(MessageBoxBase):
                 else:
                     dateLineEdit.setVisible(False)
 
-            dateTypeComboBox.currentIndexChanged.connect(
-                lambda: setDateLineEditVisible(self.new_control['dateTypeComboBox'],
-                                               self.new_control['customDateLineEdit']))
+            self.dateTypeComboBox.currentIndexChanged.connect(
+                lambda: setDateLineEditVisible(self.dateTypeComboBox, self.customDateLineEdit))
 
             # 为自定义日期输入框添加日期格式限制
             format_regex = QRegularExpression(r'\d{1,4} \d{1,2} \d{1,2}')
             date_validator = QRegularExpressionValidator(format_regex)
-            customDateLineEdit.setValidator(date_validator)  # 设置输入的格式限制
+            self.customDateLineEdit.setValidator(date_validator)  # 设置输入的格式限制
 
             # 将日期输入布局添加至主布局
             dateLayout.addLayout(dateTypeLayout)
@@ -818,18 +805,16 @@ class RuleInputInterface(MessageBoxBase):
             posLayout.addWidget(posLabel, 1, Qt.AlignmentFlag.AlignLeft)
 
             # 单选按钮
-            headBtn = RadioButton('文件名首')
-            tailBtn = RadioButton('文件名尾')
+            self.headBtn = RadioButton('文件名首')
+            self.tailBtn = RadioButton('文件名尾')
             posBtnGroup = QButtonGroup(self)  # 创建一个按钮组，组内的单选按钮是互斥的
-            posBtnGroup.addButton(headBtn)
-            posBtnGroup.addButton(tailBtn)
+            posBtnGroup.addButton(self.headBtn)
+            posBtnGroup.addButton(self.tailBtn)
 
-            headBtn.setChecked(True)  # 设置默认选中的按钮
+            self.headBtn.setChecked(True)  # 设置默认选中的按钮
 
-            posLayout.addWidget(headBtn, 0, Qt.AlignmentFlag.AlignRight)
-            self.new_control['headBtn'] = headBtn
-            posLayout.addWidget(tailBtn, 0, Qt.AlignmentFlag.AlignRight)
-            self.new_control['tailBtn'] = tailBtn
+            posLayout.addWidget(self.headBtn, 0, Qt.AlignmentFlag.AlignRight)
+            posLayout.addWidget(self.tailBtn, 0, Qt.AlignmentFlag.AlignRight)
 
             # 将日期位置输入布局添加至主布局
             self.viewLayout.addLayout(posLayout)
@@ -846,21 +831,19 @@ class RuleInputInterface(MessageBoxBase):
 
             # 下拉框
             self.split_char_type = ('-', '_', '空格', '年月日', '自定义')
-            splitCharComboBox = ComboBox()
-            splitCharComboBox.addItems(self.split_char_type)
-            splitCharComboBox.setFixedWidth(110)
-            splitCharInputLayout.addWidget(splitCharComboBox)
-            self.new_control['splitCharComboBox'] = splitCharComboBox
+            self.splitCharComboBox = ComboBox()
+            self.splitCharComboBox.addItems(self.split_char_type)
+            self.splitCharComboBox.setFixedWidth(110)
+            splitCharInputLayout.addWidget(self.splitCharComboBox)
 
             # 自定义分隔符输入框
-            customSplitCharLineEdit = SpaceAwareLineEdit()
-            splitCharInputLayout.addWidget(customSplitCharLineEdit, 0)
-            self.new_control['customSplitCharLineEdit'] = customSplitCharLineEdit
+            self.customSplitCharLineEdit = SpaceAwareLineEdit()
+            splitCharInputLayout.addWidget(self.customSplitCharLineEdit, 0)
 
-            customSplitCharLineEdit.setFixedWidth(110)
-            customSplitCharLineEdit.setPlaceholderText('请输入分隔符')
-            customSplitCharLineEdit.setValidator(char_validator)
-            customSplitCharLineEdit.setVisible(False)  # 默认不显示，当选择自定义分隔符才显示
+            self.customSplitCharLineEdit.setFixedWidth(110)
+            self.customSplitCharLineEdit.setPlaceholderText('请输入分隔符')
+            self.customSplitCharLineEdit.setValidator(char_validator)
+            self.customSplitCharLineEdit.setVisible(False)  # 默认不显示，当选择自定义分隔符才显示
 
             def setSplitCharLineEditVisible(comboBox, dateLineEdit):
                 """根据下拉框选择的内容修改分隔符输入框的可见性"""
@@ -869,9 +852,8 @@ class RuleInputInterface(MessageBoxBase):
                 else:
                     dateLineEdit.setVisible(False)
 
-            splitCharComboBox.currentIndexChanged.connect(
-                lambda: setSplitCharLineEditVisible(self.new_control['splitCharComboBox'],
-                                                    self.new_control['customSplitCharLineEdit']))
+            self.splitCharComboBox.currentIndexChanged.connect(
+                lambda: setSplitCharLineEditVisible(self.splitCharComboBox, self.customSplitCharLineEdit))
 
             # 将日期分隔符输入的布局添加至主布局
             splitCharLayout.addLayout(splitCharInputLayout)
@@ -887,12 +869,11 @@ class RuleInputInterface(MessageBoxBase):
             newNameLayout.addWidget(newNameLabel)
 
             # 输入框
-            newNameLineEdit = LineEdit()
-            newNameLineEdit.setPlaceholderText('请输入新文件名（必填）')
-            newNameLineEdit.setFixedWidth(200)
-            newNameLayout.addWidget(newNameLineEdit)
-            self.new_control['newNameLineEdit'] = newNameLineEdit
-            newNameLineEdit.setValidator(char_validator)
+            self.newNameLineEdit = LineEdit()
+            self.newNameLineEdit.setPlaceholderText('请输入新文件名（必填）')
+            self.newNameLineEdit.setFixedWidth(200)
+            newNameLayout.addWidget(self.newNameLineEdit)
+            self.newNameLineEdit.setValidator(char_validator)
 
             # 将新水平布局添加至主布局
             self.viewLayout.addLayout(newNameLayout)
@@ -906,12 +887,11 @@ class RuleInputInterface(MessageBoxBase):
             numTypeLayout.addWidget(numTypeLabel)
 
             # 下拉选择框
-            numTypeComboBox = ComboBox()
-            numTypeComboBox.setFixedWidth(60)
+            self.numTypeComboBox = ComboBox()
+            self.numTypeComboBox.setFixedWidth(60)
             self.num_types = ('1.', '1-', '1_', '(1)', '[1]', '{1}')
-            numTypeComboBox.addItems(self.num_types)
-            numTypeLayout.addWidget(numTypeComboBox)
-            self.new_control['numTypeComboBox'] = numTypeComboBox
+            self.numTypeComboBox.addItems(self.num_types)
+            numTypeLayout.addWidget(self.numTypeComboBox)
 
             # 将水平布局添加至主布局
             self.viewLayout.addLayout(numTypeLayout)
@@ -925,15 +905,14 @@ class RuleInputInterface(MessageBoxBase):
             startNumLayout.addWidget(startNumLabel)
 
             # 输入框
-            startNumLineEdit = LineEdit()
-            startNumLineEdit.setPlaceholderText('输入起始编号')
-            startNumLineEdit.setFixedWidth(125)
-            startNumLayout.addWidget(startNumLineEdit)
-            self.new_control['startNumLineEdit'] = startNumLineEdit
+            self.startNumLineEdit = LineEdit()
+            self.startNumLineEdit.setPlaceholderText('输入起始编号')
+            self.startNumLineEdit.setFixedWidth(125)
+            startNumLayout.addWidget(self.startNumLineEdit)
 
             num_regex = QRegularExpression(r'\d+')  # 限制只能输入数字
             num_validator = QRegularExpressionValidator(num_regex)
-            startNumLineEdit.setValidator(num_validator)
+            self.startNumLineEdit.setValidator(num_validator)
 
             self.viewLayout.addLayout(startNumLayout)
 
@@ -946,15 +925,14 @@ class RuleInputInterface(MessageBoxBase):
             stepLengthLayout.addWidget(stepLengthLabel)
 
             # 输入框
-            stepLengthLineEdit = LineEdit()
-            stepLengthLineEdit.setPlaceholderText('输入步长')
-            stepLengthLineEdit.setFixedWidth(125)
-            stepLengthLayout.addWidget(stepLengthLineEdit)
-            self.new_control['stepLengthLineEdit'] = stepLengthLineEdit
+            self.stepLengthLineEdit = LineEdit()
+            self.stepLengthLineEdit.setPlaceholderText('输入步长')
+            self.stepLengthLineEdit.setFixedWidth(125)
+            stepLengthLayout.addWidget(self.stepLengthLineEdit)
 
             step_regex = QRegularExpression(r'^[^0]\d*$')  # 限制不能以0开头并且只能输入数字
             step_validator = QRegularExpressionValidator(step_regex)
-            stepLengthLineEdit.setValidator(step_validator)
+            self.stepLengthLineEdit.setValidator(step_validator)
 
             self.viewLayout.addLayout(stepLengthLayout)
 
@@ -967,18 +945,16 @@ class RuleInputInterface(MessageBoxBase):
             posLayout.addWidget(posLabel, 1, Qt.AlignmentFlag.AlignLeft)
 
             # 单选按钮
-            headBtn = RadioButton('文件名首')
-            tailBtn = RadioButton('文件名尾')
+            self.headBtn = RadioButton('文件名首')
+            self.tailBtn = RadioButton('文件名尾')
             posBtnGroup = QButtonGroup(self)  # 创建一个按钮组，组内的单选按钮是互斥的
-            posBtnGroup.addButton(headBtn)
-            posBtnGroup.addButton(tailBtn)
+            posBtnGroup.addButton(self.headBtn)
+            posBtnGroup.addButton(self.tailBtn)
 
-            headBtn.setChecked(True)  # 设置默认选中的按钮
+            self.headBtn.setChecked(True)  # 设置默认选中的按钮
 
-            posLayout.addWidget(headBtn, 0, Qt.AlignmentFlag.AlignRight)
-            self.new_control['headBtn'] = headBtn
-            posLayout.addWidget(tailBtn, 0, Qt.AlignmentFlag.AlignRight)
-            self.new_control['tailBtn'] = tailBtn
+            posLayout.addWidget(self.headBtn, 0, Qt.AlignmentFlag.AlignRight)
+            posLayout.addWidget(self.tailBtn, 0, Qt.AlignmentFlag.AlignRight)
 
             # 将日期位置输入布局添加至主布局
             self.viewLayout.addLayout(posLayout)
@@ -1001,11 +977,10 @@ class RuleInputInterface(MessageBoxBase):
             fileNameBtn = RadioButton('仅文件名')
             extBtn = RadioButton('仅扩展名')
             bothBtn = RadioButton('全部')
-            actionScopeGroup = QButtonGroup(self)
-            self.new_control['actionScopeGroup'] = actionScopeGroup
-            actionScopeGroup.addButton(fileNameBtn, 1)
-            actionScopeGroup.addButton(extBtn, 2)
-            actionScopeGroup.addButton(bothBtn, 3)
+            self.actionScopeGroup = QButtonGroup(self)
+            self.actionScopeGroup.addButton(fileNameBtn, 1)
+            self.actionScopeGroup.addButton(extBtn, 2)
+            self.actionScopeGroup.addButton(bothBtn, 3)
             fileNameBtn.setChecked(True)  # 默认选中文件名按钮
 
             actionScopeBtnLayout.addWidget(fileNameBtn)
@@ -1032,11 +1007,10 @@ class RuleInputInterface(MessageBoxBase):
             upperBtn = RadioButton('全部大写')
             lowerBtn = RadioButton('全部小写')
             titleBtn = RadioButton('单词首字母大写')
-            functionGroup = QButtonGroup(self)
-            self.new_control['functionGroup'] = functionGroup
-            functionGroup.addButton(upperBtn, 1)
-            functionGroup.addButton(lowerBtn, 2)
-            functionGroup.addButton(titleBtn, 3)
+            self.functionGroup = QButtonGroup(self)
+            self.functionGroup.addButton(upperBtn, 1)
+            self.functionGroup.addButton(lowerBtn, 2)
+            self.functionGroup.addButton(titleBtn, 3)
             upperBtn.setChecked(True)
 
             functionBtnLayout.addWidget(upperBtn)
@@ -1272,21 +1246,21 @@ class RuleListInterface(QFrame):
             split_char = rule['split_char']
             enable_re = rule.get('enable_re', False)
 
-            reviseRuleWindow.new_control['splitCharLineEdit'].setText(split_char)
+            reviseRuleWindow.splitCharLineEdit.setText(split_char)
 
             if enable_re:
-                reviseRuleWindow.new_control['enableReCheckBox'].setChecked(True)
+                reviseRuleWindow.enableReCheckBox.setChecked(True)
         elif type == 2:
             new_ext = rule['new_ext']
 
-            reviseRuleWindow.new_control['extLineEdit'].setText(new_ext)
+            reviseRuleWindow.extLineEdit.setText(new_ext)
         elif type == 3:
             target_str = rule['target_str']
             new_str = rule['new_str']
 
-            reviseRuleWindow.new_control['oldStrLineEdit'].setText(target_str)
-            reviseRuleWindow.new_control['useReCheckBox'].setChecked(rule.get('use_re', False))
-            reviseRuleWindow.new_control['newStrLineEdit'].setText(new_str)
+            reviseRuleWindow.oldStrLineEdit.setText(target_str)
+            reviseRuleWindow.useReCheckBox.setChecked(rule.get('use_re', False))
+            reviseRuleWindow.newStrLineEdit.setText(new_str)
         elif type == 4:
             split_char = rule['split_char']
             position = rule['position']
@@ -1294,19 +1268,19 @@ class RuleListInterface(QFrame):
             date_type = rule.get('date_type', 4 if customize_date else 0)
 
             if split_char in reviseRuleWindow.split_char_type:
-                reviseRuleWindow.new_control['splitCharComboBox'].setCurrentIndex(
+                reviseRuleWindow.splitCharComboBox.setCurrentIndex(
                     reviseRuleWindow.split_char_type.index(split_char))
             else:
-                reviseRuleWindow.new_control['splitCharComboBox'].setCurrentIndex(4)
-                reviseRuleWindow.new_control['customSplitCharLineEdit'].setText(split_char)
+                reviseRuleWindow.splitCharComboBox.setCurrentIndex(4)
+                reviseRuleWindow.customSplitCharLineEdit.setText(split_char)
 
             if position == 'head':
-                reviseRuleWindow.new_control['headBtn'].setChecked(True)
+                reviseRuleWindow.headBtn.setChecked(True)
             elif position == 'tail':
-                reviseRuleWindow.new_control['tailBtn'].setChecked(True)
+                reviseRuleWindow.tailBtn.setChecked(True)
 
-            reviseRuleWindow.new_control['dateTypeComboBox'].setCurrentIndex(date_type)
-            reviseRuleWindow.new_control['customDateLineEdit'].setText(customize_date)
+            reviseRuleWindow.dateTypeComboBox.setCurrentIndex(date_type)
+            reviseRuleWindow.customDateLineEdit.setText(customize_date)
         elif type == 5:
             new_name = rule['new_name']
             num_type = rule['num_type']
@@ -1315,20 +1289,20 @@ class RuleListInterface(QFrame):
             position = rule['position']
 
             if position == 'head':
-                reviseRuleWindow.new_control['headBtn'].setChecked(True)
+                reviseRuleWindow.headBtn.setChecked(True)
             elif position == 'tail':
-                reviseRuleWindow.new_control['tailBtn'].setChecked(True)
+                reviseRuleWindow.tailBtn.setChecked(True)
 
-            reviseRuleWindow.new_control['newNameLineEdit'].setText(new_name)
-            reviseRuleWindow.new_control['numTypeComboBox'].setCurrentIndex(reviseRuleWindow.num_types.index(num_type))
-            reviseRuleWindow.new_control['startNumLineEdit'].setText(start_num)
-            reviseRuleWindow.new_control['stepLengthLineEdit'].setText(step_length)
+            reviseRuleWindow.newNameLineEdit.setText(new_name)
+            reviseRuleWindow.numTypeComboBox.setCurrentIndex(reviseRuleWindow.num_types.index(num_type))
+            reviseRuleWindow.startNumLineEdit.setText(start_num)
+            reviseRuleWindow.stepLengthLineEdit.setText(step_length)
         elif type == 6:
             action_scope = rule['action_scope']
             function = rule['function']
 
-            reviseRuleWindow.new_control['actionScopeGroup'].button(action_scope).setChecked(True)
-            reviseRuleWindow.new_control['functionGroup'].button(function).setChecked(True)
+            reviseRuleWindow.actionScopeGroup.button(action_scope).setChecked(True)
+            reviseRuleWindow.functionGroup.button(function).setChecked(True)
 
         """窗口关闭后执行的操作"""
         reviseRuleWindow.submit_data.connect(
