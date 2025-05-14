@@ -9,18 +9,18 @@ from FilenameChanger.rename_rules.rule_manager import *
 """
 
 
-def use_type_1(selected_rule, old_name_list):
+def use_type_1(selected_rule, old_names):
     """
     功能：应用类型一的规则（交换分隔符前后内容）
     参数 selected_rule：当前激活的规则
-    参数 old_name_list：旧文件名列表
+    参数 old_names：旧文件名序列
     返回：生成的新文件名列表
     """
     split_char = selected_rule['split_char']
     enable_re = selected_rule.get('enable_re', False)
 
     new_name_list = []
-    for file in old_name_list:
+    for file in old_names:
         file_name, ext = os.path.splitext(file)  # 分离文件名和扩展名
 
         if enable_re:
@@ -47,17 +47,17 @@ def use_type_1(selected_rule, old_name_list):
     return new_name_list
 
 
-def use_type_2(selected_rule, old_name_list):
+def use_type_2(selected_rule, old_names):
     """
     功能：应用类型二的规则（扩展名替换）
     参数 selected_rule：当前激活的规则
-    参数 old_name_list：旧文件名列表
+    参数 old_names：旧文件名序列
     返回：生成的新文件名列表
     """
     new_ext = selected_rule['new_ext']
 
     name_list = []  # 文件名（排除扩展名）列表
-    for file in old_name_list:
+    for file in old_names:
         signal_name = os.path.splitext(file)[0]
         name_list.append(signal_name)
 
@@ -69,11 +69,11 @@ def use_type_2(selected_rule, old_name_list):
     return new_name_list
 
 
-def use_type_3(selected_rule, old_name_list):
+def use_type_3(selected_rule, old_names):
     """
     功能：应用类型三的规则（字符串替换）
     参数 selected_rule：当前激活的规则
-    参数 old_name_list：旧文件名列表
+    参数 old_names：旧文件名序列
     返回：生成的新文件名列表
     """
     target_str = selected_rule['target_str']  # 待替换的字符串
@@ -83,7 +83,7 @@ def use_type_3(selected_rule, old_name_list):
     # 分离文件名和扩展名
     old_file_name_list = []  # 文件名（排除扩展名）列表
     old_file_ext_list = []  # 文件扩展名列表
-    for file in old_name_list:
+    for file in old_names:
         name, ext = os.path.splitext(file)
 
         old_file_name_list.append(name)
@@ -129,11 +129,11 @@ def get_file_time(file_path, time_type, split_char):
     return format_date
 
 
-def use_type_4(selected_rule, old_name_list, directory):
+def use_type_4(selected_rule, old_names, directory):
     """
     功能：应用类型四的规则（添加或删除日期）
     参数 selected_rule：当前激活的规则
-    参数 old_name_list：旧文件名列表
+    参数 old_names：旧文件名序列
     参数 directory：目标文件夹路径
     返回：生成的新文件名列表
     """
@@ -154,7 +154,7 @@ def use_type_4(selected_rule, old_name_list, directory):
     new_name_list = []
 
     """遍历文件名列表，循环对单个文件名进行操作"""
-    for old_name in old_name_list:
+    for old_name in old_names:
         # 获取文件日期
         if time_type != 4:
             file_date = get_file_time(os.path.join(directory, old_name), time_type, split_char)
@@ -204,11 +204,11 @@ def use_type_4(selected_rule, old_name_list, directory):
     return new_name_list
 
 
-def use_type_5(selected_rule, old_name_list):
+def use_type_5(selected_rule, old_names):
     """
     功能：应用类型五的规则（重命名并编号）
     参数 selected_rule：当前激活的规则
-    参数 old_name_list：旧文件名列表
+    参数 old_names：旧文件名序列
     返回：生成的新文件名列表
     """
     new_file_name = selected_rule['new_name']
@@ -219,7 +219,7 @@ def use_type_5(selected_rule, old_name_list):
 
     new_name_list = []
 
-    for old_name in old_name_list:
+    for old_name in old_names:
         # 分离文件名和扩展名
         ext = os.path.splitext(old_name)[1]
 
@@ -258,11 +258,11 @@ def use_type_5(selected_rule, old_name_list):
     return new_name_list
 
 
-def use_type_6(selected_rule, old_name_list):
+def use_type_6(selected_rule, old_names):
     """
     功能：应用类型六的规则（字母大小写转换）
     参数 selected_rule：当前激活的规则
-    参数 old_name_list：旧文件名列表
+    参数 old_names：旧文件名序列
     返回：生成的新文件名列表
     """
     action_scope = selected_rule['action_scope']
@@ -279,7 +279,7 @@ def use_type_6(selected_rule, old_name_list):
         modify_ext = True
 
     new_name_list = []
-    for file in old_name_list:
+    for file in old_names:
         file_name, ext = os.path.splitext(file)
 
         if modify_name:

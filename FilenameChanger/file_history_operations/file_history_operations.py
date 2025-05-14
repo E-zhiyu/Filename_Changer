@@ -64,7 +64,7 @@ def hidden_or_protected(directory):
     return False
 
 
-def scan_files(directory):
+def scan_files(directory) -> list:
     """
     功能：扫描目标路径的所有文件名
     参数 directory：目标路径
@@ -79,16 +79,18 @@ def scan_files(directory):
             raise FileNotFoundError
     except FileNotFoundError:
         logging.error('文件名获取失败：目标文件夹不存在或为空')
-        return None
+        return []
     else:
         return old_name
 
 
-def rename(directory, file_list):
+def rename(directory, old_file_names):
     """
     功能：实现“文件重命名”操作
+    参数 directory：目标文件夹路径
+    参数 old_file_names：旧文件名序列
     """
-    if not file_list:
+    if not old_file_names:
         logging.info(f'文件夹：“{directory}”为空')
         return 0
 
@@ -101,34 +103,34 @@ def rename(directory, file_list):
         f'当前活跃的规则为“规则{config_dict['selected_index'] + 1}”，'
         f'规则种类：{selected_rule['type']}')
 
-    new_name_list = get_new_name_list(selected_rule, file_list, directory)  # 生成新文件名
+    new_name_list = get_new_name_list(selected_rule, old_file_names, directory)  # 生成新文件名
 
     logging.info('开始文件重命名……')
     if not new_name_list:
         logging.fatal('严重错误：新文件名列表为空')
         return -3
-    rename_files(directory, file_list, new_name_list)  # 执行重命名操作
+    rename_files(directory, old_file_names, new_name_list)  # 执行重命名操作
 
-    if file_list == new_name_list:  # 判断重命名前后文件名是否完全相同
+    if list(old_file_names) == new_name_list:  # 判断重命名前后文件名是否完全相同
         return -2
     else:
         return 1
 
 
-def rename_files(directory, old_name_list, new_name_list, with_record_history=True):
+def rename_files(directory, old_names, new_name_list, with_record_history=True):
     """
-    功能：为单个文件重命名并显示结果
+    功能：执行重命名操作并记录
     参数 directory：目标文件夹
-    参数 origin_name：单个原文件名
-    参数 new_name：单个新文件名
-    参数 with_record_history：是否记录重命名记录（布尔值）
+    参数 old_names：被替换的文件名序列
+    参数 new_name_list：新文件名序列
+    参数 with_record_history：是否记录重命名记录
     """
     history_list = load_history()
 
-    """文件重命名，并记录到历史记录文件"""
+    """文件重命名"""
     new_record_dict = {'directory': directory, 'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                        'old_name_list': [], 'new_name_list': [], 'error_files': []}
-    for old_name, new_name in zip(old_name_list, new_name_list):
+    for old_name, new_name in zip(old_names, new_name_list):
         if old_name == new_name:
             logging.info(f'【未更改】{old_name}')
             new_record_dict['error_files'].append(f'【前后文件名相同】{old_name}')
@@ -161,28 +163,28 @@ def rename_files(directory, old_name_list, new_name_list, with_record_history=Tr
         logging.info('未追加新的重命名记录，因为所有文件新旧文件名都相同')
 
 
-def get_new_name_list(selected_rule, old_name_list, directory):
+def get_new_name_list(selected_rule, old_names, directory):
     """
     功能：根据已加载的规则生成新文件名
     参数 selected_rule：当前激活的规则
-    参数 old_name_list：旧文件名列表
+    参数 old_names：旧文件名序列
     参数 directory：目标文件夹路径
     返回：新文件名列表
     """
     rule_type = selected_rule['type']
 
     if rule_type == 1:
-        new_name_list = use_type_1(selected_rule, old_name_list)
+        new_name_list = use_type_1(selected_rule, old_names)
     elif rule_type == 2:
-        new_name_list = use_type_2(selected_rule, old_name_list)
+        new_name_list = use_type_2(selected_rule, old_names)
     elif rule_type == 3:
-        new_name_list = use_type_3(selected_rule, old_name_list)
+        new_name_list = use_type_3(selected_rule, old_names)
     elif rule_type == 4:
-        new_name_list = use_type_4(selected_rule, old_name_list, directory)
+        new_name_list = use_type_4(selected_rule, old_names, directory)
     elif rule_type == 5:
-        new_name_list = use_type_5(selected_rule, old_name_list)
+        new_name_list = use_type_5(selected_rule, old_names)
     elif rule_type == 6:
-        new_name_list = use_type_6(selected_rule, old_name_list)
+        new_name_list = use_type_6(selected_rule, old_names)
 
     logging.info('已生成新文件名列表')
     return new_name_list
