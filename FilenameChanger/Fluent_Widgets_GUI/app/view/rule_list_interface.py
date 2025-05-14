@@ -643,7 +643,7 @@ class RuleInputInterface(MessageBoxBase):
         self.new_control.clear()
 
         """创建输入框限制器，防止输入文件名不能存在的字符"""
-        char_regex = QRegularExpression(r'[^\/:*?"<>|]+')  # 限制器内容
+        char_regex = QRegularExpression(r'[^\\/:*?"<>|]+')  # 限制器内容
         char_validator = QRegularExpressionValidator(char_regex)  # 限制器对象
 
         """删除旧的控件"""
