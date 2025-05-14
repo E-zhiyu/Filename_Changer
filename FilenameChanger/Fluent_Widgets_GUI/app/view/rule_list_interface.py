@@ -155,7 +155,7 @@ class InfoDialog(MessageBoxBase):
 
         # 规则描述
         self.descLabel = SubtitleLabel(text='规则描述：', parent=self.widget)
-        self.descContentLabel = BodyLabel(text=str(rule['desc']), parent=self.widget)
+        self.descContentLabel = BodyLabel(text=rule['desc'] if rule['desc'] else '<无>', parent=self.widget)
 
         self.descLayout = QHBoxLayout()
         self.descLayout.setSpacing(0)
@@ -427,7 +427,7 @@ class RuleCard(CardWidget):
 
         """规则名和规则描述标签"""
         self.titleLabel = SubtitleLabel(text=self.rule['name'], parent=self)
-        self.descLabel = BodyLabel(text=self.rule['desc'], parent=self)
+        self.descLabel = BodyLabel(text=self.rule['desc'] if rule['desc'] else '<无>', parent=self)
         self.labelLayout = QVBoxLayout()
 
         # 设置属性
