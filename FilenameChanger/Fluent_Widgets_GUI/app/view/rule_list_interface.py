@@ -2,7 +2,7 @@ import re
 
 from PyQt6.QtGui import QRegularExpressionValidator
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QButtonGroup
-from PyQt6.QtCore import Qt, pyqtSignal, QRegularExpression, QPoint
+from PyQt6.QtCore import Qt, pyqtSignal, QRegularExpression, QPoint, QTimer
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, PushButton, FluentIcon,
                                                                CardWidget, TransparentToolButton, SmoothScrollArea,
@@ -1081,9 +1081,13 @@ class RuleListInterface(QFrame):
         self.ruleCardLayout = QVBoxLayout(self.ruleCardWidget)  # 规则卡片的垂直布局器
 
         self.ruleScrollArea.setWidget(self.ruleCardWidget)  # 将规则卡片容器放入滚动区域，使其可以滚动
+        self.ruleScrollArea.setWidgetResizable(True)
+        self.ruleScrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)  # 水平滚动条永远不显示
 
         self.ruleCardLayout.setAlignment(Qt.AlignmentFlag.AlignTop)  # 设置卡片对齐方式为顶对齐
         self.ruleCardLayout.setSpacing(7)  # 设置卡片布局器间隔：每个卡片间隔距离为7
+
+        self.widgetVLayout.addWidget(self.ruleScrollArea)
 
         """初始化规则卡片展示区域"""
         self.ruleCardList = []  # 存放规则卡片的列表
@@ -1109,10 +1113,6 @@ class RuleListInterface(QFrame):
         self.ruleCardList.clear()  # 清空列表中已保存的规则卡片
 
         """添加新的布局"""
-        self.ruleScrollArea.setWidgetResizable(True)
-        self.ruleScrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)  # 水平滚动条永远不显示
-
-        self.widgetVLayout.addWidget(self.ruleScrollArea)
         if self.rule_dict['rules']:
             self.ruleCardLayout.setAlignment(Qt.AlignmentFlag.AlignTop)  # 卡片默认顶部对齐
 
@@ -1189,7 +1189,9 @@ class RuleListInterface(QFrame):
                     flag = del_rules(self.rule_dict, self.currentIndex)
 
                     if flag == 1:
+                        v_pos = self.ruleScrollArea.verticalScrollBar().value()
                         self.initRuleViewArea()  # （删除规则）刷新规则卡片布局
+                        self.ruleScrollArea.verticalScrollBar().setValue(v_pos)
 
                     elif flag == 0:
                         title = '失败'
@@ -1215,7 +1217,10 @@ class RuleListInterface(QFrame):
                 logging.info('用户确认添加规则')
                 rule = analise_rule(addRuleWindow)  # 解析添加规则时输入的内容
                 addRuleWindow.submit_data.emit(rule)  # 发送规则种类、名称和描述的信号
+
                 self.initRuleViewArea()  # （添加规则）刷新规则卡片布局
+                QTimer.singleShot(10, lambda: self.ruleScrollArea.verticalScrollBar().setValue(
+                    self.ruleScrollArea.verticalScrollBar().maximum()))  # 增加10ms延迟，防止UI未更新完全就滚动
             else:
                 logging.info('用户取消添加规则')
 
@@ -1312,6 +1317,9 @@ class RuleListInterface(QFrame):
             logging.info('用户确认修改规则')
             revised_rule = analise_rule(reviseRuleWindow)
             reviseRuleWindow.submit_data.emit(revised_rule)  # 发送信号给规则保存函数
+
+            v_pos = self.ruleScrollArea.verticalScrollBar().value()
             self.initRuleViewArea()  # （修改规则）刷新规则卡片布局
+            self.ruleScrollArea.verticalScrollBar().setValue(v_pos)
         else:
             logging.info('用户取消修改规则')
