@@ -4,8 +4,9 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFrame, QWidget, QHBoxLayout, QVBoxLayout
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, BodyLabel, PushButton, FluentIcon,
-                                                               setFont, SmoothScrollArea, CardWidget,
-                                                               TransparentToolButton, MessageBoxBase, MessageBox)
+                                                               setFont, SmoothScrollArea, CardWidget, InfoBarIcon,
+                                                               TransparentToolButton, MessageBoxBase, MessageBox,
+                                                               TeachingTipTailPosition, TeachingTip, FlowLayout)
 
 from FilenameChanger.file_history_operations.file_history_operations import (load_history, history_del, history_clear)
 from FilenameChanger.log.log_recorder import *
@@ -169,7 +170,7 @@ class HistoryCard(CardWidget):
             errorWindow.exec()
 
 
-class HistoryListInterface(QFrame):
+class HistoryListInterface(QWidget):
     """历史记录列表界面"""
     history_list = []  # 定义类属性：历史记录列表
 
@@ -271,10 +272,22 @@ class HistoryListInterface(QFrame):
 
         # 删除历史记录
         def delHistory():
-            if self.currentIndex > -1:
+            if self.currentIndex != -1:
                 history_del(self.history_list, self.currentIndex)
                 self.initCardView()  # （删除历史记录）刷新卡片布局
                 self.currentIndex -= 1  # 将选中卡片的下标恢复为-1防止下标越界
+            else:
+                # 显示一个气泡弹窗
+                TeachingTip.create(
+                    target=self.delBtn,
+                    icon=InfoBarIcon.ERROR,
+                    title='错误',
+                    content='请先选择一条历史记录',
+                    isClosable=True,
+                    tailPosition=TeachingTipTailPosition.TOP_LEFT,
+                    duration=1500,
+                    parent=self
+                )
 
         self.delBtn.clicked.connect(delHistory)
 

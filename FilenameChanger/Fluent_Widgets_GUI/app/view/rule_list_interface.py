@@ -8,7 +8,8 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, se
                                                                CardWidget, TransparentToolButton, SmoothScrollArea,
                                                                IconWidget, InfoBarIcon, MessageBox, ComboBox,
                                                                MessageBoxBase, LineEdit, RadioButton, CheckBox,
-                                                               RoundMenu, Action, BodyLabel, TextBrowser)
+                                                               RoundMenu, Action, BodyLabel, TextBrowser, TeachingTip,
+                                                               TeachingTipTailPosition)
 
 from FilenameChanger.rename_rules.rule_manager import (load_config, switch_rule, del_rules, save_new_rule, analise_rule,
                                                        revise_rule)
@@ -1028,7 +1029,7 @@ class RuleInputInterface(MessageBoxBase):
         self.viewLayout.addWidget(self.errorInfoLabel, 0, Qt.AlignmentFlag.AlignCenter)
 
 
-class RuleListInterface(QFrame):
+class RuleListInterface(QWidget):
     """定义规则列表界面布局"""
     rule_dict = None
 
@@ -1171,6 +1172,17 @@ class RuleListInterface(QFrame):
                 # 并新的规则卡片设置为已激活
                 current_index = self.rule_dict['selected_index']
                 self.ruleCardList[current_index].setActive(True)
+            else:
+                TeachingTip.create(
+                    target=self.activateRuleBtn,
+                    icon=InfoBarIcon.ERROR,
+                    title='错误',
+                    content='请先选择一条规则',
+                    isClosable=True,
+                    tailPosition=TeachingTipTailPosition.BOTTOM_LEFT,
+                    duration=1500,
+                    parent=self
+                )
 
         self.activateRuleBtn.clicked.connect(activate_rule_callback)
 
@@ -1204,6 +1216,18 @@ class RuleListInterface(QFrame):
                     self.currentIndex = -1  # 无论是否删除成功都把选中的下标置为-1
                 else:
                     logging.info('用户取消删除规则')
+            else:
+                # 未选中卡片时显示气泡弹窗
+                TeachingTip.create(
+                    target=self.delRuleBtn,
+                    icon=InfoBarIcon.ERROR,
+                    title='错误',
+                    content='请先选择一条规则',
+                    isClosable=True,
+                    tailPosition=TeachingTipTailPosition.LEFT,
+                    duration=1500,
+                    parent=self
+                )
 
         self.delRuleBtn.clicked.connect(del_rule_callback)
 

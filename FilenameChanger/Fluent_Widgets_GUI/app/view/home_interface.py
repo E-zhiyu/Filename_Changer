@@ -5,7 +5,8 @@ from PyQt6.QtCore import Qt, pyqtSignal
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, BodyLabel, setFont, LineEdit, FluentIcon,
                                                                PrimaryPushButton, SmoothScrollArea, MessageBox,
-                                                               ToolButton, CardWidget, CheckBox, MessageBoxBase)
+                                                               ToolButton, CardWidget, CheckBox, MessageBoxBase,
+                                                               TeachingTip, InfoBarIcon, TeachingTipTailPosition)
 
 from FilenameChanger.file_history_operations.file_history_operations import (is_directory_usable, rename,
                                                                              cancel_rename_operation, scan_files)
@@ -169,7 +170,7 @@ class FileListInterface(MessageBoxBase):
                 card.setCardChecked(False)
 
 
-class HomeInterface(QFrame):
+class HomeInterface(QWidget):
     """定义主页布局"""
 
     # 定义触发历史记录列表刷新布局方法的信号
@@ -389,5 +390,17 @@ class HomeInterface(QFrame):
                 fileListInterface = FileListInterface(self.scan_file, self.selected_file_tuple, self)
                 if fileListInterface.exec():
                     self.selected_file_tuple = tuple(sorted(fileListInterface.selected_file_list))
+            else:
+                # 显示一个气泡弹窗
+                TeachingTip.create(
+                    target=self.fileListBtn,
+                    icon=InfoBarIcon.ERROR,
+                    title='错误',
+                    content='请先输入有效文件夹路径',
+                    isClosable=True,
+                    tailPosition=TeachingTipTailPosition.LEFT,
+                    duration=1500,
+                    parent=self
+                )
 
         self.fileListBtn.clicked.connect(file_list_callback)
