@@ -222,7 +222,7 @@ class TextInterface(MessageBoxBase):
         self.textBrowser.setMarkdown(text)  # 将内容添加至文本框
 
 
-class InfoInterface(QFrame):
+class InfoInterface(QWidget):
     """关于软件的界面"""
 
     def __init__(self, parent=None):
