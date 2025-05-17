@@ -1,7 +1,7 @@
 import re
 
 from PyQt6.QtGui import QRegularExpressionValidator
-from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QButtonGroup
+from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QButtonGroup
 from PyQt6.QtCore import Qt, pyqtSignal, QRegularExpression, QPoint, QTimer, QDate
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, PushButton, FluentIcon,
@@ -9,8 +9,7 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, se
                                                                IconWidget, InfoBarIcon, MessageBox, ComboBox,
                                                                MessageBoxBase, LineEdit, RadioButton, CheckBox,
                                                                RoundMenu, Action, BodyLabel, TextBrowser, TeachingTip,
-                                                               TeachingTipTailPosition, ZhDatePicker
-                                                               )
+                                                               TeachingTipTailPosition, ZhDatePicker)
 
 from FilenameChanger.rename_rules.rule_manager import (load_config, switch_rule, del_rules, save_new_rule, analise_rule,
                                                        revise_rule)

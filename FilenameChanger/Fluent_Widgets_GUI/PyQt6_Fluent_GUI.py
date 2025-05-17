@@ -1,5 +1,4 @@
 # coding:utf-8
-import os
 import sys
 
 from PyQt6.QtCore import Qt
