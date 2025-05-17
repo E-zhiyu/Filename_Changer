@@ -299,18 +299,19 @@ class HomeInterface(QWidget):
 
         # 重命名按钮功能实现
         def rename_button_callback():
-            logging.info(f'已选择：{len(self.selected_file_tuple)}/{len(self.scan_file)}')
             logging.info('用户点击重命名按钮，确认操作中……')
             if confirm_operation():  # 弹出消息框确认操作
                 logging.info('用户确认重命名')
 
                 targetDirectory = self.folderLineEdit.text().strip('\"')
+                self.scan_file = scan_files(targetDirectory)
+                self.selected_file_tuple = tuple(self.scan_file)
+                logging.info(f'已选择：{len(self.selected_file_tuple)}/{len(self.scan_file)}')
                 flag = rename(targetDirectory, self.selected_file_tuple)
                 # 显示一个消息提示框
                 if flag == 1:
                     title = '成功'
                     message = '文件重命名完成！'
-                    self.refreshView_signal.emit()  # 重命名成功才将按钮点击的信号发送出去
                 elif flag == 0:
                     message = '文件夹为空或未选中任何文件！'
                     title = '失败'
@@ -319,7 +320,7 @@ class HomeInterface(QWidget):
                     message = '规则列表为空！请先写入规则！'
                 elif flag == -2:
                     title = '失败'
-                    message = '所有文件的新旧文件名都相同\n本次重命名不会产生新的重命名记录'
+                    message = '所有文件的新旧文件名都相同'
                 elif flag == -3:  # 仅用于调试
                     title = '严重错误'
                     message = '新文件名列表为空，请检查代码逻辑！'
@@ -332,6 +333,8 @@ class HomeInterface(QWidget):
 
             else:
                 logging.info('用户取消重命名')
+
+            self.refreshView_signal.emit()
 
         self.renameBtn.clicked.connect(rename_button_callback)
 
