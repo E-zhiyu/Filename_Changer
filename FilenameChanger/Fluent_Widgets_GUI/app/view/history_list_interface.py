@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, BodyLabel, PushButton, FluentIcon,
                                                                setFont, SmoothScrollArea, CardWidget, InfoBarIcon,
                                                                TransparentToolButton, MessageBoxBase, MessageBox,
-                                                               TeachingTipTailPosition, TeachingTip, FlowLayout)
+                                                               TeachingTipTailPosition, TeachingTip)
 
 from FilenameChanger.file_history_operations.file_history_operations import (load_history, history_del, history_clear)
 from FilenameChanger.log.log_recorder import *
