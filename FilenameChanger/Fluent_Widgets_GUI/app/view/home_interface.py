@@ -276,30 +276,24 @@ class HomeInterface(QWidget):
 
         def dirLineEdit_function():
             # 文本框功能实现
-            self.folderLineEdit.setFocus()
-
-            targetDirectory = self.folderLineEdit.text()
-            targetDirectory, flag = is_directory_usable(targetDirectory)
+            targetDirectory = self.folderLineEdit.text().strip('\"')
+            flag = is_directory_usable(targetDirectory)
             if flag == 1:
+                logging.info('路径有效，进行下一步操作')
                 self.renameBtn.setEnabled(True)
                 self.tipLabel.setStyleSheet("""QLabel{color: rgb(72, 180, 72);
                                               text-shadow: 2px 2px 4px black;}""")
                 self.tipLabel.setText('文件夹路径有效！')
-
-                self.scan_file = scan_files(targetDirectory)
-                self.selected_file_tuple = tuple(self.scan_file)  # 类型为元组，防止传值时被外部变量修改
             elif flag == 0:
+                logging.warning('路径无效')
                 self.renameBtn.setEnabled(False)
                 self.tipLabel.setStyleSheet("""QLabel{color: rgb(255, 100, 100);
                                                 text-shadow: 2px 2px 4px black;}""")
                 self.tipLabel.setText('这不是一个有效的文件夹！')
-
-                self.scan_file.clear()
             elif flag == -1:
+                logging.info('用户清空输入框的路径')
                 self.renameBtn.setEnabled(False)
-                self.tipLabel.clear()
-
-                self.scan_file.clear()
+                self.tipLabel.setText('')
 
         self.folderLineEdit.textChanged.connect(dirLineEdit_function)
 
@@ -325,7 +319,7 @@ class HomeInterface(QWidget):
                     message = '规则列表为空！请先写入规则！'
                 elif flag == -2:
                     title = '失败'
-                    message = '所有文件的新旧文件名都相同，本次重命名不会产生新的重命名记录'
+                    message = '所有文件的新旧文件名都相同\n本次重命名不会产生新的重命名记录'
                 elif flag == -3:  # 仅用于调试
                     title = '严重错误'
                     message = '新文件名列表为空，请检查代码逻辑！'
@@ -386,6 +380,13 @@ class HomeInterface(QWidget):
 
         # 文件列表按钮功能实现
         def file_list_callback():
+            targetDirectory = self.folderLineEdit.text().strip('\"')
+            if is_directory_usable(targetDirectory) == 1:
+                self.scan_file = scan_files(targetDirectory)
+                self.selected_file_tuple = tuple(self.scan_file)  # 类型为元组，防止传值时被外部变量修改
+            else:
+                self.scan_file.clear()
+
             if self.scan_file:
                 fileListInterface = FileListInterface(self.scan_file, self.selected_file_tuple, self)
                 if fileListInterface.exec():

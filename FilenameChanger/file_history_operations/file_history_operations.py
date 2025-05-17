@@ -15,27 +15,16 @@ def is_directory_usable(directory):
     """
     功能：判断文件夹路径是否有效
     参数 directory：目标文件夹路径
-    返回：去除引号后的路径和响应代码
+    返回：响应代码
     """
     if directory:
-        # 去除前后双引号
-        directory = directory.strip('"')
-        logging.info(f'输入路径“{directory}”')
-
         # 路径有效性的异常处理
-        try:
-            if os.path.isdir(directory):
-                logging.info('路径有效，进行下一步操作')
-                return directory, 1
-            else:
-                logging.warning('路径无效')
-                return directory, 0
-        except Exception as e:
-            logging.error('【错误】输入路径时发生未知错误！')
-            return directory, 0
+        if os.path.isdir(directory):
+            return 1
+        else:
+            return 0
     else:
-        logging.info('用户清空输入框的路径')
-        return None, -1
+        return -1
 
 
 def hidden_or_protected(directory):
