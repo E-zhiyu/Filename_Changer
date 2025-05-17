@@ -494,7 +494,7 @@ class RuleCard(CardWidget):
             """)
 
     def setActive(self, isActive: bool):
-        """切换激活状态"""
+        """设置激活状态"""
         if isActive:
             self.isActivatedIcon.setIcon(InfoBarIcon.SUCCESS)
             self.isActivatedLabel.setText('已激活')
