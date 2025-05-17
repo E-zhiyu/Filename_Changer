@@ -2,14 +2,15 @@ import re
 
 from PyQt6.QtGui import QRegularExpressionValidator
 from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QButtonGroup
-from PyQt6.QtCore import Qt, pyqtSignal, QRegularExpression, QPoint, QTimer
+from PyQt6.QtCore import Qt, pyqtSignal, QRegularExpression, QPoint, QTimer, QDate
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, PushButton, FluentIcon,
                                                                CardWidget, TransparentToolButton, SmoothScrollArea,
                                                                IconWidget, InfoBarIcon, MessageBox, ComboBox,
                                                                MessageBoxBase, LineEdit, RadioButton, CheckBox,
                                                                RoundMenu, Action, BodyLabel, TextBrowser, TeachingTip,
-                                                               TeachingTipTailPosition)
+                                                               TeachingTipTailPosition, ZhDatePicker
+                                                               )
 
 from FilenameChanger.rename_rules.rule_manager import (load_config, switch_rule, del_rules, save_new_rule, analise_rule,
                                                        revise_rule)
@@ -620,8 +621,8 @@ class RuleInputInterface(MessageBoxBase):
 
         elif self.new_rule_type == 4:
             if self.dateTypeComboBox.currentIndex() == 4:
-                if (self.customDateLineEdit.text()
-                        and not re.findall(r'[-_ ]?\d{4} ?\d{1,2} ?\d{1,2}[-_ ]?', self.customDateLineEdit.text())):
+                if (self.customDatePicker.text()
+                        and not re.findall(r'[-_ ]?\d{4} ?\d{1,2} ?\d{1,2}[-_ ]?', self.customDatePicker.text())):
                     self.errorInfoLabel.setText('自定义日期格式无效！')
                     self.errorInfoLabel.setHidden(False)
                     return False
@@ -768,15 +769,14 @@ class RuleInputInterface(MessageBoxBase):
             self.dateTypeComboBox.addItems(date_type)
             self.dateTypeComboBox.setFixedWidth(150)
 
-            dateTypeLayout.addWidget(self.dateTypeComboBox)
+            dateTypeLayout.addWidget(self.dateTypeComboBox, 0, Qt.AlignmentFlag.AlignRight)
 
             # 自定义填充日期
-            self.customDateLineEdit = LineEdit()
-            self.customDateLineEdit.setPlaceholderText('年月日用空格隔开')
-            self.customDateLineEdit.setFixedWidth(150)
-            self.customDateLineEdit.setVisible(False)  # 默认为不可见，只有下拉框选择自定义才会显示
+            self.customDatePicker = ZhDatePicker()
+            self.customDatePicker.setFixedWidth(150)
+            self.customDatePicker.setVisible(False)  # 默认为不可见，只有下拉框选择自定义才会显示
 
-            dateTypeLayout.addWidget(self.customDateLineEdit)
+            dateTypeLayout.addWidget(self.customDatePicker)
 
             def setDateLineEditVisible(comboBox, dateLineEdit):
                 """根据下拉框选择的内容修改日期输入框的可见性"""
@@ -786,12 +786,7 @@ class RuleInputInterface(MessageBoxBase):
                     dateLineEdit.setVisible(False)
 
             self.dateTypeComboBox.currentIndexChanged.connect(
-                lambda: setDateLineEditVisible(self.dateTypeComboBox, self.customDateLineEdit))
-
-            # 为自定义日期输入框添加日期格式限制
-            format_regex = QRegularExpression(r'\d{1,4} \d{1,2} \d{1,2}')
-            date_validator = QRegularExpressionValidator(format_regex)
-            self.customDateLineEdit.setValidator(date_validator)  # 设置输入的格式限制
+                lambda: setDateLineEditVisible(self.dateTypeComboBox, self.customDatePicker))
 
             # 将日期输入布局添加至主布局
             dateLayout.addLayout(dateTypeLayout)
@@ -1309,7 +1304,10 @@ class RuleListInterface(QWidget):
                 reviseRuleWindow.tailBtn.setChecked(True)
 
             reviseRuleWindow.dateTypeComboBox.setCurrentIndex(date_type)
-            reviseRuleWindow.customDateLineEdit.setText(customize_date)
+
+            year, month, day = customize_date.split()
+            if customize_date:
+                reviseRuleWindow.customDatePicker.setDate(QDate(int(year), int(month), int(day)))
         elif type == 5:
             new_name = rule['new_name']
             num_type = rule['num_type']

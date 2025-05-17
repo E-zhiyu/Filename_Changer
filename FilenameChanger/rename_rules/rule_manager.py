@@ -3,7 +3,7 @@ import json
 import logging
 from json import JSONDecodeError
 
-from FilenameChanger import config_path
+from FilenameChanger import rule_path
 from FilenameChanger.log.log_recorder import *
 
 """
@@ -17,7 +17,7 @@ def load_config():
     返回：json文件根字典
     """
     try:
-        with open(config_path, 'r', encoding='utf-8') as f:
+        with open(rule_path, 'r', encoding='utf-8') as f:
             logging.info('加载规则配置……')
             config = json.load(f)
 
@@ -28,7 +28,7 @@ def load_config():
     except (JSONDecodeError, FileNotFoundError):  # 防止规则文件存在但是为空而导致程序无法启动
         logging.info('配置文件为空或不存在，正在初始化……')
         init_json()
-        with open(config_path, 'r', encoding='utf-8') as f:
+        with open(rule_path, 'r', encoding='utf-8') as f:
             logging.info('规则配置已初始化并成功加载')
             return json.load(f)
 
@@ -42,7 +42,7 @@ def save_new_rule(config_dict, new_rule):
     config_dict['num'] += 1
     config_dict['rules'].append(new_rule)  # 将新规则字典并入现有的规则
 
-    with open(config_path, 'w', encoding='utf-8') as f:
+    with open(rule_path, 'w', encoding='utf-8') as f:
         json.dump(config_dict, f, ensure_ascii=False, indent=4)
         logging.info('新规则已成功保存')
 
@@ -55,7 +55,7 @@ def revise_rule(rule_dict, revised_rule, index):
     参数 index：需要修改的规则的下标
     """
     rule_dict['rules'][index] = revised_rule
-    with open(config_path, 'w', encoding='utf-8') as f:
+    with open(rule_path, 'w', encoding='utf-8') as f:
         json.dump(rule_dict, f, ensure_ascii=False, indent=4)
 
 
@@ -65,8 +65,8 @@ def init_json():
     参数 config_path：规则配置文件路径
     """
     inited_rules = {'num': 0, 'selected_index': 0, 'rules': []}
-    os.makedirs(os.path.dirname(config_path), exist_ok=True)  # 先创建规则文件目录
-    with open(config_path, 'w', encoding='utf-8') as f:
+    os.makedirs(os.path.dirname(rule_path), exist_ok=True)  # 先创建规则文件目录
+    with open(rule_path, 'w', encoding='utf-8') as f:
         json.dump(inited_rules, f, ensure_ascii=False, indent=4)
 
     logging.info('规则文件初始化成功')
@@ -95,7 +95,7 @@ def del_rules(config_dict, index):
 
         config_dict['num'] -= 1
         del config_dict['rules'][index]
-        with open(config_path, 'w', encoding='utf-8') as f:
+        with open(rule_path, 'w', encoding='utf-8') as f:
             json.dump(config_dict, f, ensure_ascii=False, indent=4)
 
         return 1
@@ -110,7 +110,7 @@ def switch_rule(config_dict, index):
     logging.info(f'用户切换至规则{index + 1}')
     config_dict['selected_index'] = index
     # 将更改写入配置文件
-    with open(config_path, 'w', encoding='utf-8') as f:
+    with open(rule_path, 'w', encoding='utf-8') as f:
         json.dump(config_dict, f, ensure_ascii=False, indent=4)
 
 
@@ -177,7 +177,7 @@ def analise_rule(addRuleWindow):
             logging.info(f'位置：尾部')
 
         if addRuleWindow.dateTypeComboBox.currentIndex() == 4:
-            rule['date'] = addRuleWindow.customDateLineEdit.text()
+            rule['date'] = addRuleWindow.customDatePicker.date.toString('yyyy MM dd')
             if not rule['date']:
                 rule['split_char'] = ''  #如果自定义日期为空，则强制将分隔符置为空
             logging.info(f'日期：{rule["date"]}')
