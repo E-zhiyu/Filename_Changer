@@ -83,7 +83,7 @@ def rename(directory, old_file_names):
         logging.info(f'文件夹：“{directory}”为空')
         return 0
 
-    config_dict = load_config()  # 重命名时加载已保存的规则
+    config_dict = load_rule()  # 重命名时加载已保存的规则
     selected_rule = config_dict['rules'][config_dict['selected_index']]
     if not config_dict['rules']:  # 若规则为空，则结束本函数
         logging.info('规则为空，请先前往规则设置写入规则！')

@@ -1,4 +1,3 @@
-import logging
 import re
 
 from PyQt6.QtGui import QRegularExpressionValidator
@@ -9,11 +8,10 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, se
                                                                CardWidget, TransparentToolButton, SmoothScrollArea,
                                                                IconWidget, InfoBarIcon, MessageBox, ComboBox,
                                                                MessageBoxBase, LineEdit, RadioButton, CheckBox,
-                                                               RoundMenu, Action, BodyLabel, TextBrowser, TeachingTip,
-                                                               TeachingTipTailPosition, ZhDatePicker, InfoBar,
-                                                               InfoBarPosition)
+                                                               RoundMenu, Action, BodyLabel, TextBrowser, ZhDatePicker,
+                                                               InfoBar, InfoBarPosition)
 
-from FilenameChanger.rename_rules.rule_manager import (load_config, switch_rule, del_rules, save_new_rule, analise_rule,
+from FilenameChanger.rename_rules.rule_manager import (load_rule, switch_rule, del_rules, save_new_rule, analise_rule,
                                                        revise_rule)
 
 from FilenameChanger.log.log_recorder import *
@@ -1097,7 +1095,7 @@ class RuleListInterface(QWidget):
     def initRuleViewArea(self):
         """初始化规则卡片显示区域"""
         logging.info('开始更新规则卡片布局')
-        self.rule_dict = load_config()  # 更新现存规则
+        self.rule_dict = load_rule()  # 更新现存规则
         rule_list = self.rule_dict['rules']
         selected_index = self.rule_dict['selected_index']
         self.currentIndex = -1  # 先将目前选中的卡片下标置为-1，否则会有下标越界风险
@@ -1220,7 +1218,6 @@ class RuleListInterface(QWidget):
                             duration=2000,
                             parent=self
                         )
-                        logging.info('已成功删除一条规则')
                     elif flag == 0:
                         InfoBar.error(
                             title='错误',
@@ -1229,7 +1226,6 @@ class RuleListInterface(QWidget):
                             duration=2000,
                             parent=self
                         )
-                        logging.error('删除规则失败：无法删除最后一个规则')
 
                     self.setSelected(-1)  # 无论是否删除成功都取消选中卡片
                 else:
@@ -1260,6 +1256,15 @@ class RuleListInterface(QWidget):
                 self.initRuleViewArea()  # （添加规则）刷新规则卡片布局
                 QTimer.singleShot(10, lambda: self.ruleScrollArea.verticalScrollBar().setValue(
                     self.ruleScrollArea.verticalScrollBar().maximum()))  # 增加10ms延迟，防止UI未更新完全就滚动
+
+                # 创建成功添加规则的消息框
+                InfoBar.success(
+                    title='成功',
+                    content='已添加一条新规则',
+                    position=InfoBarPosition.TOP,
+                    duration=2000,
+                    parent=self
+                )
             else:
                 logging.info('用户取消添加规则')
 
@@ -1363,5 +1368,14 @@ class RuleListInterface(QWidget):
             v_pos = self.ruleScrollArea.verticalScrollBar().value()
             self.initRuleViewArea()  # （修改规则）刷新规则卡片布局
             self.ruleScrollArea.verticalScrollBar().setValue(v_pos)
+
+            # 创建修改成功的消息框
+            InfoBar.success(
+                title='成功',
+                content='已成功修改指定规则',
+                position=InfoBarPosition.TOP,
+                duration=2000,
+                parent=self
+            )
         else:
             logging.info('用户取消修改规则')

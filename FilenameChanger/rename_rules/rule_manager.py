@@ -11,7 +11,7 @@ from FilenameChanger.log.log_recorder import *
 """
 
 
-def load_config():
+def load_rule():
     """
     功能：加载配置文件
     返回：json文件根字典
@@ -79,7 +79,7 @@ def del_rules(config_dict, index):
     参数 index：需要删除的规则的下标
     """
     if config_dict['num'] == 1:
-        logging.error('无法移除最后一个规则')
+        logging.error('无法删除最后一个规则')
         return 0
     else:
         logging.info(f'用户删除第{index + 1}个规则，剩余规则{config_dict['num'] - 1}个')
@@ -107,7 +107,7 @@ def switch_rule(config_dict, index):
     参数 config_dict：规则配置文件根字典
     参数 index：需要切换到的规则的下标
     """
-    logging.info(f'用户切换至规则{index + 1}')
+    logging.info(f'用户激活规则{index + 1}')
     config_dict['selected_index'] = index
     # 将更改写入配置文件
     with open(rule_path, 'w', encoding='utf-8') as f:
@@ -130,7 +130,7 @@ def analise_rule(addRuleWindow):
             'name': addRuleWindow.ruleNameLineEdit.text(),
             'desc': addRuleWindow.ruleDescLineEdit.text(),
             'split_char': addRuleWindow.splitCharLineEdit.text(),
-            'enable_re':addRuleWindow.enableReCheckBox.isChecked()
+            'enable_re': addRuleWindow.enableReCheckBox.isChecked()
         }
         logging.info(f'分隔符：{rule['split_char']}')
         if rule['enable_re']:
@@ -179,7 +179,7 @@ def analise_rule(addRuleWindow):
         if addRuleWindow.dateTypeComboBox.currentIndex() == 4:
             rule['date'] = addRuleWindow.customDatePicker.date.toString('yyyy MM dd')
             if not rule['date']:
-                rule['split_char'] = ''  #如果自定义日期为空，则强制将分隔符置为空
+                rule['split_char'] = ''  # 如果自定义日期为空，则强制将分隔符置为空
             logging.info(f'日期：{rule["date"]}')
 
         if addRuleWindow.splitCharComboBox.currentIndex() != 4:

@@ -377,6 +377,8 @@ class HomeInterface(QWidget):
                         parent=self
                     )
                     logging.info('撤销重命名成功')
+
+                    self.refreshView_signal.emit()  # 将按钮点击的信号发送出去
                 elif flag == 0:
                     InfoBar.error(
                         title='失败',
@@ -396,9 +398,6 @@ class HomeInterface(QWidget):
                     )
                     logging.error('原文件夹被移除或移动至其他位置，无法撤销重命名')
 
-                # 撤销成功才将按钮点击的信号发送出去
-                if flag == 1:
-                    self.refreshView_signal.emit()
             else:
                 logging.info('用户取消撤销重命名')
 
