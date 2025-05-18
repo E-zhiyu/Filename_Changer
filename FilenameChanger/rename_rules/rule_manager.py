@@ -193,11 +193,16 @@ def analise_rule(addRuleWindow):
             'type': 5,
             'name': addRuleWindow.ruleNameLineEdit.text(),
             'desc': addRuleWindow.ruleDescLineEdit.text(),
-            'new_name': addRuleWindow.newNameLineEdit.text(),
             'num_type': addRuleWindow.numTypeComboBox.text(),
         }
-        logging.info(f'新文件名：{rule["new_name"]}')
         logging.info(f'编号样式：{rule["num_type"]}')
+
+        if addRuleWindow.fileNameComboBox.currentIndex() == 1:
+            rule['new_name'] = addRuleWindow.newNameLineEdit.text()
+            logging.info(f'文件名：{rule["new_name"]}')
+        elif addRuleWindow.fileNameComboBox.currentIndex() == 0:
+            rule['use_original_name'] = True
+            logging.info('文件名：原文件名')
 
         if not addRuleWindow.startNumLineEdit.text():
             rule['start_num'] = 1

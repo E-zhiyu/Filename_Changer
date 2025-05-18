@@ -310,8 +310,11 @@ class InfoDialog(MessageBoxBase):
             self.scrollLayout.addLayout(self.splitCharLayout)
         elif rule['type'] == 5:
             # 新文件名
-            newNameLabel = SubtitleLabel(text='新文件名：', parent=self.widget)
-            newNameContentLabel = BodyLabel(text=rule['new_name'], parent=self.widget)
+            newNameLabel = SubtitleLabel(text='文件名：', parent=self.widget)
+            if 'new_name' in rule.keys():  # 如果规则含有关键字new_name则显示new_name内容
+                newNameContentLabel = BodyLabel(text=rule['new_name'], parent=self.widget)
+            else:
+                newNameContentLabel = BodyLabel(text='<原文件名>', parent=self.widget)
             newNameLayout = QHBoxLayout()
 
             newNameLayout.setSpacing(0)
@@ -546,7 +549,7 @@ class RuleInputInterface(MessageBoxBase):
             '2.修改后缀名',
             '3.修改特定字符串',
             '4.日期替换',
-            '5.重命名并编号',
+            '5.文件编号',
             '6.字母大小写转换'
         )
         self.ruleTypeComboBox = ComboBox()
@@ -627,7 +630,7 @@ class RuleInputInterface(MessageBoxBase):
                     return False
 
         elif self.new_rule_type == 5:
-            if not self.newNameLineEdit.text():
+            if not self.newNameLineEdit.text() and self.fileNameComboBox.currentIndex() == 1:
                 self.errorInfoLabel.setText('未输入新文件名！')
                 self.errorInfoLabel.setHidden(False)
                 return False
@@ -855,23 +858,42 @@ class RuleInputInterface(MessageBoxBase):
             self.viewLayout.addLayout(splitCharLayout)
 
         elif self.new_rule_type == 5:
-            """新文件名输入"""
-            newNameLayout = QHBoxLayout()
-            self.new_layout_list.append(newNameLayout)
+            """文件名填充"""
+            fileNameLayout = QHBoxLayout()
+            fileNameInputLayout = QVBoxLayout()
+            self.new_layout_list.append(fileNameLayout)
 
             # 文本标签
-            newNameLabel = SubtitleLabel(text='新文件名', parent=self)
-            newNameLayout.addWidget(newNameLabel)
+            newNameLabel = SubtitleLabel(text='文件名', parent=self)
+            fileNameLayout.addWidget(newNameLabel)
+
+            # 文件名填充下拉框
+            self.fileNameComboBox = ComboBox()
+            file_name = ('原文件名', '自定义文件名')
+            self.fileNameComboBox.addItems(file_name)
+            self.fileNameComboBox.setFixedWidth(150)
+            self.fileNameComboBox.setCurrentIndex(0)
+            fileNameInputLayout.addWidget(self.fileNameComboBox, 0, Qt.AlignmentFlag.AlignRight)
 
             # 输入框
             self.newNameLineEdit = LineEdit()
             self.newNameLineEdit.setPlaceholderText('请输入新文件名（必填）')
             self.newNameLineEdit.setFixedWidth(200)
-            newNameLayout.addWidget(self.newNameLineEdit)
+            fileNameInputLayout.addWidget(self.newNameLineEdit)
             self.newNameLineEdit.setValidator(char_validator)
+            self.newNameLineEdit.setVisible(False)  # 默认设置为不可见
+
+            def switchNewNameLineEditVisible():
+                if self.fileNameComboBox.currentIndex() == 1:
+                    self.newNameLineEdit.setVisible(True)
+                else:
+                    self.newNameLineEdit.setVisible(False)
+
+            self.fileNameComboBox.currentIndexChanged.connect(switchNewNameLineEditVisible)
 
             # 将新水平布局添加至主布局
-            self.viewLayout.addLayout(newNameLayout)
+            fileNameLayout.addLayout(fileNameInputLayout)
+            self.viewLayout.addLayout(fileNameLayout)
 
             """编号样式选择"""
             numTypeLayout = QHBoxLayout()
@@ -1334,11 +1356,17 @@ class RuleListInterface(QWidget):
             if customize_date:
                 reviseRuleWindow.customDatePicker.setDate(QDate(int(year), int(month), int(day)))
         elif type == 5:
-            new_name = rule['new_name']
+            new_name = rule.get('new_name', '')
             num_type = rule['num_type']
             start_num = str(rule['start_num'])
             step_length = str(rule['step_length'])
             position = rule['position']
+            use_original_name = rule.get('use_original_name', False)
+
+            if use_original_name:
+                reviseRuleWindow.fileNameComboBox.setCurrentIndex(0)
+            else:
+                reviseRuleWindow.fileNameComboBox.setCurrentIndex(1)
 
             if position == 'head':
                 reviseRuleWindow.headBtn.setChecked(True)

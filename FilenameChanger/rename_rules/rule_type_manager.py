@@ -1,6 +1,7 @@
 # FilenameChanger/rename_rules/rule_type_manager.py
 import re
 import time
+from types import new_class
 
 from FilenameChanger.rename_rules.rule_manager import *
 
@@ -211,17 +212,18 @@ def use_type_5(selected_rule, old_names):
     参数 old_names：旧文件名序列
     返回：生成的新文件名列表
     """
-    new_file_name = selected_rule['new_name']
+    new_name = selected_rule.get('new_name')
     num_type = selected_rule['num_type']
     position = selected_rule['position']
     number = selected_rule['start_num']
     step_length = selected_rule['step_length']
+    use_original_name = selected_rule.get('use_original_name', True)  # v2.2.1之前只能启用重命名
 
     new_name_list = []
 
     for old_name in old_names:
         # 分离文件名和扩展名
-        ext = os.path.splitext(old_name)[1]
+        original_file_name, ext = os.path.splitext(old_name)
 
         # 生成编号
         if position == 'head':
@@ -247,10 +249,16 @@ def use_type_5(selected_rule, old_names):
             serial_number = '{' + str(number) + '}'
 
         # 将编号合并至文件名
-        if position == 'head':
-            new_name = f'{serial_number}{new_file_name}{ext}'
-        elif position == 'tail':
-            new_name = f'{new_file_name}{serial_number}{ext}'
+        if use_original_name:
+            if position == 'head':
+                new_name = f'{serial_number}{original_file_name}{ext}'
+            elif position == 'tail':
+                new_name = f'{original_file_name}{serial_number}{ext}'
+        else:
+            if position == 'head':
+                new_name = f'{serial_number}{new_name}{ext}'
+            elif position == 'tail':
+                new_name = f'{new_name}{serial_number}{ext}'
 
         new_name_list.append(new_name)
         number += step_length
