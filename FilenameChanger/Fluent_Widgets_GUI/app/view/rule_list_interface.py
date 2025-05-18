@@ -1,3 +1,4 @@
+import logging
 import re
 
 from PyQt6.QtGui import QRegularExpressionValidator
@@ -9,7 +10,8 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, se
                                                                IconWidget, InfoBarIcon, MessageBox, ComboBox,
                                                                MessageBoxBase, LineEdit, RadioButton, CheckBox,
                                                                RoundMenu, Action, BodyLabel, TextBrowser, TeachingTip,
-                                                               TeachingTipTailPosition, ZhDatePicker)
+                                                               TeachingTipTailPosition, ZhDatePicker, InfoBar,
+                                                               InfoBarPosition)
 
 from FilenameChanger.rename_rules.rule_manager import (load_config, switch_rule, del_rules, save_new_rule, analise_rule,
                                                        revise_rule)
@@ -1135,11 +1137,14 @@ class RuleListInterface(QWidget):
         切换卡片选中状态
         参数 index：调用该方法的卡片下标，即鼠标点击的卡片下标
         """
-        if self.currentIndex >= 0:  # 先将当前已选中的卡片切换为未选中状态
+        # 先将当前已选中的卡片切换为未选中状态
+        if self.currentIndex >= 0:
             self.ruleCardList[self.currentIndex].setCardSelected(False)
 
+        # 再将选中的卡片切换为选中状态
         self.currentIndex = index
-        self.ruleCardList[self.currentIndex].setCardSelected(True)  # 再将选中的卡片切换为选中状态
+        if self.currentIndex > -1:
+            self.ruleCardList[self.currentIndex].setCardSelected(True)
 
     def achieve_functions(self):
         """实现各控件功能"""
@@ -1166,15 +1171,24 @@ class RuleListInterface(QWidget):
                 # 并新的规则卡片设置为已激活
                 current_index = self.rule_dict['selected_index']
                 self.ruleCardList[current_index].setActive(True)
+
+                # 创建激活成功的提示框
+                InfoBar.success(
+                    title='成功',
+                    content='已激活新规则',
+                    position=InfoBarPosition.TOP,
+                    duration=2000,
+                    parent=self
+                )
+
+                # 将选中规则下标归位
+                self.setSelected(-1)
             else:
-                TeachingTip.create(
-                    target=self.activateRuleBtn,
-                    icon=InfoBarIcon.ERROR,
-                    title='错误',
+                InfoBar.warning(
+                    title='提示',
                     content='请先选择一条规则',
-                    isClosable=True,
-                    tailPosition=TeachingTipTailPosition.BOTTOM_LEFT,
-                    duration=1500,
+                    position=InfoBarPosition.TOP,
+                    duration=2000,
                     parent=self
                 )
 
@@ -1199,27 +1213,34 @@ class RuleListInterface(QWidget):
                         self.initRuleViewArea()  # （删除规则）刷新规则卡片布局
                         self.ruleScrollArea.verticalScrollBar().setValue(v_pos)
 
+                        InfoBar.success(
+                            title='成功',
+                            content='已删除选中的规则',
+                            position=InfoBarPosition.TOP,
+                            duration=2000,
+                            parent=self
+                        )
+                        logging.info('已成功删除一条规则')
                     elif flag == 0:
-                        title = '失败'
-                        message = '无法删除最后一个规则'
-                        message_window = MessageBox(title=title, content=message, parent=self)
-                        message_window.yesButton.setText('确认')
-                        message_window.cancelButton.hide()
-                        message_window.exec()
+                        InfoBar.error(
+                            title='错误',
+                            content='无法删除最后一个规则',
+                            position=InfoBarPosition.TOP,
+                            duration=2000,
+                            parent=self
+                        )
+                        logging.error('删除规则失败：无法删除最后一个规则')
 
-                    self.currentIndex = -1  # 无论是否删除成功都把选中的下标置为-1
+                    self.setSelected(-1)  # 无论是否删除成功都取消选中卡片
                 else:
                     logging.info('用户取消删除规则')
             else:
                 # 未选中卡片时显示气泡弹窗
-                TeachingTip.create(
-                    target=self.delRuleBtn,
-                    icon=InfoBarIcon.ERROR,
-                    title='错误',
+                InfoBar.warning(
+                    title='提示',
                     content='请先选择一条规则',
-                    isClosable=True,
-                    tailPosition=TeachingTipTailPosition.LEFT,
-                    duration=1500,
+                    position=InfoBarPosition.TOP,
+                    duration=2000,
                     parent=self
                 )
 

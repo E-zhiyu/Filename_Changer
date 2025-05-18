@@ -1,12 +1,11 @@
-from operator import index
-
-from PyQt6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QWidget, QFileDialog, QSizePolicy
+from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QFileDialog
 from PyQt6.QtCore import Qt, pyqtSignal
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, BodyLabel, setFont, LineEdit, FluentIcon,
-                                                               PrimaryPushButton, SmoothScrollArea, MessageBox,
+                                                               PrimaryPushButton, SmoothScrollArea, MessageBox, InfoBar,
                                                                ToolButton, CardWidget, CheckBox, MessageBoxBase,
-                                                               TeachingTip, InfoBarIcon, TeachingTipTailPosition)
+                                                               InfoBarPosition, TeachingTip, InfoBarIcon,
+                                                               TeachingTipTailPosition)
 
 from FilenameChanger.file_history_operations.file_history_operations import (is_directory_usable, rename,
                                                                              cancel_rename_operation, scan_files)
@@ -310,26 +309,50 @@ class HomeInterface(QWidget):
                 flag = rename(targetDirectory, self.selected_file_tuple)
                 # 显示一个消息提示框
                 if flag == 1:
-                    title = '成功'
-                    message = '文件重命名完成！'
+                    InfoBar.success(
+                        title='成功',
+                        content='所有文件已成功重命名！',
+                        position=InfoBarPosition.TOP,
+                        duration=2000,
+                        parent=self
+                    )
+                    logging.info('文件重命名成功！')
                 elif flag == 0:
-                    message = '文件夹为空或未选中任何文件！'
-                    title = '失败'
+                    InfoBar.error(
+                        title='失败',
+                        content='文件夹为空或未选中任何文件！',
+                        position=InfoBarPosition.TOP,
+                        duration=2000,
+                        parent=self
+                    )
+                    logging.error('文件重命名失败：文件夹为空或未选中文件')
                 elif flag == -1:
-                    title = '失败'
-                    message = '规则列表为空！请先写入规则！'
+                    InfoBar.error(
+                        title='失败',
+                        content='规则列表为空，请先写入规则！',
+                        position=InfoBarPosition.TOP,
+                        duration=2000,
+                        parent=self
+                    )
+                    logging.error('文件重命名失败：规则列表为空')
                 elif flag == -2:
-                    title = '失败'
-                    message = '所有文件的新旧文件名都相同'
+                    InfoBar.warning(
+                        title='警告',
+                        content='重命名前后所有文件名都相同',
+                        position=InfoBarPosition.TOP,
+                        duration=2000,
+                        parent=self
+                    )
+                    logging.warning('文件重命名异常：前后文件名都相同')
                 elif flag == -3:  # 仅用于调试
-                    title = '严重错误'
-                    message = '新文件名列表为空，请检查代码逻辑！'
-
-                message_window = MessageBox(title=title, content=message, parent=self)
-                message_window.cancelButton.hide()
-                message_window.buttonLayout.insertStretch(1)
-                message_window.yesButton.setText("确认")
-                message_window.exec()
+                    InfoBar.error(
+                        title='严重错误',
+                        content='新文件名列表为空，请检查代码逻辑！',
+                        position=InfoBarPosition.TOP,
+                        duration=2000,
+                        parent=self
+                    )
+                    logging.fatal('严重错误：新文件名列表为空')
 
             else:
                 logging.info('用户取消重命名')
@@ -346,19 +369,32 @@ class HomeInterface(QWidget):
                 flag = cancel_rename_operation()
 
                 if flag == 1:
-                    message = '撤销重命名成功！'
-                    title = '成功'
+                    InfoBar.success(
+                        title='成功',
+                        content='已成功撤销重命名',
+                        position=InfoBarPosition.TOP,
+                        duration=2000,
+                        parent=self
+                    )
+                    logging.info('撤销重命名成功')
                 elif flag == 0:
-                    message = '历史记录为空，无法撤销重命名！'
-                    title = '失败'
+                    InfoBar.error(
+                        title='失败',
+                        content='历史记录为空，无法撤销重命名',
+                        position=InfoBarPosition.TOP,
+                        duration=2000,
+                        parent=self
+                    )
+                    logging.error('历史记录为空，无法撤销重命名')
                 elif flag == -1:
-                    message = '上次重命名的文件夹不存在或已被移除！'
-                    title = '失败'
-                message_window = MessageBox(title=title, content=message, parent=self)
-                message_window.cancelButton.hide()
-                message_window.buttonLayout.insertStretch(1)
-                message_window.yesButton.setText("确认")
-                message_window.exec()
+                    InfoBar.error(
+                        title='失败',
+                        content='原文件夹被移除或移动至其他位置',
+                        position=InfoBarPosition.TOP,
+                        duration=2000,
+                        parent=self
+                    )
+                    logging.error('原文件夹被移除或移动至其他位置，无法撤销重命名')
 
                 # 撤销成功才将按钮点击的信号发送出去
                 if flag == 1:
@@ -398,12 +434,12 @@ class HomeInterface(QWidget):
                 # 显示一个气泡弹窗
                 TeachingTip.create(
                     target=self.fileListBtn,
-                    icon=InfoBarIcon.ERROR,
-                    title='错误',
+                    icon=InfoBarIcon.WARNING,
+                    title='提示',
                     content='请先输入有效文件夹路径',
                     isClosable=True,
                     tailPosition=TeachingTipTailPosition.LEFT,
-                    duration=1500,
+                    duration=2000,
                     parent=self
                 )
 

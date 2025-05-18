@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, BodyLabel, PushButton, FluentIcon,
                                                                setFont, SmoothScrollArea, CardWidget, InfoBarIcon,
                                                                TransparentToolButton, MessageBoxBase, MessageBox,
-                                                               TeachingTipTailPosition, TeachingTip)
+                                                               TeachingTipTailPosition, InfoBarPosition, InfoBar)
 
 from FilenameChanger.file_history_operations.file_history_operations import (load_history, history_del, history_clear)
 from FilenameChanger.log.log_recorder import *
@@ -244,7 +244,7 @@ class HistoryListInterface(QWidget):
             index = 0
             for history in self.history_list:
                 card = HistoryCard(history, index, self)
-                card.clicked.connect(lambda index=card.index: self.setSelected(index))
+                card.clicked.connect(lambda i=card.index: self.setSelected(i))
                 self.cardList.append(card)
                 self.historyCardLayout.addWidget(card)  # 将父亲设置为历史界面，以便历史详情界面正常显示
 
@@ -257,35 +257,51 @@ class HistoryListInterface(QWidget):
     def setSelected(self, index):
         """
         功能：点击卡片时将对应卡片设置为选中
-        参数 index：鼠标点击的卡片的下标
+        参数 index：目标卡片的下标
         """
         # 将原来的卡片设置为未选中
         if self.currentIndex > -1:
             self.cardList[self.currentIndex].setCardSelected(False)
 
-        # 将鼠标点击的卡片设置为选中
+        # 将目标卡片设置为选中
         self.currentIndex = index
-        self.cardList[self.currentIndex].setCardSelected(True)
+        if self.currentIndex > -1:
+            self.cardList[self.currentIndex].setCardSelected(True)
 
     def achieveFunctions(self):
         """实现控件功能"""
 
         # 删除历史记录
         def delHistory():
-            if self.currentIndex != -1:
-                history_del(self.history_list, self.currentIndex)
-                self.initCardView()  # （删除历史记录）刷新卡片布局
-                self.currentIndex -= 1  # 将选中卡片的下标恢复为-1防止下标越界
+            if self.history_list:
+                if self.currentIndex != -1:
+                    history_del(self.history_list, self.currentIndex)
+                    self.initCardView()  # （删除历史记录）刷新卡片布局
+                    self.setSelected(-1)  # 取消选中任何卡片
+
+                    # 创建操作成功的消息框
+                    InfoBar.success(
+                        title='成功',
+                        content='已删除选中的历史记录',
+                        position=InfoBarPosition.TOP,
+                        duration=2000,
+                        parent=self
+                    )
+                else:
+                    # 显示一个气泡弹窗
+                    InfoBar.warning(
+                        title='提示',
+                        content='请先选择一条历史记录',
+                        position=InfoBarPosition.TOP,
+                        duration=2000,
+                        parent=self
+                    )
             else:
-                # 显示一个气泡弹窗
-                TeachingTip.create(
-                    target=self.delBtn,
-                    icon=InfoBarIcon.ERROR,
+                InfoBar.error(
                     title='错误',
-                    content='请先选择一条历史记录',
-                    isClosable=True,
-                    tailPosition=TeachingTipTailPosition.TOP_LEFT,
-                    duration=1500,
+                    content='历史记录为空',
+                    position=InfoBarPosition.TOP,
+                    duration=2000,
                     parent=self
                 )
 
@@ -303,8 +319,24 @@ class HistoryListInterface(QWidget):
                     logging.info('用户确认清空历史记录')
                     history_clear()
                     self.initCardView()  # （清空历史记录）刷新卡片布局
-                    self.currentIndex -= 1
+                    self.setSelected(-1)
+
+                    InfoBar.success(
+                        title='成功',
+                        content='已清除全部历史记录',
+                        position=InfoBarPosition.TOP,
+                        duration=2000,
+                        parent=self
+                    )
                 else:
                     logging.info('用户取消清空历史记录')
+            else:
+                InfoBar.error(
+                    title='错误',
+                    content='历史记录为空',
+                    position=InfoBarPosition.TOP,
+                    duration=2000,
+                    parent=self
+                )
 
         self.clearBtn.clicked.connect(clearHistory)
