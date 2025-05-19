@@ -1352,9 +1352,12 @@ class RuleListInterface(QWidget):
 
             reviseRuleWindow.dateTypeComboBox.setCurrentIndex(date_type)
 
-            year, month, day = customize_date.split()
-            if customize_date:
-                reviseRuleWindow.customDatePicker.setDate(QDate(int(year), int(month), int(day)))
+            try:
+                year, month, day = customize_date.split()
+                if customize_date:
+                    reviseRuleWindow.customDatePicker.setDate(QDate(int(year), int(month), int(day)))
+            except ValueError:
+                pass
         elif type == 5:
             new_name = rule.get('new_name', '')
             num_type = rule['num_type']
