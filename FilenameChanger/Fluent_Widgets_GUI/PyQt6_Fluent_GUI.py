@@ -19,7 +19,6 @@ if cfg.get(cfg.dpiScale) != "Auto":
 def run_with_gui():
     # 创建应用程序
     app = QApplication(sys.argv)
-    app.setAttribute(Qt.ApplicationAttribute.AA_DontCreateNativeWidgetSiblings)
 
     # 创建主窗口
     w = MainWindow()
@@ -27,4 +26,3 @@ def run_with_gui():
 
     app.exec()
     logging.info('程序结束运行\n')
-    sys.exit()
