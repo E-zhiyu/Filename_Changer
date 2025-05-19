@@ -2,8 +2,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, PushButton, FluentIcon, MessageBoxBase,
-                                                               SmoothScrollArea, TextBrowser, HyperlinkButton)
-from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import setFont
+                                                               SmoothScrollArea, TextBrowser, HyperlinkButton, setFont)
 
 from FilenameChanger import version, author
 

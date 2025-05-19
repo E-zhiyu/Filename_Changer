@@ -8,6 +8,7 @@ from FilenameChanger.Fluent_Widgets_GUI.app.common.config import cfg
 from FilenameChanger.Fluent_Widgets_GUI.app.view.main_window import MainWindow
 
 from FilenameChanger.log.log_recorder import *
+from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (setTheme, Theme)
 
 # 启用DPI比例
 if cfg.get(cfg.dpiScale) != "Auto":

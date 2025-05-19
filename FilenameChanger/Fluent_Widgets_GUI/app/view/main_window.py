@@ -1,5 +1,4 @@
 # coding:utf-8
-
 from FilenameChanger import version
 
 from PyQt6.QtWidgets import QApplication
@@ -12,6 +11,7 @@ from FilenameChanger.Fluent_Widgets_GUI.app.view.home_interface import HomeInter
 from FilenameChanger.Fluent_Widgets_GUI.app.view.rule_list_interface import RuleListInterface
 from FilenameChanger.Fluent_Widgets_GUI.app.view.info_interface import InfoInterface
 from FilenameChanger.Fluent_Widgets_GUI.app.view.history_list_interface import HistoryListInterface
+from FilenameChanger.Fluent_Widgets_GUI.app.view.setting_interface import SettingInterface
 
 
 class MainWindow(FluentWindow):
@@ -28,6 +28,7 @@ class MainWindow(FluentWindow):
         self.homeInterface = HomeInterface(self)
         self.ruleListInterface = RuleListInterface('规则列表', self)
         self.historyListInterface = HistoryListInterface('历史记录', self)
+        self.settingInterface = SettingInterface(self)
         self.infoInterface = InfoInterface(self)
 
         # 初始化导航栏
@@ -46,7 +47,8 @@ class MainWindow(FluentWindow):
         self.addSubInterface(self.historyListInterface, FIF.HISTORY, '重命名记录')
 
         # 添加导航栏底部按钮
-        self.addSubInterface(self.infoInterface, FIF.INFO, '关于软件', NavigationItemPosition.BOTTOM)  # 添加应用详情界面
+        self.addSubInterface(self.settingInterface, FIF.SETTING, '设置', NavigationItemPosition.BOTTOM)
+        self.addSubInterface(self.infoInterface, FIF.INFO, '关于软件', NavigationItemPosition.BOTTOM)
 
     def initWindow(self):
         """初始化窗口"""
