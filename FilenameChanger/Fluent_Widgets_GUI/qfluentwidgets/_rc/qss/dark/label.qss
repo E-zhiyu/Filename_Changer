@@ -1,5 +1,6 @@
 FluentLabelBase {
     color: white;
+    background-color: transparent;
 }
 
 HyperlinkLabel {

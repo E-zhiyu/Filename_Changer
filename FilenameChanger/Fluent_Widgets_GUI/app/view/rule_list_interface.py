@@ -9,7 +9,7 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, se
                                                                IconWidget, InfoBarIcon, MessageBox, ComboBox,
                                                                MessageBoxBase, LineEdit, RadioButton, CheckBox,
                                                                RoundMenu, Action, BodyLabel, TextBrowser, ZhDatePicker,
-                                                               InfoBar, InfoBarPosition)
+                                                               InfoBar, InfoBarPosition, setCustomStyleSheet)
 
 from FilenameChanger.rename_rules.rule_manager import (load_rule, switch_rule, del_rules, save_new_rule, analise_rule,
                                                        revise_rule)
@@ -435,10 +435,13 @@ class RuleCard(CardWidget):
         self.labelLayout = QVBoxLayout()
 
         # 设置属性
-        self.titleLabel.setStyleSheet('background-color:transparent')  # 将标签的背景色设为透明，防止选择卡片的时候影响美观
-        self.descLabel.setStyleSheet('background-color:transparent')  # 将标签的背景色设为透明，防止选择卡片的时候影响美观
         setFont(self.titleLabel, 22)
         setFont(self.descLabel, 16)
+
+        # 自定义样式
+        label_qss = 'SubtitleLabel,BodyLabel{background-color:transparent;}'
+        setCustomStyleSheet(self.titleLabel, label_qss, label_qss)
+        setCustomStyleSheet(self.descLabel, label_qss, label_qss)
 
         # 添加控件到布局器
         self.labelLayout.addWidget(self.titleLabel)
@@ -484,14 +487,14 @@ class RuleCard(CardWidget):
         if not isSelected:
             self.setStyleSheet("""
                 QWidget {
-                    background: transparent;
+                    background-color: transparent;
                     border-radius: 5px;
                 }
             """)
         else:
             self.setStyleSheet("""
                 QWidget {
-                    background: #ff009faa;
+                    background-color: #ff009faa;
                     border-radius: 5px;
                 }
             """)
@@ -1096,6 +1099,11 @@ class RuleListInterface(QWidget):
         self.ruleScrollArea = SmoothScrollArea(self.totalWidget)  # 创建平滑滚动区域
         self.ruleCardWidget = QWidget(self.ruleScrollArea)  # 创建存放所有规则卡片的容器
         self.ruleCardLayout = QVBoxLayout(self.ruleCardWidget)  # 规则卡片的垂直布局器
+
+        # 自定义样式
+        light_widget_qss = 'QWidget{background-color: rgb(255, 255, 255);}'
+        dark_widget_qss = 'QWidget{background-color: rgb(249, 249, 249);}'
+        setCustomStyleSheet(self.ruleCardWidget, light_widget_qss, dark_widget_qss)
 
         self.ruleScrollArea.setWidget(self.ruleCardWidget)  # 将规则卡片容器放入滚动区域，使其可以滚动
         self.ruleScrollArea.setWidgetResizable(True)
