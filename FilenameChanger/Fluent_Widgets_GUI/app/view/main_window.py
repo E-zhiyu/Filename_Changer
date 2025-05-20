@@ -4,6 +4,7 @@ from FilenameChanger import version
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtGui import QIcon
 
+from FilenameChanger.Fluent_Widgets_GUI.app.common.config import cfg
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import FluentIcon as FIF, setTheme, Theme
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (NavigationItemPosition, FluentWindow)
 
@@ -33,6 +34,9 @@ class MainWindow(FluentWindow):
 
         # 初始化导航栏
         self.initNavigation()
+
+        # 捕获themeChanged信号并连接至修改主题函数
+        cfg.themeChanged.connect(setTheme)
 
         # 将各窗口的信号连接至对应方法
         self.homeInterface.refreshView_signal.connect(lambda: self.historyListInterface.initCardView())
