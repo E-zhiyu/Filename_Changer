@@ -69,6 +69,8 @@ class MainWindow(FluentWindow):
     def setStyle(self, theme: Theme):
         """设置样式"""
         setTheme(theme)
+
+        # 设置滚动区域背景颜色
         light_scrollBackground = 'QFrame{background-color:rgb(240, 240, 240)}'
         dark_scrollBackground = 'QFrame{background-color:rgb(24, 24, 24)}'
         if not isDarkTheme():
