@@ -127,6 +127,7 @@ class InfoDialog(MessageBoxBase):
         self.scrollLayout = QVBoxLayout(self.scrollAreaWidget)
 
         self.scrollArea.setWidgetResizable(True)
+        self.scrollAreaWidget.setStyleSheet('border-radius: 5px;')
         self.viewLayout.addWidget(self.scrollArea)
 
         """显示规则通用信息"""
@@ -1103,6 +1104,7 @@ class RuleListInterface(QWidget):
         self.ruleScrollArea.setWidget(self.ruleCardWidget)  # 将规则卡片容器放入滚动区域，使其可以滚动
         self.ruleScrollArea.setWidgetResizable(True)
         self.ruleScrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)  # 水平滚动条永远不显示
+        self.ruleCardWidget.setStyleSheet('border-radius: 5px;')
 
         self.ruleCardLayout.setAlignment(Qt.AlignmentFlag.AlignTop)  # 设置卡片对齐方式为顶对齐
         self.ruleCardLayout.setSpacing(7)  # 设置卡片布局器间隔：每个卡片间隔距离为7

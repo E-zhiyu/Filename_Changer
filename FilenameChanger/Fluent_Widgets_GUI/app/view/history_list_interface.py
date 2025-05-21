@@ -52,6 +52,7 @@ class InfoWindow(MessageBoxBase):
 
         self.infoLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.infoLayout.setSpacing(5)
+        self.infoWidget.setStyleSheet('border-radius: 5px;')
 
         self.infoScrollArea.setWidget(self.infoWidget)
         self.infoScrollArea.setWidgetResizable(True)
