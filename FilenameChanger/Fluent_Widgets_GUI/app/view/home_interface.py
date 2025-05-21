@@ -272,6 +272,10 @@ class HomeInterface(QWidget):
             self.path_flag = is_directory_usable(targetDirectory)
             if self.path_flag == 1:
                 logging.info('路径有效，进行下一步操作')
+
+                # 扫描整个文件夹
+                self.scan_file = scan_files(targetDirectory)
+                self.selected_file_tuple = tuple(self.scan_file)  # 类型为元组，防止传值时被外部变量修改
             elif self.path_flag == 0:
                 logging.warning('路径无效')
             elif self.path_flag == -1:
@@ -410,18 +414,12 @@ class HomeInterface(QWidget):
 
         # 文件列表按钮功能实现
         def file_list_callback():
-            targetDirectory = self.folderLineEdit.text().strip('\"')
-            if is_directory_usable(targetDirectory) == 1:
-                self.scan_file = scan_files(targetDirectory)
-                self.selected_file_tuple = tuple(self.scan_file)  # 类型为元组，防止传值时被外部变量修改
-            else:
-                self.scan_file.clear()
-
-            if self.scan_file:
+            if self.path_flag == 1:
                 fileListInterface = FileListInterface(self.scan_file, self.selected_file_tuple, self)
                 if fileListInterface.exec():
                     self.selected_file_tuple = tuple(sorted(fileListInterface.selected_file_list))
             else:
+                self.scan_file.clear()
                 # 显示一个气泡弹窗
                 TeachingTip.create(
                     target=self.fileListBtn,
