@@ -1,7 +1,7 @@
 import re
 
 from PyQt6.QtGui import QRegularExpressionValidator
-from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QButtonGroup
+from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QButtonGroup, QFrame
 from PyQt6.QtCore import Qt, pyqtSignal, QRegularExpression, QPoint, QTimer, QDate
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, setFont, PushButton, FluentIcon,
@@ -9,7 +9,9 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, se
                                                                IconWidget, InfoBarIcon, MessageBox, ComboBox,
                                                                MessageBoxBase, LineEdit, RadioButton, CheckBox,
                                                                RoundMenu, Action, BodyLabel, TextBrowser, ZhDatePicker,
-                                                               InfoBar, InfoBarPosition, setCustomStyleSheet)
+                                                               InfoBar, InfoBarPosition, setCustomStyleSheet,
+                                                               isDarkTheme)
+from FilenameChanger.Fluent_Widgets_GUI.app.common.config import cfg
 
 from FilenameChanger.rename_rules.rule_manager import (load_rule, switch_rule, del_rules, save_new_rule, analise_rule,
                                                        revise_rule)
@@ -122,7 +124,7 @@ class InfoDialog(MessageBoxBase):
 
         """规则详情滚动区域"""
         self.scrollArea = SmoothScrollArea(parent=self)
-        self.scrollAreaWidget = QWidget(self.scrollArea)
+        self.scrollAreaWidget = QFrame(self.scrollArea)
         self.scrollArea.setWidget(self.scrollAreaWidget)
         self.scrollLayout = QVBoxLayout(self.scrollAreaWidget)
 
@@ -1097,13 +1099,8 @@ class RuleListInterface(QWidget):
 
         """规则卡片展示区域"""
         self.ruleScrollArea = SmoothScrollArea(self.totalWidget)  # 创建平滑滚动区域
-        self.ruleCardWidget = QWidget(self.ruleScrollArea)  # 创建存放所有规则卡片的容器
+        self.ruleCardWidget = QFrame(self.ruleScrollArea)  # 创建存放所有规则卡片的容器
         self.ruleCardLayout = QVBoxLayout(self.ruleCardWidget)  # 规则卡片的垂直布局器
-
-        # 自定义样式
-        light_widget_qss = 'QWidget{background-color: rgb(255, 255, 255);}'
-        dark_widget_qss = 'QWidget{background-color: rgb(249, 249, 249);}'
-        setCustomStyleSheet(self.ruleCardWidget, light_widget_qss, dark_widget_qss)
 
         self.ruleScrollArea.setWidget(self.ruleCardWidget)  # 将规则卡片容器放入滚动区域，使其可以滚动
         self.ruleScrollArea.setWidgetResizable(True)

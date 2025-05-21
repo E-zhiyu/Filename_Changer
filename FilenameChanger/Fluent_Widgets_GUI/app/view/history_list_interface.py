@@ -1,5 +1,5 @@
 from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout
+from PyQt6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFrame
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, BodyLabel, PushButton, FluentIcon,
                                                                setFont, SmoothScrollArea, CardWidget,
@@ -206,7 +206,7 @@ class HistoryListInterface(QWidget):
         self.widgetLayout.addLayout(self.btnLayout)
 
         """历史记录展示区域"""
-        self.historyWidget = QWidget(self)
+        self.historyWidget = QFrame(self)
         self.historyScrollArea = SmoothScrollArea(self)
         self.historyCardLayout = QVBoxLayout(self.historyWidget)
 

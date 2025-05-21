@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import QApplication
 from PyQt6.QtGui import QIcon
 
 from FilenameChanger.Fluent_Widgets_GUI.app.common.config import cfg
-from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import FluentIcon as FIF, setTheme, Theme
+from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import FluentIcon as FIF, setTheme, Theme, isDarkTheme
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (NavigationItemPosition, FluentWindow)
 
 from FilenameChanger.Fluent_Widgets_GUI.app.view.home_interface import HomeInterface
@@ -36,7 +36,7 @@ class MainWindow(FluentWindow):
         self.initNavigation()
 
         # 捕获themeChanged信号并连接至修改主题函数
-        cfg.themeChanged.connect(setTheme)
+        cfg.themeChanged.connect(self.setStyle)
 
         # 将各窗口的信号连接至对应方法
         self.homeInterface.refreshView_signal.connect(lambda: self.historyListInterface.initCardView())
@@ -65,3 +65,17 @@ class MainWindow(FluentWindow):
         w, h = desktop.width(), desktop.height()
         self.move(w // 2 - self.width() // 2, h // 2 - self.height() // 2)
         self.show()
+
+    def setStyle(self, theme: Theme):
+        """设置样式"""
+        setTheme(theme)
+        light_scrollBackground = 'QFrame{background-color:rgb(240, 240, 240)}'
+        dark_scrollBackground = 'QFrame{background-color:rgb(24, 24, 24)}'
+        if not isDarkTheme():
+            self.homeInterface.setStyleSheet(light_scrollBackground)
+            self.ruleListInterface.setStyleSheet(light_scrollBackground)
+            self.historyListInterface.setStyleSheet(light_scrollBackground)
+        else:
+            self.homeInterface.setStyleSheet(dark_scrollBackground)
+            self.ruleListInterface.setStyleSheet(dark_scrollBackground)
+            self.historyListInterface.setStyleSheet(dark_scrollBackground)

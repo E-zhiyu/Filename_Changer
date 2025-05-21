@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QFileDialog
+from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QFileDialog, QFrame
 from PyQt6.QtCore import Qt, pyqtSignal
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, BodyLabel, setFont, LineEdit, FluentIcon,
@@ -122,7 +122,7 @@ class FileListInterface(MessageBoxBase):
 
         """文件展示区域"""
         self.fileScrollArea = SmoothScrollArea()
-        self.fileWidget = QWidget(self)
+        self.fileWidget = QFrame(self)
         self.fileScrollArea.setWidget(self.fileWidget)
         self.fileScrollArea.setWidgetResizable(True)
 
@@ -280,14 +280,12 @@ class HomeInterface(QWidget):
             if flag == 1:
                 logging.info('路径有效，进行下一步操作')
                 self.renameBtn.setEnabled(True)
-                self.tipLabel.setStyleSheet("""QLabel{color: rgb(72, 180, 72);
-                                              text-shadow: 2px 2px 4px black;}""")
+                self.tipLabel.setStyleSheet("""QLabel{color: rgb(72, 180, 72);}""")
                 self.tipLabel.setText('文件夹路径有效！')
             elif flag == 0:
                 logging.warning('路径无效')
                 self.renameBtn.setEnabled(False)
-                self.tipLabel.setStyleSheet("""QLabel{color: rgb(255, 100, 100);
-                                                text-shadow: 2px 2px 4px black;}""")
+                self.tipLabel.setStyleSheet("""QLabel{color: rgb(255, 100, 100);}""")
                 self.tipLabel.setText('这不是一个有效的文件夹！')
             elif flag == -1:
                 logging.info('用户清空输入框的路径')
