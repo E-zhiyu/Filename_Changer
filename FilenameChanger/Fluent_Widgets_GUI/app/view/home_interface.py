@@ -180,6 +180,7 @@ class HomeInterface(QWidget):
         self.setObjectName('HomeInterface')  # 设置全局唯一对象名，否则不能将该界面添加至导航栏
         self.scan_file = []
         self.selected_file_tuple = None
+        self.path_flag = -1  # 标记输入路径的有效性
 
         """基本布局设置"""
         self.totalWidget = QWidget(self)  # 创建一个总容器存放所有控件，使得调整窗口大小的时候各控件不会相互分离
@@ -200,35 +201,28 @@ class HomeInterface(QWidget):
         """文件夹选择"""
         # 文本框
         self.folderLineEdit = LineEdit(self.totalWidget)
-        self.lineEditAndBtnLayout = QHBoxLayout()  # 文件夹选择布局器（水平）
-        self.lineEditLayout = QVBoxLayout()  # 文本框布局器（垂直）
-        self.lineEditLayout.addLayout(self.lineEditAndBtnLayout)
+        self.lineEditLayout = QHBoxLayout()  # 输入框布局器
+        self.lineEditLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-        self.lineEditAndBtnLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.folderLineEdit.setFixedWidth(250)
         self.folderLineEdit.setClearButtonEnabled(True)
         self.folderLineEdit.setPlaceholderText('请选择一个文件夹')  # 设置文本框提示文本
 
-        self.lineEditAndBtnLayout.addWidget(self.folderLineEdit)
+        self.lineEditLayout.addWidget(self.folderLineEdit)
 
         # 文件夹浏览按钮
         self.folderSelectBtn = ToolButton(FluentIcon.FOLDER)
         self.folderSelectBtn.setFixedHeight(34)
-        self.lineEditAndBtnLayout.addWidget(self.folderSelectBtn)
+        self.lineEditLayout.addWidget(self.folderSelectBtn)
 
         # 文件查看按钮
         self.fileListBtn = ToolButton(FluentIcon.ALIGNMENT)
         self.fileListBtn.setFixedHeight(34)
-        self.lineEditAndBtnLayout.addWidget(self.fileListBtn)
-
-        # 文件夹路径有效性提示标签
-        self.tipLabel = BodyLabel(self.totalWidget)  # 提示用户是否输入正确的路径
-        setFont(self.tipLabel, 17)
-        self.lineEditLayout.addWidget(self.tipLabel, 0, Qt.AlignmentFlag.AlignCenter)
+        self.lineEditLayout.addWidget(self.fileListBtn)
 
         # 将整体布局添加至主布局器
         self.widgetLayout.addLayout(self.lineEditLayout)
-        self.widgetLayout.addSpacing(10)
+        self.widgetLayout.addSpacing(20)
 
         """功能按钮"""
         self.renameBtn = PrimaryPushButton(FluentIcon.PENCIL_INK, '文件重命名')
@@ -236,7 +230,6 @@ class HomeInterface(QWidget):
         self.buttonHBoxLayout = QHBoxLayout()  # 按钮布局器（水平）
 
         self.renameBtn.setFixedWidth(175)
-        self.renameBtn.setEnabled(False)  # 先将其禁用防止未输入路径就重命名
         self.cancelOperationBtn.setFixedWidth(175)
 
         self.buttonHBoxLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -276,84 +269,85 @@ class HomeInterface(QWidget):
         def dirLineEdit_function():
             # 文本框功能实现
             targetDirectory = self.folderLineEdit.text().strip('\"')
-            flag = is_directory_usable(targetDirectory)
-            if flag == 1:
+            self.path_flag = is_directory_usable(targetDirectory)
+            if self.path_flag == 1:
                 logging.info('路径有效，进行下一步操作')
-                self.renameBtn.setEnabled(True)
-                self.tipLabel.setStyleSheet("""QLabel{color: rgb(72, 180, 72);}""")
-                self.tipLabel.setText('文件夹路径有效！')
-            elif flag == 0:
+            elif self.path_flag == 0:
                 logging.warning('路径无效')
-                self.renameBtn.setEnabled(False)
-                self.tipLabel.setStyleSheet("""QLabel{color: rgb(255, 100, 100);}""")
-                self.tipLabel.setText('这不是一个有效的文件夹！')
-            elif flag == -1:
+            elif self.path_flag == -1:
                 logging.info('用户清空输入框的路径')
-                self.renameBtn.setEnabled(False)
-                self.tipLabel.setText('')
 
         self.folderLineEdit.textChanged.connect(dirLineEdit_function)
 
         # 重命名按钮功能实现
         def rename_button_callback():
-            logging.info('用户点击重命名按钮，确认操作中……')
-            if confirm_operation():  # 弹出消息框确认操作
-                logging.info('用户确认重命名')
+            if self.path_flag == 1:
+                logging.info('用户点击重命名按钮，确认操作中……')
+                if confirm_operation():  # 弹出消息框确认操作
+                    logging.info('用户确认重命名')
 
-                targetDirectory = self.folderLineEdit.text().strip('\"')
-                self.scan_file = scan_files(targetDirectory)
-                self.selected_file_tuple = tuple(self.scan_file)
-                logging.info(f'已选择：{len(self.selected_file_tuple)}/{len(self.scan_file)}')
-                flag = rename(targetDirectory, self.selected_file_tuple)
-                # 显示一个消息提示框
-                if flag == 1:
-                    InfoBar.success(
-                        title='成功',
-                        content='所有文件已成功重命名！',
-                        position=InfoBarPosition.TOP,
-                        duration=2000,
-                        parent=self
-                    )
-                    logging.info('文件重命名成功！')
-                elif flag == 0:
-                    InfoBar.error(
-                        title='失败',
-                        content='文件夹为空或未选中任何文件！',
-                        position=InfoBarPosition.TOP,
-                        duration=2000,
-                        parent=self
-                    )
-                    logging.error('文件重命名失败：文件夹为空或未选中文件')
-                elif flag == -1:
-                    InfoBar.error(
-                        title='失败',
-                        content='规则列表为空，请先写入规则！',
-                        position=InfoBarPosition.TOP,
-                        duration=2000,
-                        parent=self
-                    )
-                    logging.error('文件重命名失败：规则列表为空')
-                elif flag == -2:
-                    InfoBar.warning(
-                        title='警告',
-                        content='重命名前后所有文件名都相同',
-                        position=InfoBarPosition.TOP,
-                        duration=2000,
-                        parent=self
-                    )
-                    logging.warning('文件重命名异常：前后文件名都相同')
-                elif flag == -3:  # 仅用于调试
-                    InfoBar.error(
-                        title='严重错误',
-                        content='新文件名列表为空，请检查代码逻辑！',
-                        position=InfoBarPosition.TOP,
-                        duration=2000,
-                        parent=self
-                    )
-                    logging.fatal('严重错误：新文件名列表为空')
+                    targetDirectory = self.folderLineEdit.text().strip('\"')
+                    self.scan_file = scan_files(targetDirectory)
+                    self.selected_file_tuple = tuple(self.scan_file)
+                    logging.info(f'已选择：{len(self.selected_file_tuple)}/{len(self.scan_file)}')
+                    flag = rename(targetDirectory, self.selected_file_tuple)
+                    # 显示一个消息提示框
+                    if flag == 1:
+                        InfoBar.success(
+                            title='成功',
+                            content='所有文件已成功重命名！',
+                            position=InfoBarPosition.TOP,
+                            duration=2000,
+                            parent=self
+                        )
+                        logging.info('文件重命名成功！')
+                    elif flag == 0:
+                        InfoBar.error(
+                            title='失败',
+                            content='文件夹为空或未选中任何文件！',
+                            position=InfoBarPosition.TOP,
+                            duration=2000,
+                            parent=self
+                        )
+                        logging.error('文件重命名失败：文件夹为空或未选中文件')
+                    elif flag == -1:
+                        InfoBar.error(
+                            title='失败',
+                            content='规则列表为空，请先写入规则！',
+                            position=InfoBarPosition.TOP,
+                            duration=2000,
+                            parent=self
+                        )
+                        logging.error('文件重命名失败：规则列表为空')
+                    elif flag == -2:
+                        InfoBar.warning(
+                            title='警告',
+                            content='重命名前后所有文件名都相同',
+                            position=InfoBarPosition.TOP,
+                            duration=2000,
+                            parent=self
+                        )
+                        logging.warning('文件重命名异常：前后文件名都相同')
+                    elif flag == -3:  # 仅用于调试
+                        InfoBar.error(
+                            title='严重错误',
+                            content='新文件名列表为空，请检查代码逻辑！',
+                            position=InfoBarPosition.TOP,
+                            duration=2000,
+                            parent=self
+                        )
+                        logging.fatal('严重错误：新文件名列表为空')
 
+                else:
+                    logging.info('用户取消重命名')
             else:
-                logging.info('用户取消重命名')
+                InfoBar.error(
+                    title='错误',
+                    content='请输入有效的文件夹路径',
+                    position=InfoBarPosition.TOP,
+                    duration=2000,
+                    parent=self
+                )
 
             self.refreshView_signal.emit()
 
