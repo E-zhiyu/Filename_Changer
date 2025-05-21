@@ -9,9 +9,7 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, se
                                                                IconWidget, InfoBarIcon, MessageBox, ComboBox,
                                                                MessageBoxBase, LineEdit, RadioButton, CheckBox,
                                                                RoundMenu, Action, BodyLabel, TextBrowser, ZhDatePicker,
-                                                               InfoBar, InfoBarPosition, setCustomStyleSheet,
-                                                               isDarkTheme)
-from FilenameChanger.Fluent_Widgets_GUI.app.common.config import cfg
+                                                               InfoBar, InfoBarPosition, setCustomStyleSheet)
 
 from FilenameChanger.rename_rules.rule_manager import (load_rule, switch_rule, del_rules, save_new_rule, analise_rule,
                                                        revise_rule)
@@ -32,7 +30,7 @@ rule_help_md = """\
 - 功能：将文件名中的日期替换为指定日期，支持自定义日期留空以删除日期，若文件名存在多个日期则会全部替换为空串后再增加指定日期
 
 ## 5.重命名并编号
-- 功能：将所有文件重命名为同一名称并编号
+- 功能：添加编号至文件名，可选择是否重命名后再编号
 
 ## 6.字母大小写转换
 - 功能：对文件名中的英文字母进行大小写转换，支持全部大写或小写以及首字母大写，可选择仅修改文件名、仅修改扩展名和修改全部
