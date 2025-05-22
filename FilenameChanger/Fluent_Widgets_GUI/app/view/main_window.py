@@ -32,6 +32,9 @@ class MainWindow(FluentWindow):
         # 初始化导航栏
         self.initNavigation()
 
+        # 初始化主题
+        self.setStyle(cfg.theme)  # 缺少该语句可能导致滚动区域背景与主题不符
+
         # 捕获themeChanged信号并连接至修改主题函数
         cfg.themeChanged.connect(self.setStyle)
 
@@ -65,17 +68,15 @@ class MainWindow(FluentWindow):
 
     def setStyle(self, theme: Theme):
         """设置样式"""
-        setTheme(theme)
-
         # 设置滚动区域背景颜色
         light_scrollBackground = """QFrame{
-                                    background-color:rgb(240, 240, 240);
-                                    border-radius: 5px;
-                                }"""
+                                            background-color:rgb(240, 240, 240);
+                                            border-radius: 5px;
+                                        }"""
         dark_scrollBackground = """QFrame{
-                                    background-color:rgb(24, 24, 24);
-                                    border-radius: 5px;
-                                }"""
+                                            background-color:rgb(24, 24, 24);
+                                            border-radius: 5px;
+                                        }"""
         if not isDarkTheme():
             self.homeInterface.setStyleSheet(light_scrollBackground)
             self.ruleListInterface.setStyleSheet(light_scrollBackground)
@@ -84,3 +85,7 @@ class MainWindow(FluentWindow):
             self.homeInterface.setStyleSheet(dark_scrollBackground)
             self.ruleListInterface.setStyleSheet(dark_scrollBackground)
             self.historyListInterface.setStyleSheet(dark_scrollBackground)
+
+        # 设置应用主题
+        if cfg.theme != theme:
+            setTheme(theme)
