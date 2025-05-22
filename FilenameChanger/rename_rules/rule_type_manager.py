@@ -1,7 +1,6 @@
 # FilenameChanger/rename_rules/rule_type_manager.py
 import re
 import time
-from types import new_class
 
 from FilenameChanger.rename_rules.rule_manager import *
 

@@ -1,5 +1,4 @@
 # file_history_operations/file_history_operations.py
-import logging
 import platform  # 判断系统类型
 import stat  # 判断文件属性
 
