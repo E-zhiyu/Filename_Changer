@@ -1,6 +1,5 @@
 # rename_rules/rule_manager.py
-import json
-import logging
+import json, shutil
 from json import JSONDecodeError
 
 from FilenameChanger import rule_path
@@ -247,3 +246,56 @@ def analise_rule(addRuleWindow):
             logging.info('模式：首字母大写')
 
     return rule
+
+
+def import_rule(src_path):
+    """
+    功能：导入外部规则文件
+    参数 src_path：导入的规则文件路径
+    返回：导入结果和提示语
+    """
+
+    class FileCopyValidator:
+        """文件内容验证器"""
+
+        def __init__(self, src_path):
+            self.src_path = src_path
+            self.dst_path = rule_path
+
+        def safeCopy(self):
+            try:
+                with open(self.src_path, 'r', encoding='utf-8') as f:
+                    content = json.load(f)
+                    if isinstance(content, dict):
+                        if content.get('num') is not None and content.get('rules') is not None:
+                            shutil.copy(self.src_path, self.dst_path)
+                        else:
+                            raise ValueError
+                    else:
+                        raise ValueError
+            except JSONDecodeError:
+                return False, '不是有效的JSON格式'
+            except FileNotFoundError:
+                return False, '待导入的文件不存在'
+            except ValueError:
+                return False, '文件内容格式错误'
+            else:
+                return True, '文件复制成功'
+
+    validator = FileCopyValidator(src_path)
+    return validator.safeCopy()
+
+
+def export_rule(dst_path):
+    """
+    功能：导出规则文件到指定位置
+    参数 dst_path：导出到的文件夹路径
+    返回：导出结果和提示语
+    """
+    file_name = datetime.now().strftime('%Y_%m_%d_') + 'FC_rule.json'
+    try:
+        shutil.copy(rule_path, os.path.join(dst_path, file_name))
+    except FileNotFoundError:
+        return False, '规则文件不存在'
+    else:
+        return True, '规则导出成功'
