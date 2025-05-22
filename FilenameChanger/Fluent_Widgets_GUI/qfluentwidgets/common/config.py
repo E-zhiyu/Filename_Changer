@@ -10,6 +10,7 @@ from PyQt6.QtGui import QColor
 
 from .exception_handler import exceptionHandler
 
+from FilenameChanger import config_path
 
 ALERT = "\n\033[1;33m📢 Tips:\033[0m QFluentWidgets Pro is now released. Click \033[1;96mhttps://qfluentwidgets.com/pages/pro\033[0m to learn more about it.\n"
 
@@ -270,7 +271,7 @@ class QConfig(QObject):
 
     def __init__(self):
         super().__init__()
-        self.file = Path("config/config.json")
+        self.file = Path(config_path)
         self._theme = Theme.LIGHT
         self._cfg = self
 
@@ -412,6 +413,7 @@ except UnicodeEncodeError:
 def isDarkTheme():
     """ whether the theme is dark mode """
     return qconfig.theme == Theme.DARK
+
 
 def theme():
     """ get theme mode """
