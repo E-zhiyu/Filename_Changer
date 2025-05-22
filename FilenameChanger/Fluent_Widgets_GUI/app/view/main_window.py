@@ -70,13 +70,13 @@ class MainWindow(FluentWindow):
         """设置样式"""
         # 设置滚动区域背景颜色
         light_scrollBackground = """QFrame{
-                                            background-color:rgb(240, 240, 240);
-                                            border-radius: 5px;
-                                        }"""
+                                    background-color:rgb(240, 240, 240);
+                                    border-radius: 5px;
+                                }"""
         dark_scrollBackground = """QFrame{
-                                            background-color:rgb(24, 24, 24);
-                                            border-radius: 5px;
-                                        }"""
+                                    background-color:rgb(35, 35, 35);
+                                    border-radius: 5px;
+                                }"""
         if not isDarkTheme():
             self.homeInterface.setStyleSheet(light_scrollBackground)
             self.ruleListInterface.setStyleSheet(light_scrollBackground)
