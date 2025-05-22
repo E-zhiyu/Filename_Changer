@@ -22,9 +22,6 @@ class MainWindow(FluentWindow):
         super().__init__()
         self.initWindow()
 
-        # 设置界面亮暗主题
-        setTheme(Theme.AUTO)
-
         # 实例化不同的子界面
         self.homeInterface = HomeInterface(self)
         self.ruleListInterface = RuleListInterface('规则列表', self)

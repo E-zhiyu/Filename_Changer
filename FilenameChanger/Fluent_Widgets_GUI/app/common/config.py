@@ -1,14 +1,6 @@
 # coding:utf-8
 import sys
-from enum import Enum
-from pathlib import Path
-
-from PyQt6.QtCore import QLocale
-from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (qconfig, QConfig, ConfigItem, OptionsConfigItem,
-                                                               BoolValidator,
-                                                               OptionsValidator, RangeConfigItem, RangeValidator,
-                                                               FolderListValidator, Theme, ConfigSerializer,
-                                                               __version__)
+from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (qconfig, QConfig, OptionsConfigItem, OptionsValidator)
 
 from FilenameChanger import config_path
 
@@ -42,9 +34,9 @@ class Config(QConfig):
         "Folders", "LocalMusic", [], FolderListValidator())'''
 
     # main window
-    '''micaEnabled = ConfigItem("MainWindow", "MicaEnabled", isWin11(), BoolValidator())'''
     dpiScale = OptionsConfigItem(
         "MainWindow", "DpiScale", "Auto", OptionsValidator([1, 1.25, 1.5, 1.75, 2, "Auto"]), restart=True)
+    '''micaEnabled = ConfigItem("MainWindow", "MicaEnabled", isWin11(), BoolValidator())'''
     '''language = OptionsConfigItem(
         "MainWindow", "Language", Language.AUTO, OptionsValidator(Language), LanguageSerializer(), restart=True)'''
 
@@ -56,5 +48,4 @@ class Config(QConfig):
 
 
 cfg = Config()
-cfg.themeMode.value = Theme.AUTO
-qconfig.load(Path(config_path), cfg)
+qconfig.load(config_path, cfg)
