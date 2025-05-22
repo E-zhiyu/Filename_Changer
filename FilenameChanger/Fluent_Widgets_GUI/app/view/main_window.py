@@ -39,7 +39,8 @@ class MainWindow(FluentWindow):
         cfg.themeChanged.connect(self.setStyle)
 
         # 将各窗口的信号连接至对应方法
-        self.homeInterface.refreshView_signal.connect(lambda: self.historyListInterface.initCardView())
+        self.homeInterface.refreshView_signal.connect(self.historyListInterface.initCardView)
+        self.settingInterface.ruleChanged.connect(self.ruleListInterface.initRuleViewArea)
 
     def initNavigation(self):
         """初始化导航栏"""

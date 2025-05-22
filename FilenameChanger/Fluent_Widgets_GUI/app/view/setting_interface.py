@@ -1,4 +1,4 @@
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QFileDialog
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (FluentIcon, setFont, ScrollArea, SubtitleLabel,
@@ -11,6 +11,7 @@ from FilenameChanger.rename_rules.rule_manager import (import_rule, export_rule)
 
 class SettingInterface(ScrollArea):
     """应用设置界面"""
+    ruleChanged = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -93,6 +94,7 @@ class SettingInterface(ScrollArea):
                         position=InfoBarPosition.TOP,
                         parent=self
                     )
+            self.ruleChanged.emit()
 
         self.ruleImportCard.clicked.connect(importRule)
         self.ruleIOGroup.addSettingCard(self.ruleImportCard)
