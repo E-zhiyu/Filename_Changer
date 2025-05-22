@@ -87,5 +87,4 @@ class MainWindow(FluentWindow):
             self.historyListInterface.setStyleSheet(dark_scrollBackground)
 
         # 设置应用主题
-        if cfg.theme != theme:
-            setTheme(theme)
+        setTheme(theme)
