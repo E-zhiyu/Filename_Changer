@@ -9,7 +9,8 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, se
                                                                IconWidget, InfoBarIcon, MessageBox, ComboBox,
                                                                MessageBoxBase, LineEdit, RadioButton, CheckBox,
                                                                RoundMenu, Action, BodyLabel, TextBrowser, ZhDatePicker,
-                                                               InfoBar, InfoBarPosition, setCustomStyleSheet)
+                                                               InfoBar, InfoBarPosition, setCustomStyleSheet,
+                                                               ToolTipFilter, ToolTipPosition)
 
 from FilenameChanger.rename_rules.rule_manager import (load_rule, switch_rule, del_rules, save_new_rule, analise_rule,
                                                        revise_rule)
@@ -1083,11 +1084,23 @@ class RuleListInterface(QWidget):
         self.widgetVLayout.addWidget(self.ruleHelpBtn)
 
         """功能按钮"""
+        # 添加规则按钮
         self.addRuleBtn = PushButton(FluentIcon.ADD, '添加规则')
-        self.activateRuleBtn = PushButton(FluentIcon.COMPLETED, '激活规则')
-        self.delRuleBtn = PushButton(FluentIcon.DELETE.icon(color='red'), '删除规则')
-        self.btnLayout = QHBoxLayout()  # 控制顶部规则编辑按钮的布局
+        self.addRuleBtn.setToolTip('添加一条新规则')
+        self.addRuleBtn.installEventFilter(ToolTipFilter(self.addRuleBtn, showDelay=300, position=ToolTipPosition.TOP))
 
+        # 激活规则按钮
+        self.activateRuleBtn = PushButton(FluentIcon.COMPLETED, '激活规则')
+        self.activateRuleBtn.setToolTip('将选中的规则设置为活跃规则')
+        self.activateRuleBtn.installEventFilter(
+            ToolTipFilter(self.activateRuleBtn, showDelay=300, position=ToolTipPosition.TOP))
+
+        # 删除规则按钮
+        self.delRuleBtn = PushButton(FluentIcon.DELETE.icon(color='red'), '删除规则')
+        self.delRuleBtn.setToolTip('删除选中的规则')
+        self.delRuleBtn.installEventFilter(ToolTipFilter(self.delRuleBtn, showDelay=300, position=ToolTipPosition.TOP))
+
+        self.btnLayout = QHBoxLayout()  # 控制顶部规则编辑按钮的布局
         self.btnLayout.setSpacing(4)
         self.btnLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)  # 按钮布局器默认左对齐
 
@@ -1200,7 +1213,7 @@ class RuleListInterface(QWidget):
                 # 创建激活成功的提示框
                 InfoBar.success(
                     title='成功',
-                    content='已激活新规则',
+                    content='已激活选中的规则',
                     position=InfoBarPosition.TOP,
                     duration=2000,
                     parent=self
@@ -1232,7 +1245,6 @@ class RuleListInterface(QWidget):
                     logging.info('用户确认删除规则')
 
                     flag = del_rules(self.rule_dict, self.currentIndex)
-
                     if flag == 1:
                         v_pos = self.ruleScrollArea.verticalScrollBar().value()
                         self.initRuleViewArea()  # （删除规则）刷新规则卡片布局

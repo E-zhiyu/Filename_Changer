@@ -4,7 +4,7 @@ from PyQt6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFrame
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, BodyLabel, PushButton, FluentIcon,
                                                                setFont, SmoothScrollArea, CardWidget,
                                                                TransparentToolButton, MessageBoxBase, MessageBox,
-                                                               InfoBarPosition, InfoBar)
+                                                               InfoBarPosition, InfoBar, ToolTipFilter, ToolTipPosition)
 
 from FilenameChanger.file_history_operations.file_history_operations import (load_history, history_del, history_clear)
 from FilenameChanger.log.log_recorder import *
@@ -195,12 +195,18 @@ class HistoryListInterface(QWidget):
         self.widgetLayout.addWidget(self.titleLabel)
 
         """历史记录编辑按钮"""
+        # 删除单条历史记录按钮
         self.delBtn = PushButton(FluentIcon.DELETE, '删除选中记录')
+        self.delBtn.setToolTip('删除选中的历史记录')
+        self.delBtn.installEventFilter(ToolTipFilter(self.delBtn, showDelay=300, position=ToolTipPosition.TOP))
+
+        # 清空历史记录按钮
         self.clearBtn = PushButton(FluentIcon.BROOM, '清空所有记录')
+        self.clearBtn.setToolTip('清空所有历史记录')
+        self.clearBtn.installEventFilter(ToolTipFilter(self.clearBtn, showDelay=300, position=ToolTipPosition.TOP))
+
         self.btnLayout = QHBoxLayout(self)
-
         self.btnLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
-
         self.btnLayout.addWidget(self.delBtn)
         self.btnLayout.addWidget(self.clearBtn)
 

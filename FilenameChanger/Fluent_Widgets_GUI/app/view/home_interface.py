@@ -5,7 +5,7 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, Bo
                                                                PrimaryPushButton, SmoothScrollArea, MessageBox, InfoBar,
                                                                ToolButton, CardWidget, CheckBox, MessageBoxBase,
                                                                InfoBarPosition, TeachingTip, InfoBarIcon,
-                                                               TeachingTipTailPosition)
+                                                               TeachingTipTailPosition, ToolTipPosition, ToolTipFilter)
 
 from FilenameChanger.file_history_operations.file_history_operations import (is_directory_usable, rename,
                                                                              cancel_rename_operation, scan_files)
@@ -212,11 +212,17 @@ class HomeInterface(QWidget):
 
         # 文件夹浏览按钮
         self.folderSelectBtn = ToolButton(FluentIcon.FOLDER)
+        self.folderSelectBtn.setToolTip('打开文件夹选择窗口')
+        self.folderSelectBtn.installEventFilter(
+            ToolTipFilter(self.folderSelectBtn, showDelay=300, position=ToolTipPosition.TOP))
         self.folderSelectBtn.setFixedHeight(34)
         self.lineEditLayout.addWidget(self.folderSelectBtn)
 
         # 文件查看按钮
         self.fileListBtn = ToolButton(FluentIcon.ALIGNMENT)
+        self.fileListBtn.setToolTip('选择需要重命名的文件')
+        self.fileListBtn.installEventFilter(
+            ToolTipFilter(self.fileListBtn, showDelay=300, position=ToolTipPosition.TOP))
         self.fileListBtn.setFixedHeight(34)
         self.lineEditLayout.addWidget(self.fileListBtn)
 
@@ -225,10 +231,18 @@ class HomeInterface(QWidget):
         self.widgetLayout.addSpacing(20)
 
         """功能按钮"""
+        # 重命名按钮
         self.renameBtn = PrimaryPushButton(FluentIcon.PENCIL_INK, '文件重命名')
-        self.cancelOperationBtn = PrimaryPushButton(FluentIcon.HISTORY, '撤销重命名')
-        self.buttonHBoxLayout = QHBoxLayout()  # 按钮布局器（水平）
+        self.renameBtn.setToolTip('开始文件重命名')
+        self.renameBtn.installEventFilter(ToolTipFilter(self.renameBtn, showDelay=300, position=ToolTipPosition.BOTTOM))
 
+        # 撤销重命名按钮
+        self.cancelOperationBtn = PrimaryPushButton(FluentIcon.HISTORY, '撤销重命名')
+        self.cancelOperationBtn.setToolTip('撤销上一次重命名')
+        self.cancelOperationBtn.installEventFilter(
+            ToolTipFilter(self.cancelOperationBtn, showDelay=300, position=ToolTipPosition.BOTTOM))
+
+        self.buttonHBoxLayout = QHBoxLayout()  # 按钮布局器（水平）
         self.renameBtn.setFixedWidth(175)
         self.cancelOperationBtn.setFixedWidth(175)
 
