@@ -168,10 +168,10 @@ def analise_rule(addRuleWindow):
         }
         logging.info(f'日期种类：{rule['date_type']}')
 
-        if addRuleWindow.headBtn.isChecked():
+        if addRuleWindow.posLayout.headBtn.isChecked():
             rule['position'] = 'head'
             logging.info(f'位置：头部')
-        elif addRuleWindow.tailBtn.isChecked():
+        elif addRuleWindow.posLayout.tailBtn.isChecked():
             rule['position'] = 'tail'
             logging.info(f'位置：尾部')
 
@@ -215,10 +215,10 @@ def analise_rule(addRuleWindow):
             rule['step_length'] = int(addRuleWindow.stepLengthLineEdit.text())
         logging.info(f'步长：{rule['step_length']}')
 
-        if addRuleWindow.headBtn.isChecked():
+        if addRuleWindow.posLayout.headBtn.isChecked():
             rule['position'] = 'head'
             logging.info(f'位置：头部')
-        elif addRuleWindow.tailBtn.isChecked():
+        elif addRuleWindow.posLayout.tailBtn.isChecked():
             rule['position'] = 'tail'
             logging.info(f'位置：尾部')
 

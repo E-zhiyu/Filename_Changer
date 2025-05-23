@@ -27,7 +27,7 @@ rule_help_md = """\
 ## 3.修改特定字符串
 - 功能：将文件名中所有匹配的字符串修改为用户指定的字符串，匹配字符串支持正则表达式
 
-## 4.日期替换
+## 4.日期填充
 - 功能：将文件名中的日期替换为指定日期，支持自定义日期留空以删除日期，若文件名存在多个日期则会全部替换为空串后再增加指定日期
 
 ## 5.重命名并编号
@@ -527,6 +527,30 @@ class RuleCard(CardWidget):
         menu.exec(pos, ani=True)
 
 
+class PositionBtnLayout(QHBoxLayout):
+    """存放位置单选按钮的容器"""
+
+    def __init__(self, parent):
+        super().__init__()
+        parent.new_layout_list.append(self)  # 将自身添加到父容器的新布局列表中
+
+        """文本标签"""
+        self.titleLabel = SubtitleLabel(text='位置')
+        self.addWidget(self.titleLabel, 1, Qt.AlignmentFlag.AlignLeft)
+
+        """单选按钮"""
+        self.tailBtn = RadioButton('文件名尾')
+        self.headBtn = RadioButton('文件名首')
+        self.btnGroup = QButtonGroup(parent)
+        self.btnGroup.addButton(self.tailBtn)
+        self.btnGroup.addButton(self.headBtn)
+
+        self.headBtn.setChecked(True)
+
+        self.addWidget(self.headBtn, 0, Qt.AlignmentFlag.AlignRight)
+        self.addWidget(self.tailBtn, 0, Qt.AlignmentFlag.AlignRight)
+
+
 class RuleInputInterface(MessageBoxBase):
     """规则参数输入窗口"""
 
@@ -553,7 +577,7 @@ class RuleInputInterface(MessageBoxBase):
             '1.交换分隔符前后内容',
             '2.修改后缀名',
             '3.修改特定字符串',
-            '4.日期替换',
+            '4.日期填充',
             '5.文件编号',
             '6.字母大小写转换'
         )
@@ -800,27 +824,8 @@ class RuleInputInterface(MessageBoxBase):
             self.viewLayout.addLayout(dateLayout)
 
             """填充位置选择"""
-            posLayout = QHBoxLayout()
-            self.new_layout_list.append(posLayout)
-
-            # 文本标签
-            posLabel = SubtitleLabel(text='日期插入位置', parent=self)
-            posLayout.addWidget(posLabel, 1, Qt.AlignmentFlag.AlignLeft)
-
-            # 单选按钮
-            self.headBtn = RadioButton('文件名首')
-            self.tailBtn = RadioButton('文件名尾')
-            posBtnGroup = QButtonGroup(self)  # 创建一个按钮组，组内的单选按钮是互斥的
-            posBtnGroup.addButton(self.headBtn)
-            posBtnGroup.addButton(self.tailBtn)
-
-            self.headBtn.setChecked(True)  # 设置默认选中的按钮
-
-            posLayout.addWidget(self.headBtn, 0, Qt.AlignmentFlag.AlignRight)
-            posLayout.addWidget(self.tailBtn, 0, Qt.AlignmentFlag.AlignRight)
-
-            # 将日期位置输入布局添加至主布局
-            self.viewLayout.addLayout(posLayout)
+            self.posLayout = PositionBtnLayout(self)
+            self.viewLayout.addLayout(self.posLayout)
 
             """日期分隔符选择"""
             splitCharLayout = QHBoxLayout()
@@ -959,27 +964,8 @@ class RuleInputInterface(MessageBoxBase):
             self.viewLayout.addLayout(stepLengthLayout)
 
             """位置选择"""
-            posLayout = QHBoxLayout()
-            self.new_layout_list.append(posLayout)
-
-            # 文本标签
-            posLabel = SubtitleLabel(text='编号插入位置', parent=self)
-            posLayout.addWidget(posLabel, 1, Qt.AlignmentFlag.AlignLeft)
-
-            # 单选按钮
-            self.headBtn = RadioButton('文件名首')
-            self.tailBtn = RadioButton('文件名尾')
-            posBtnGroup = QButtonGroup(self)  # 创建一个按钮组，组内的单选按钮是互斥的
-            posBtnGroup.addButton(self.headBtn)
-            posBtnGroup.addButton(self.tailBtn)
-
-            self.headBtn.setChecked(True)  # 设置默认选中的按钮
-
-            posLayout.addWidget(self.headBtn, 0, Qt.AlignmentFlag.AlignRight)
-            posLayout.addWidget(self.tailBtn, 0, Qt.AlignmentFlag.AlignRight)
-
-            # 将日期位置输入布局添加至主布局
-            self.viewLayout.addLayout(posLayout)
+            self.posLayout = PositionBtnLayout(self)
+            self.viewLayout.addLayout(self.posLayout)
 
         elif self.new_rule_type == 6:
             """作用域选择"""
@@ -1363,9 +1349,9 @@ class RuleListInterface(QWidget):
                 reviseRuleWindow.customSplitCharLineEdit.setText(split_char)
 
             if position == 'head':
-                reviseRuleWindow.headBtn.setChecked(True)
+                reviseRuleWindow.posLayout.headBtn.setChecked(True)
             elif position == 'tail':
-                reviseRuleWindow.tailBtn.setChecked(True)
+                reviseRuleWindow.posLayout.tailBtn.setChecked(True)
 
             reviseRuleWindow.dateTypeComboBox.setCurrentIndex(date_type)
 
@@ -1389,9 +1375,9 @@ class RuleListInterface(QWidget):
                 reviseRuleWindow.fileNameComboBox.setCurrentIndex(1)
 
             if position == 'head':
-                reviseRuleWindow.headBtn.setChecked(True)
+                reviseRuleWindow.posLayout.headBtn.setChecked(True)
             elif position == 'tail':
-                reviseRuleWindow.tailBtn.setChecked(True)
+                reviseRuleWindow.posLayout.tailBtn.setChecked(True)
 
             reviseRuleWindow.newNameLineEdit.setText(new_name)
             reviseRuleWindow.numTypeComboBox.setCurrentIndex(reviseRuleWindow.num_types.index(num_type))
