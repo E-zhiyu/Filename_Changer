@@ -126,7 +126,7 @@ def analise_rule(addRuleWindow):
     }
     logging.info(f'规则类型：{rule["type"]}')
     logging.info(f'名称：{rule["name"]}')
-    logging.info(f'描述：{rule["desc"]}')
+    logging.info(f'描述：{rule["desc"] if rule["desc"] else "<空>"}')
 
     if rule['type'] == 1:
         rule['split_char'] = addRuleWindow.splitCharLineEdit.text()
