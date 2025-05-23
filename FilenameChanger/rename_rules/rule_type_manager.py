@@ -78,7 +78,7 @@ def use_type_3(selected_rule, old_names):
     """
     target_str = selected_rule['target_str']  # 待替换的字符串
     new_str = selected_rule['new_str']  # 新字符串
-    use_re = selected_rule.get('use_re', False)  # 判断是否使用正则表达式
+    enable_re = selected_rule.get('enable_re', False)  # 判断是否使用正则表达式
 
     # 分离文件名和扩展名
     old_file_name_list = []  # 文件名（排除扩展名）列表
@@ -91,7 +91,7 @@ def use_type_3(selected_rule, old_names):
 
     new_name_list = []
     for file_name, ext in zip(old_file_name_list, old_file_ext_list):
-        if use_re:
+        if enable_re:
             new_name = f'{re.sub(target_str, new_str, file_name)}{ext}'
         else:
             new_name = f'{file_name.replace(target_str, new_str)}{ext}'
@@ -306,6 +306,30 @@ def use_type_6(selected_rule, old_names):
                 ext = ext.title()
 
         new_name = f'{file_name}{ext}'
+        new_name_list.append(new_name)
+
+    return new_name_list
+
+
+def use_type_7(selected_rule, old_names):
+    """
+    功能：应用类型七的规则（添加字符串）
+    参数 selected_rule：当前激活的规则
+    参数 old_names：旧文件名序列
+    返回：生成的新文件名列表
+    """
+    string = selected_rule['string']
+    position = selected_rule['position']
+
+    new_name_list = []
+    for file in old_names:
+        file_name, ext = os.path.splitext(file)
+
+        if position == 'head':
+            new_name = f'{string}{file_name}{ext}'
+        elif position == 'tail':
+            new_name = f'{file_name}{string}{ext}'
+
         new_name_list.append(new_name)
 
     return new_name_list

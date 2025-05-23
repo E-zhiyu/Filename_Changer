@@ -119,53 +119,44 @@ def analise_rule(addRuleWindow):
     参数 addRuleWindow：添加规则的窗口
     返回：解析的规则字典
     """
-    logging.info(f'规则类型：{addRuleWindow.new_rule_type}')
-    logging.info(f'名称：{addRuleWindow.ruleNameLineEdit.text()}')
-    logging.info(f'描述：{addRuleWindow.ruleDescLineEdit.text()}')
+    rule = {
+        'type': addRuleWindow.new_rule_type,
+        'name': addRuleWindow.ruleNameLineEdit.text(),
+        'desc': addRuleWindow.ruleDescLineEdit.text(),
+    }
+    logging.info(f'规则类型：{rule["type"]}')
+    logging.info(f'名称：{rule["name"]}')
+    logging.info(f'描述：{rule["desc"]}')
 
-    if addRuleWindow.new_rule_type == 1:
-        rule = {
-            'type': 1,
-            'name': addRuleWindow.ruleNameLineEdit.text(),
-            'desc': addRuleWindow.ruleDescLineEdit.text(),
-            'split_char': addRuleWindow.splitCharLineEdit.text(),
-            'enable_re': addRuleWindow.enableReCheckBox.isChecked()
-        }
+    if rule['type'] == 1:
+        rule['split_char'] = addRuleWindow.splitCharLineEdit.text()
         logging.info(f'分隔符：{rule['split_char']}')
+
+        rule['enable_re'] = addRuleWindow.enableReCheckBox.isChecked()
         if rule['enable_re']:
             logging.info('使用正则表达式：是')
         else:
             logging.info('使用正则表达式：否')
-    elif addRuleWindow.new_rule_type == 2:
-        rule = {
-            'type': 2,
-            'name': addRuleWindow.ruleNameLineEdit.text(),
-            'desc': addRuleWindow.ruleDescLineEdit.text(),
-            'new_ext': addRuleWindow.extLineEdit.text()
-        }
+
+    elif rule['type'] == 2:
+        rule['new_ext'] = addRuleWindow.extLineEdit.text()
         logging.info(f'新扩展名：{rule['new_ext']}')
-    elif addRuleWindow.new_rule_type == 3:
-        rule = {
-            'type': 3,
-            'name': addRuleWindow.ruleNameLineEdit.text(),
-            'desc': addRuleWindow.ruleDescLineEdit.text(),
-            'target_str': addRuleWindow.oldStrLineEdit.text(),
-            'use_re': addRuleWindow.useReCheckBox.isChecked(),
-            'new_str': addRuleWindow.newStrLineEdit.text()
-        }
+
+    elif rule['type'] == 3:
+        rule['target_str'] = addRuleWindow.oldStrLineEdit.text()
         logging.info(f'匹配字符串：{rule['target_str']}')
-        if rule['use_re']:
+
+        rule['enable_re'] = addRuleWindow.enableReCheckBox.isChecked()
+        if rule['enable_re']:
             logging.info('使用正则表达式：是')
         else:
             logging.info('使用正则表达式：否')
+
+        rule['new_str'] = addRuleWindow.newStrLineEdit.text()
         logging.info(f'新字符串：{rule['new_str']}')
-    elif addRuleWindow.new_rule_type == 4:
-        rule = {
-            'type': 4,
-            'name': addRuleWindow.ruleNameLineEdit.text(),
-            'desc': addRuleWindow.ruleDescLineEdit.text(),
-            'date_type': addRuleWindow.dateTypeComboBox.currentIndex(),
-        }
+
+    elif rule['type'] == 4:
+        rule['date_type'] = addRuleWindow.dateTypeComboBox.currentIndex()
         logging.info(f'日期种类：{rule['date_type']}')
 
         if addRuleWindow.posLayout.headBtn.isChecked():
@@ -187,13 +178,8 @@ def analise_rule(addRuleWindow):
             rule['split_char'] = addRuleWindow.customSplitCharLineEdit.text()
         logging.info(f'分隔符：{rule["split_char"] if rule["split_char"] else '无'}')
 
-    elif addRuleWindow.new_rule_type == 5:
-        rule = {
-            'type': 5,
-            'name': addRuleWindow.ruleNameLineEdit.text(),
-            'desc': addRuleWindow.ruleDescLineEdit.text(),
-            'num_type': addRuleWindow.numTypeComboBox.text(),
-        }
+    elif rule['type'] == 5:
+        rule['num_type'] = addRuleWindow.numTypeComboBox.currentIndex()
         logging.info(f'编号样式：{rule["num_type"]}')
 
         if addRuleWindow.fileNameComboBox.currentIndex() == 1:
@@ -222,15 +208,8 @@ def analise_rule(addRuleWindow):
             rule['position'] = 'tail'
             logging.info(f'位置：尾部')
 
-    elif addRuleWindow.new_rule_type == 6:
-        rule = {
-            'type': 6,
-            'name': addRuleWindow.ruleNameLineEdit.text(),
-            'desc': addRuleWindow.ruleDescLineEdit.text(),
-            'action_scope': addRuleWindow.actionScopeGroup.checkedId(),
-            'function': addRuleWindow.functionGroup.checkedId()
-        }
-
+    elif rule['type'] == 6:
+        rule['action_scope'] = addRuleWindow.actionScopeGroup.checkedId()
         if rule['action_scope'] == 1:
             logging.info('作用域：仅文件名')
         elif rule['action_scope'] == 2:
@@ -238,12 +217,24 @@ def analise_rule(addRuleWindow):
         elif rule['action_scope'] == 3:
             logging.info('作用域：全部')
 
+        rule['function'] = addRuleWindow.functionGroup.checkedId()
         if rule['function'] == 1:
             logging.info('模式：全部大写')
         elif rule['function'] == 2:
             logging.info('模式：全部小写')
         elif rule['function'] == 3:
             logging.info('模式：首字母大写')
+
+    elif rule['type'] == 7:
+        rule['string'] = addRuleWindow.strInputLineEdit.text()
+        logging.info(f'自定义字符串：{rule["string"]}')
+
+        if addRuleWindow.posLayout.headBtn.isChecked():
+            rule['position'] = 'head'
+            logging.info(f'位置：头部')
+        elif addRuleWindow.posLayout.tailBtn.isChecked():
+            rule['position'] = 'tail'
+            logging.info(f'位置：尾部')
 
     return rule
 

@@ -72,9 +72,9 @@ def scan_files(directory) -> list:
         return old_name
 
 
-def rename(directory, old_file_names):
+def rename_operation(directory, old_file_names):
     """
-    功能：实现“文件重命名”操作
+    功能：执行“文件重命名”操作
     参数 directory：目标文件夹路径
     参数 old_file_names：旧文件名序列
     """
@@ -173,6 +173,8 @@ def get_new_name_list(selected_rule, old_names, directory):
         new_name_list = use_type_5(selected_rule, old_names)
     elif rule_type == 6:
         new_name_list = use_type_6(selected_rule, old_names)
+    elif rule_type == 7:
+        new_name_list = use_type_7(selected_rule, old_names)
 
     logging.info('已生成新文件名列表')
     return new_name_list

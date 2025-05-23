@@ -35,6 +35,9 @@ rule_help_md = """\
 
 ## 6.字母大小写转换
 - 功能：对文件名中的英文字母进行大小写转换，支持全部大写或小写以及首字母大写，可选择仅修改文件名、仅修改扩展名和修改全部
+
+## 7.添加字符串
+- 功能：添加自定义字符串到文件头部或者尾部
 """
 
 
@@ -413,6 +416,35 @@ class InfoDialog(MessageBoxBase):
             functionLayout.addWidget(functionContentLabel)
             self.scrollLayout.addLayout(functionLayout)
 
+        elif rule['type'] == 7:
+            # 自定义字符串
+            strLabel = SubtitleLabel(text='自定义字符串：', parent=self.widget)
+            strContentLabel = BodyLabel(text=rule['string'], parent=self.widget)
+
+            strLayout = QHBoxLayout()
+            strLayout.setSpacing(0)
+            strLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+
+            strLayout.addWidget(strLabel)
+            strLayout.addWidget(strContentLabel)
+            self.scrollLayout.addLayout(strLayout)
+
+            # 位置
+            if rule['position'] == 'head':
+                pos = '文件名首'
+            elif rule['position'] == 'tail':
+                pos = '文件名尾'
+            posLabel = SubtitleLabel(text='位置：', parent=self.widget)
+            posContentLabel = BodyLabel(text=pos, parent=self.widget)
+            posLayout = QHBoxLayout()
+
+            posLayout.setSpacing(0)
+            posLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+            posLayout.addWidget(posLabel)
+            posLayout.addWidget(posContentLabel)
+
+            self.scrollLayout.addLayout(posLayout)
+
 
 class RuleCard(CardWidget):
     """定义规则卡片"""
@@ -579,7 +611,8 @@ class RuleInputInterface(MessageBoxBase):
             '3.修改特定字符串',
             '4.日期填充',
             '5.文件编号',
-            '6.字母大小写转换'
+            '6.字母大小写转换',
+            '7.添加字符串'
         )
         self.ruleTypeComboBox = ComboBox()
         self.ruleTypeLabel = SubtitleLabel(text='规则种类', parent=self.widget)
@@ -661,6 +694,12 @@ class RuleInputInterface(MessageBoxBase):
         elif self.new_rule_type == 5:
             if not self.newNameLineEdit.text() and self.fileNameComboBox.currentIndex() == 1:
                 self.errorInfoLabel.setText('未输入新文件名！')
+                self.errorInfoLabel.setHidden(False)
+                return False
+
+        elif self.new_rule_type == 7:
+            if not self.strInputLineEdit.text():
+                self.errorInfoLabel.setText('未输入自定义字符串')
                 self.errorInfoLabel.setHidden(False)
                 return False
 
@@ -1028,6 +1067,28 @@ class RuleInputInterface(MessageBoxBase):
             functionLayout.addLayout(functionBtnLayout)
             self.viewLayout.addLayout(functionLayout)
 
+        elif self.new_rule_type == 7:
+            """自定义字符串"""
+            strLayout = QHBoxLayout()
+            self.new_layout_list.append(strLayout)
+
+            # 文本标签
+            strTitleLabel = SubtitleLabel(text='自定义字符串', parent=self)
+            strLayout.addWidget(strTitleLabel, 0, Qt.AlignmentFlag.AlignLeft)
+
+            # 自定义字符串输入框
+            self.strInputLineEdit = LineEdit()
+            self.strInputLineEdit.setPlaceholderText('请输入自定义字符串')
+            self.strInputLineEdit.setFixedWidth(200)
+            self.strInputLineEdit.setValidator(char_validator)
+            strLayout.addWidget(self.strInputLineEdit, 0, Qt.AlignmentFlag.AlignRight)
+
+            self.viewLayout.addLayout(strLayout)
+
+            """填充位置选择"""
+            self.posLayout = PositionBtnLayout(self)
+            self.viewLayout.addLayout(self.posLayout)
+
         """验证不通过时的警告文本框"""
         setFont(self.errorInfoLabel, 15)
         self.errorInfoLabel.setStyleSheet("color: rgb(255, 100, 100);")
@@ -1389,6 +1450,16 @@ class RuleListInterface(QWidget):
 
             reviseRuleWindow.actionScopeGroup.button(action_scope).setChecked(True)
             reviseRuleWindow.functionGroup.button(function).setChecked(True)
+        elif type == 7:
+            string = rule['string']
+            position = rule['position']
+
+            reviseRuleWindow.strInputLineEdit.setText(string)
+
+            if position == 'head':
+                reviseRuleWindow.posLayout.headBtn.setChecked(True)
+            elif position == 'tail':
+                reviseRuleWindow.posLayout.tailBtn.setChecked(True)
 
         """窗口关闭后执行的操作"""
         reviseRuleWindow.submit_data.connect(

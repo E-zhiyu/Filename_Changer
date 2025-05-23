@@ -7,7 +7,7 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, Bo
                                                                InfoBarPosition, TeachingTip, InfoBarIcon,
                                                                TeachingTipTailPosition, ToolTipPosition, ToolTipFilter)
 
-from FilenameChanger.file_history_operations.file_history_operations import (is_directory_usable, rename,
+from FilenameChanger.file_history_operations.file_history_operations import (is_directory_usable, rename_operation,
                                                                              cancel_rename_operation, scan_files)
 from FilenameChanger.log.log_recorder import *
 
@@ -308,7 +308,7 @@ class HomeInterface(QWidget):
                     self.scan_file = scan_files(targetDirectory)
                     self.selected_file_tuple = tuple(self.scan_file)
                     logging.info(f'已选择：{len(self.selected_file_tuple)}/{len(self.scan_file)}')
-                    flag = rename(targetDirectory, self.selected_file_tuple)
+                    flag = rename_operation(targetDirectory, self.selected_file_tuple)
                     # 显示一个消息提示框
                     if flag == 1:
                         InfoBar.success(
