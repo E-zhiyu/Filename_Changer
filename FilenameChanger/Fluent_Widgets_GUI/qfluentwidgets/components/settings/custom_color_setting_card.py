@@ -50,17 +50,17 @@ class CustomColorSettingCard(ExpandGroupSettingCard):
         self.radioWidget = QWidget(self.view)
         self.radioLayout = QVBoxLayout(self.radioWidget)
         self.defaultRadioButton = RadioButton(
-            self.tr('Default color'), self.radioWidget)
+            '默认颜色', self.radioWidget)
         self.customRadioButton = RadioButton(
-            self.tr('Custom color'), self.radioWidget)
+            '自定义颜色', self.radioWidget)
         self.buttonGroup = QButtonGroup(self)
 
         self.customColorWidget = QWidget(self.view)
         self.customColorLayout = QHBoxLayout(self.customColorWidget)
         self.customLabel = QLabel(
-            self.tr('Custom color'), self.customColorWidget)
+            '自定义颜色', self.customColorWidget)
         self.chooseColorButton = QPushButton(
-            self.tr('Choose color'), self.customColorWidget)
+            '选择颜色', self.customColorWidget)
 
         self.__initWidget()
 

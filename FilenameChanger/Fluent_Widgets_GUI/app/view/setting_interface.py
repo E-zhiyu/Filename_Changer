@@ -3,32 +3,39 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QFileDialog
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (FluentIcon, setFont, ScrollArea, SubtitleLabel,
                                                                OptionsSettingCard, PushSettingCard, SettingCardGroup,
-                                                               InfoBar, InfoBarPosition)
+                                                               InfoBar, InfoBarPosition, CustomColorSettingCard,
+                                                               ExpandLayout)
 from FilenameChanger.Fluent_Widgets_GUI.app.common.config import cfg
 
 from FilenameChanger.rename_rules.rule_manager import (import_rule, export_rule)
 from FilenameChanger.log.log_recorder import *
 
 
-class SettingInterface(ScrollArea):
+class SettingInterface(QWidget):
     """应用设置界面"""
     ruleChanged = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.setObjectName("SettingInterface")
-        self.enableTransparentBackground()
 
         """基本布局设置"""
+        self.scrollArea = ScrollArea(parent=self)
         self.widget = QWidget()
-        self.setWidget(self.widget)
-        self.viewLayout = QVBoxLayout()
-        self.setLayout(self.viewLayout)
+        self.viewLayout = ExpandLayout(self.widget)
+        self.interfaceLayout = QVBoxLayout()
+        self.setLayout(self.interfaceLayout)
+        self.scrollArea.setWidget(self.widget)
+        self.scrollArea.setWidgetResizable(True)
         self.viewLayout.setAlignment(Qt.AlignmentFlag.AlignTop)  # 顶部对齐
+        self.interfaceLayout.addWidget(self.scrollArea)
+
+        # 将背景设置为透明
+        self.scrollArea.setStyleSheet("QScrollArea{background: transparent; border: none}")
+        self.widget.setStyleSheet("background-color: transparent;")
 
         self.titleLabel = SubtitleLabel(text='设置', parent=self.widget)
         setFont(self.titleLabel, 30)
-        self.viewLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.viewLayout.setSpacing(28)
         self.viewLayout.setContentsMargins(30, 10, 30, 0)
 
@@ -41,7 +48,7 @@ class SettingInterface(ScrollArea):
 
         """个性化设置项"""
         self.personalizationGroup = SettingCardGroup('个性化', self.widget)
-        self.viewLayout.addWidget(self.personalizationGroup, 0, Qt.AlignmentFlag.AlignTop)
+        self.viewLayout.addWidget(self.personalizationGroup)
 
         # 修改应用主题
         self.themeCard = OptionsSettingCard(
@@ -53,13 +60,23 @@ class SettingInterface(ScrollArea):
                 '浅色', '深色',
                 '跟随系统'
             ],
-            parent=self
+            parent=self.personalizationGroup
         )
         self.personalizationGroup.addSettingCard(self.themeCard)
 
+        # 修改主题颜色
+        self.themeColorCard = CustomColorSettingCard(
+            cfg.themeColor,
+            FluentIcon.PALETTE,
+            '主题颜色',
+            '调整你的应用主题颜色',
+            parent=self.personalizationGroup
+        )
+        self.personalizationGroup.addSettingCard(self.themeColorCard)
+
         """规则导入导出"""
         self.ruleIOGroup = SettingCardGroup('规则导入和导出', self.widget)
-        self.viewLayout.addWidget(self.ruleIOGroup, 0, Qt.AlignmentFlag.AlignTop)
+        self.viewLayout.addWidget(self.ruleIOGroup)
 
         # 规则导入
         self.ruleImportCard = PushSettingCard(
