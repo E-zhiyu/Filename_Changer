@@ -7,6 +7,7 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (FluentIcon, setFo
 from FilenameChanger.Fluent_Widgets_GUI.app.common.config import cfg
 
 from FilenameChanger.rename_rules.rule_manager import (import_rule, export_rule)
+from FilenameChanger.log.log_recorder import *
 
 
 class SettingInterface(ScrollArea):
@@ -86,6 +87,7 @@ class SettingInterface(ScrollArea):
                         position=InfoBarPosition.TOP,
                         parent=self
                     )
+                    logging.info(f'用户从“{src_path}”导入规则成功')
                 else:
                     InfoBar.error(
                         '失败',
@@ -94,6 +96,8 @@ class SettingInterface(ScrollArea):
                         position=InfoBarPosition.TOP,
                         parent=self
                     )
+                    logging.info(f'用户从“{src_path}”导入规则失败')
+                    logging.info(f'原因：{message}')
             self.ruleChanged.emit()
 
         self.ruleImportCard.clicked.connect(importRule)
@@ -125,6 +129,7 @@ class SettingInterface(ScrollArea):
                         position=InfoBarPosition.TOP,
                         parent=self
                     )
+                    logging.info(f'用户导出规则至“{dst_path}”成功')
                 else:
                     InfoBar.error(
                         '失败',
@@ -133,6 +138,8 @@ class SettingInterface(ScrollArea):
                         position=InfoBarPosition.TOP,
                         parent=self
                     )
+                    logging.info(f'用户导出规则至“{dst_path}”失败')
+                    logging.info(f'原因：{message}')
 
         self.ruleExportCard.clicked.connect(exportRule)
         self.ruleIOGroup.addSettingCard(self.ruleExportCard)
