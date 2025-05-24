@@ -1247,8 +1247,7 @@ class RuleListInterface(QWidget):
 
                 index += 1
         else:
-            ruleEmptyLabel = SubtitleLabel(text='您还未创建任何规则，点击上方的按钮创建一个规则吧！',
-                                           parent=self.ruleCardWidget)
+            ruleEmptyLabel = SubtitleLabel(text='规则列表空空如也', parent=self.ruleCardWidget)
             self.ruleCardLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
             self.ruleCardLayout.addWidget(ruleEmptyLabel, 0, Qt.AlignmentFlag.AlignCenter)
 
