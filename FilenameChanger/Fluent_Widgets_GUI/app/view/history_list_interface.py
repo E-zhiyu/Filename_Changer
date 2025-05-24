@@ -47,7 +47,7 @@ class InfoWindow(MessageBoxBase):
 
         """文件名更改详情的展示区域"""
         self.infoScrollArea = SmoothScrollArea(parent=self.widget)
-        self.infoWidget = QWidget(self.widget)
+        self.infoWidget = QFrame(self.widget)
         self.infoLayout = QVBoxLayout(self.infoWidget)  # 文件名变化从想到下排列
 
         self.infoLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
