@@ -1235,17 +1235,14 @@ class RuleListInterface(QWidget):
 
             index = 0
             for rule in rule_list:  # 添加至卡片列表，便于其他函数调用
-                if index == selected_index:
-                    activated = True
-                else:
-                    activated = False
-
-                card = RuleCard(rule, index, activated, parent=self)
+                card = RuleCard(rule, index, parent=self)
                 card.clicked.connect(lambda index=card.index: self.setSelected(index))  # 将点击卡片的动作连接至选中卡片方法
                 self.ruleCardList.append(card)  # 将规则以卡片的形式添加至卡片列表
                 self.ruleCardLayout.addWidget(card, 0)  # 依此将卡片添加至卡片布局器中
 
                 index += 1
+
+            self.setSelected(selected_index)  # 激活对应的规则卡片
         else:
             ruleEmptyLabel = SubtitleLabel(text='规则列表空空如也', parent=self.ruleCardWidget)
             self.ruleCardLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
