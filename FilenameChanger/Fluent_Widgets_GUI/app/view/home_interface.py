@@ -441,6 +441,13 @@ class HomeInterface(QWidget):
                 fileListInterface = FileListInterface(self.scan_file, self.selected_file_tuple, self)
                 if fileListInterface.exec():
                     self.selected_file_tuple = tuple(sorted(fileListInterface.selected_file_list))
+                    InfoBar.success(
+                        title='成功',
+                        content='重命名作用域修改成功',
+                        position=InfoBarPosition.TOP,
+                        duration=2000,
+                        parent=self
+                    )
             else:
                 self.scan_file.clear()
                 # 显示一个气泡弹窗
