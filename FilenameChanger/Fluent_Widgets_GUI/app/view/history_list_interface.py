@@ -292,6 +292,28 @@ class HistoryListInterface(QWidget):
             index = 0
             for history in self.history_list:
                 card = HistoryCard(history, index, self)
+
+                if isDarkTheme():
+                    label_qss = """
+                        QLabel {
+                            color: white;
+                            background-color: transparent;
+                        }
+                    """
+                    btn_qss = 'QPushButton {color: white;}'  # 深色模式未选中时文字为白色
+                else:
+                    label_qss = """
+                        QLabel {
+                            color: black;
+                            background-color: transparent;
+                        }
+                    """
+                    btn_qss = 'QPushButton {color: black;}'  # 浅色模式未选中时文字为黑色
+                card.timeLabel.setStyleSheet(label_qss)
+                card.directoryLabel.setStyleSheet(label_qss)
+                setCustomStyleSheet(card.openFolderBtn, btn_qss, btn_qss)
+
+
                 card.clicked.connect(lambda i=card.index: self.setSelected(i))
                 self.historyCardList.append(card)
                 self.historyCardLayout.addWidget(card)  # 将父亲设置为历史界面，以便历史详情界面正常显示
