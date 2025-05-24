@@ -171,9 +171,8 @@ class FileListInterface(MessageBoxBase):
 
 class HomeInterface(QWidget):
     """定义主页布局"""
-
-    # 定义触发历史记录列表刷新布局方法的信号
-    refreshView_signal = pyqtSignal()
+    refreshView_signal = pyqtSignal()  # 定义触发历史记录列表刷新布局方法的信号
+    filenameChanged = pyqtSignal()  # 重命名或者撤销重命名后发送的信号
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -259,8 +258,12 @@ class HomeInterface(QWidget):
         """初始化文件列表"""
         # 扫描整个文件夹
         directory = self.folderLineEdit.text().strip('\"')
-        self.scan_file = scan_files(directory)
-        self.selected_file_tuple = tuple(self.scan_file)  # 类型为元组，防止传值时被外部变量修改
+        flag = is_directory_usable(directory)
+        if flag == 1:  # 路径有效才扫描
+            self.scan_file = scan_files(directory)
+            self.selected_file_tuple = tuple(self.scan_file)  # 类型为元组，防止传值时被外部变量修改
+
+        return flag
 
     def achieve_functions(self):
         """实现各控件的功能"""
@@ -288,15 +291,10 @@ class HomeInterface(QWidget):
                 return 0
 
         def dirLineEdit_function():
-            # 文本框功能实现
-            targetDirectory = self.folderLineEdit.text().strip('\"')
-            self.path_flag = is_directory_usable(targetDirectory)
+            """文本框功能实现"""
+            self.path_flag = self.initFileList()  # 扫描整个文件夹
             if self.path_flag == 1:
                 logging.info('路径有效，进行下一步操作')
-
-                # 扫描整个文件夹
-                self.scan_file = scan_files(targetDirectory)
-                self.selected_file_tuple = tuple(self.scan_file)  # 类型为元组，防止传值时被外部变量修改
             elif self.path_flag == 0:
                 logging.warning('路径无效')
             elif self.path_flag == -1:
@@ -304,8 +302,8 @@ class HomeInterface(QWidget):
 
         self.folderLineEdit.textChanged.connect(dirLineEdit_function)
 
-        # 重命名按钮功能实现
         def rename_button_callback():
+            """重命名按钮功能实现"""
             if self.path_flag == 1:
                 logging.info('用户点击重命名按钮，确认操作中……')
                 if confirm_operation():  # 弹出消息框确认操作
@@ -377,11 +375,12 @@ class HomeInterface(QWidget):
                 )
 
             self.refreshView_signal.emit()
+            self.initFileList()  # 文件名改变后重新扫描目标文件夹
 
         self.renameBtn.clicked.connect(rename_button_callback)
 
-        # 撤销重命名按钮功能实现
         def cancel_button_callback():
+            """撤销重命名按钮功能实现"""
             logging.info('用户点击撤销重命名按钮，确认操作中……')
             if confirm_operation():  # 弹出消息框确认操作
                 logging.info('用户确认撤销重命名')
@@ -420,10 +419,12 @@ class HomeInterface(QWidget):
             else:
                 logging.info('用户取消撤销重命名')
 
+            self.initFileList()  # 文件名修改后重新扫描文件夹
+
         self.cancelOperationBtn.clicked.connect(cancel_button_callback)
 
-        # 文件夹浏览按钮功能实现
         def select_folder_callback():
+            """文件夹浏览按钮功能实现"""
             folder_path = QFileDialog.getExistingDirectory(
                 self,
                 '选择文件夹',
@@ -435,8 +436,8 @@ class HomeInterface(QWidget):
 
         self.folderSelectBtn.clicked.connect(select_folder_callback)
 
-        # 文件列表按钮功能实现
         def file_list_callback():
+            """文件列表按钮功能实现"""
             if self.path_flag == 1:
                 fileListInterface = FileListInterface(self.scan_file, self.selected_file_tuple, self)
                 if fileListInterface.exec():
