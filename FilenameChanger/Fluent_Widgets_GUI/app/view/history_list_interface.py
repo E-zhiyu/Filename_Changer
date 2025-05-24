@@ -4,7 +4,8 @@ from PyQt6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFrame
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, BodyLabel, PushButton, FluentIcon,
                                                                setFont, SmoothScrollArea, CardWidget, themeColor,
                                                                TransparentToolButton, MessageBoxBase, MessageBox,
-                                                               InfoBarPosition, InfoBar, ToolTipFilter, ToolTipPosition)
+                                                               InfoBarPosition, InfoBar, ToolTipFilter, ToolTipPosition,
+                                                               isDarkTheme, setCustomStyleSheet)
 
 from FilenameChanger.file_history_operations.file_history_operations import (load_history, history_del, history_clear)
 from FilenameChanger.log.log_recorder import *
@@ -140,14 +141,60 @@ class HistoryCard(CardWidget):
         color = themeColor()
 
         if isSelected:
+            # 设置卡片背景颜色
+            self.setStyleSheet("QWidget {background-color:" + f"{color.name()};" +
+                               "border-radius: 5px;}")
+
+            if isDarkTheme():
+                label_qss = """
+                    QLabel {
+                        color: black;
+                        background-color: transparent;
+                    }"""
+                btn_qss = 'QPushButton {color: black;}'  # 深色模式选中时文字为黑色
+                self.openFolderBtn.setIcon(FluentIcon.FOLDER.icon(color='black'))
+                self.infoBtn.setIcon(FluentIcon.INFO.icon(color='black'))
+
+                self.timeLabel.setStyleSheet(label_qss)
+                self.directoryLabel.setStyleSheet(label_qss)
+
+            else:
+                btn_qss = 'QPushButton {color: black;}'  # 浅色模式选中时文字不变仍为黑色
+                self.openFolderBtn.setIcon(FluentIcon.FOLDER.icon(color='black'))
+                self.infoBtn.setIcon(FluentIcon.INFO.icon(color='black'))
+
+            setCustomStyleSheet(self.openFolderBtn, btn_qss, btn_qss)
+
+        else:
             self.setStyleSheet("""
                 QWidget {
-                    background: #ff009faa;
+                    background-color: transparent;
                     border-radius: 5px;
-                }
-            """)
-        else:
-            self.setStyleSheet("QWidget {background-color:" + f"{color.name()};" + "border-radius: 5px;}")
+                }""")  # 设置卡片背景颜色
+
+            if isDarkTheme():
+                label_qss = """
+                    QLabel {
+                        color: white;
+                        background-color: transparent;
+                    }"""
+                btn_qss = 'QPushButton {color: white;}'  # 深色模式未选中时文字为白色
+                self.openFolderBtn.setIcon(FluentIcon.FOLDER.icon(color='white'))
+                self.infoBtn.setIcon(FluentIcon.INFO.icon(color='white'))
+
+            else:
+                label_qss = """
+                    QLabel {
+                        color: black;
+                        background-color: transparent;
+                    }"""
+                btn_qss = 'QPushButton {color: black;}'  # 浅色模式未选中时文字为黑色
+                self.openFolderBtn.setIcon(FluentIcon.FOLDER.icon(color='black'))
+                self.infoBtn.setIcon(FluentIcon.INFO.icon(color='black'))
+
+            self.timeLabel.setStyleSheet(label_qss)
+            self.directoryLabel.setStyleSheet(label_qss)
+            setCustomStyleSheet(self.openFolderBtn, btn_qss, btn_qss)
 
     def showInfo(self):
         """显示记录详情"""
@@ -219,7 +266,7 @@ class HistoryListInterface(QWidget):
 
         """初始化卡片展示区域"""
         self.currentIndex = -1
-        self.cardList = []
+        self.historyCardList = []
         self.initCardView()  # 初始化布局
 
         """实现控件功能"""
@@ -236,7 +283,7 @@ class HistoryListInterface(QWidget):
             item = self.historyCardLayout.takeAt(0)
             if item.widget():
                 item.widget().deleteLater()
-        self.cardList.clear()  # 清空卡片列表
+        self.historyCardList.clear()  # 清空卡片列表
 
         """添加新的布局"""
         if self.history_list:
@@ -246,7 +293,7 @@ class HistoryListInterface(QWidget):
             for history in self.history_list:
                 card = HistoryCard(history, index, self)
                 card.clicked.connect(lambda i=card.index: self.setSelected(i))
-                self.cardList.append(card)
+                self.historyCardList.append(card)
                 self.historyCardLayout.addWidget(card)  # 将父亲设置为历史界面，以便历史详情界面正常显示
 
                 index += 1
@@ -262,12 +309,12 @@ class HistoryListInterface(QWidget):
         """
         # 将原来的卡片设置为未选中
         if self.currentIndex > -1:
-            self.cardList[self.currentIndex].setCardSelected(False)
+            self.historyCardList[self.currentIndex].setCardSelected(False)
 
         # 将目标卡片设置为选中
         self.currentIndex = index
         if self.currentIndex > -1:
-            self.cardList[self.currentIndex].setCardSelected(True)
+            self.historyCardList[self.currentIndex].setCardSelected(True)
 
     def achieveFunctions(self):
         """实现控件功能"""

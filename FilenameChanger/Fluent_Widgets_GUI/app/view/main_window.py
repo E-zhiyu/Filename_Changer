@@ -6,8 +6,8 @@ from PyQt6.QtGui import QIcon
 
 from FilenameChanger.Fluent_Widgets_GUI.app.common.config import cfg
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import FluentIcon as FIF, setTheme, Theme, isDarkTheme
-from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (NavigationItemPosition, FluentWindow, themeColor,
-                                                               setThemeColor)
+from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (NavigationItemPosition, FluentWindow,
+                                                               setCustomStyleSheet)
 
 from FilenameChanger.Fluent_Widgets_GUI.app.view.home_interface import HomeInterface
 from FilenameChanger.Fluent_Widgets_GUI.app.view.rule_list_interface import RuleListInterface
@@ -34,7 +34,7 @@ class MainWindow(FluentWindow):
         self.initNavigation()
 
         # 初始化主题
-        self.changeTheme(cfg.theme)  # 缺少该语句可能导致滚动区域背景与主题不符
+        self.changeTheme(cfg.theme, False)  # 缺少该语句可能导致滚动区域背景与主题不符
 
         # 捕获主题切换和主题色切换的信号
         cfg.themeChanged.connect(self.changeTheme)
@@ -69,8 +69,15 @@ class MainWindow(FluentWindow):
         self.move(w // 2 - self.width() // 2, h // 2 - self.height() // 2)
         self.show()
 
-    def changeTheme(self, theme: Theme):
-        """切换应用主题"""
+    def changeTheme(self, theme: Theme, reset_interface=True):
+        """
+        功能：切换应用主题
+        参数 theme：待切换到的主题
+        参数 reset_others：是否刷新子页面的各种布局
+        """
+        # 设置应用主题
+        setTheme(theme)
+
         # 设置滚动区域背景颜色
         light_scrollBackground = """QFrame{
                                     background-color:rgb(240, 240, 240);
@@ -80,23 +87,25 @@ class MainWindow(FluentWindow):
                                     background-color:rgb(35, 35, 35);
                                     border-radius: 5px;
                                 }"""
-        if not isDarkTheme():
-            self.homeInterface.setStyleSheet(light_scrollBackground)
-            self.ruleListInterface.setStyleSheet(light_scrollBackground)
-            self.historyListInterface.setStyleSheet(light_scrollBackground)
+        self.homeInterface.setStyleSheet(dark_scrollBackground if isDarkTheme() else light_scrollBackground)
+        self.ruleListInterface.setStyleSheet(dark_scrollBackground if isDarkTheme() else light_scrollBackground)
+        self.historyListInterface.setStyleSheet(dark_scrollBackground if isDarkTheme() else light_scrollBackground)
 
+        if reset_interface:
+            # 重置卡片中按钮图标和文字标签颜色
+            light_btn_qss = 'QPushButton{color: black;}'
+            dark_btn_qss = 'QPushButton{color: white;}'
             for card in self.ruleListInterface.ruleCardList:
-                card.moreBtn.setIcon(FIF.MORE.icon(color='black'))
-        else:
-            self.homeInterface.setStyleSheet(dark_scrollBackground)
-            self.ruleListInterface.setStyleSheet(dark_scrollBackground)
-            self.historyListInterface.setStyleSheet(dark_scrollBackground)
+                card.moreBtn.setIcon(FIF.MORE.icon(color='white' if isDarkTheme() else 'black'))
+            for card in self.historyListInterface.historyCardList:
+                card.openFolderBtn.setIcon(FIF.FOLDER.icon(color='white' if isDarkTheme() else 'black'))
+                card.infoBtn.setIcon(FIF.INFO.icon(color='white' if isDarkTheme() else 'black'))
+                setCustomStyleSheet(card.openFolderBtn, light_btn_qss, dark_btn_qss)
+                setCustomStyleSheet(card.infoBtn, dark_btn_qss, dark_btn_qss)
 
-            for card in self.ruleListInterface.ruleCardList:
-                card.moreBtn.setIcon(FIF.MORE.icon(color='white'))
-
-        # 设置应用主题
-        setTheme(theme)
+            # 取消选中卡片（否则选中的卡片会出现显示BUG）
+            self.ruleListInterface.setSelected(-1)
+            self.historyListInterface.setSelected(-1)
 
     def changeThemeColor(self):
         """通过重新设置应用主题刷新控件颜色"""
