@@ -10,7 +10,7 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, se
                                                                MessageBoxBase, LineEdit, RadioButton, CheckBox,
                                                                RoundMenu, Action, BodyLabel, TextBrowser, ZhDatePicker,
                                                                InfoBar, InfoBarPosition, setCustomStyleSheet,
-                                                               ToolTipFilter, ToolTipPosition)
+                                                               ToolTipFilter, ToolTipPosition, themeColor)
 
 from FilenameChanger.rename_rules.rule_manager import (load_rule, switch_rule, del_rules, save_new_rule, analise_rule,
                                                        revise_rule)
@@ -516,6 +516,7 @@ class RuleCard(CardWidget):
         if isSelected == self.selected:  # 如果带切换的状态与当前状态相同则不进行操作
             return
 
+        color = themeColor()
         self.selected = isSelected
 
         if not isSelected:
@@ -526,12 +527,7 @@ class RuleCard(CardWidget):
                 }
             """)
         else:
-            self.setStyleSheet("""
-                QWidget {
-                    background-color: #ff009faa;
-                    border-radius: 5px;
-                }
-            """)
+            self.setStyleSheet("QWidget {background-color:" + f"{color.name()};" + "border-radius: 5px;}")
 
     def setActive(self, isActive: bool):
         """设置激活状态"""

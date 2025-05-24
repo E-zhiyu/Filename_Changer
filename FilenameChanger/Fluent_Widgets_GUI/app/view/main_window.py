@@ -6,7 +6,8 @@ from PyQt6.QtGui import QIcon
 
 from FilenameChanger.Fluent_Widgets_GUI.app.common.config import cfg
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import FluentIcon as FIF, setTheme, Theme, isDarkTheme
-from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (NavigationItemPosition, FluentWindow)
+from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (NavigationItemPosition, FluentWindow, themeColor,
+                                                               setThemeColor)
 
 from FilenameChanger.Fluent_Widgets_GUI.app.view.home_interface import HomeInterface
 from FilenameChanger.Fluent_Widgets_GUI.app.view.rule_list_interface import RuleListInterface
@@ -33,10 +34,11 @@ class MainWindow(FluentWindow):
         self.initNavigation()
 
         # 初始化主题
-        self.setStyle(cfg.theme)  # 缺少该语句可能导致滚动区域背景与主题不符
+        self.changeTheme(cfg.theme)  # 缺少该语句可能导致滚动区域背景与主题不符
 
-        # 捕获themeChanged信号并连接至修改主题函数
-        cfg.themeChanged.connect(self.setStyle)
+        # 捕获主题切换和主题色切换的信号
+        cfg.themeChanged.connect(self.changeTheme)
+        cfg.themeColorChanged.connect(self.changeThemeColor)
 
         # 将各窗口的信号连接至对应方法
         self.homeInterface.refreshView_signal.connect(self.historyListInterface.initCardView)
@@ -67,8 +69,8 @@ class MainWindow(FluentWindow):
         self.move(w // 2 - self.width() // 2, h // 2 - self.height() // 2)
         self.show()
 
-    def setStyle(self, theme: Theme):
-        """设置样式"""
+    def changeTheme(self, theme: Theme):
+        """切换应用主题"""
         # 设置滚动区域背景颜色
         light_scrollBackground = """QFrame{
                                     background-color:rgb(240, 240, 240);
@@ -89,3 +91,12 @@ class MainWindow(FluentWindow):
 
         # 设置应用主题
         setTheme(theme)
+
+    def changeThemeColor(self):
+        """通过重新设置应用主题刷新控件颜色"""
+        theme = cfg.theme
+        setTheme(theme)
+
+        # 规则卡片和历史记录卡片不会刷新样式，所以手动取消选择
+        self.ruleListInterface.setSelected(-1)
+        self.historyListInterface.setSelected(-1)

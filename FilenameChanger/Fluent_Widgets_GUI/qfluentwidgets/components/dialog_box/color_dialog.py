@@ -43,8 +43,8 @@ class HuePanel(QWidget):
         self.color = QColor(color)
         self.color.setHsv(self.color.hue(), self.color.saturation(), 255)
         self.pickerPos = QPoint(
-            int(self.hue/360*self.width()),
-            int((255 - self.saturation)/255*self.height())
+            int(self.hue / 360 * self.width()),
+            int((255 - self.saturation) / 255 * self.height())
         )
         self.update()
 
@@ -196,7 +196,7 @@ class OpacityLineEdit(ColorLineEdit):
     """ Opacity line edit """
 
     def __init__(self, value, parent=None, enableAlpha=False):
-        super().__init__(int(value/255*100), parent)
+        super().__init__(int(value / 255 * 100), parent)
         self.setValidator(QRegularExpressionValidator(QRegularExpression(r'[0-9][0-9]{0,1}|100')))
         self.setTextMargins(4, 0, 33, 0)
         self.suffixLabel = QLabel('%', self)
@@ -255,11 +255,11 @@ class ColorDialog(MaskDialogBase):
         self.oldColorCard = ColorCard(color, self.scrollWidget, enableAlpha)
         self.brightSlider = BrightnessSlider(color, self.scrollWidget)
 
-        self.editLabel = QLabel(self.tr('Edit Color'), self.scrollWidget)
-        self.redLabel = QLabel(self.tr('Red'), self.scrollWidget)
-        self.blueLabel = QLabel(self.tr('Blue'), self.scrollWidget)
-        self.greenLabel = QLabel(self.tr('Green'), self.scrollWidget)
-        self.opacityLabel = QLabel(self.tr('Opacity'), self.scrollWidget)
+        self.editLabel = QLabel('编辑颜色', self.scrollWidget)
+        self.redLabel = QLabel('红', self.scrollWidget)
+        self.blueLabel = QLabel('蓝', self.scrollWidget)
+        self.greenLabel = QLabel('绿', self.scrollWidget)
+        self.opacityLabel = QLabel('不透明度', self.scrollWidget)
         self.hexLineEdit = HexColorLineEdit(color, self.scrollWidget, enableAlpha)
         self.redLineEdit = ColorLineEdit(self.color.red(), self.scrollWidget)
         self.greenLineEdit = ColorLineEdit(self.color.green(), self.scrollWidget)
@@ -275,9 +275,9 @@ class ColorDialog(MaskDialogBase):
         self.scrollArea.setViewportMargins(48, 24, 0, 24)
         self.scrollArea.setWidget(self.scrollWidget)
 
-        self.widget.setMaximumSize(488, 696+40*self.enableAlpha)
-        self.widget.resize(488, 696+40*self.enableAlpha)
-        self.scrollWidget.resize(440, 560+40*self.enableAlpha)
+        self.widget.setMaximumSize(488, 696 + 40 * self.enableAlpha)
+        self.widget.resize(488, 696 + 40 * self.enableAlpha)
+        self.scrollWidget.resize(440, 560 + 40 * self.enableAlpha)
         self.buttonGroup.setFixedSize(486, 81)
         self.yesButton.setFixedWidth(216)
         self.cancelButton.setFixedWidth(216)
@@ -292,7 +292,7 @@ class ColorDialog(MaskDialogBase):
     def __initLayout(self):
         self.huePanel.move(0, 46)
         self.newColorCard.move(288, 46)
-        self.oldColorCard.move(288, self.newColorCard.geometry().bottom()+1)
+        self.oldColorCard.move(288, self.newColorCard.geometry().bottom() + 1)
         self.brightSlider.move(0, 324)
 
         self.editLabel.move(0, 385)
@@ -371,7 +371,7 @@ class ColorDialog(MaskDialogBase):
 
     def __onOpacityChanged(self, opacity):
         """ opacity channel changed slot """
-        self.color.setAlpha(int(int(opacity)/100*255))
+        self.color.setAlpha(int(int(opacity) / 100 * 255))
         self.setColor(self.color)
 
     def __onHexColorChanged(self, color):

@@ -2,7 +2,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFrame
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, BodyLabel, PushButton, FluentIcon,
-                                                               setFont, SmoothScrollArea, CardWidget,
+                                                               setFont, SmoothScrollArea, CardWidget, themeColor,
                                                                TransparentToolButton, MessageBoxBase, MessageBox,
                                                                InfoBarPosition, InfoBar, ToolTipFilter, ToolTipPosition)
 
@@ -137,6 +137,7 @@ class HistoryCard(CardWidget):
             return
 
         self.selected = isSelected
+        color = themeColor()
 
         if isSelected:
             self.setStyleSheet("""
@@ -146,12 +147,7 @@ class HistoryCard(CardWidget):
                 }
             """)
         else:
-            self.setStyleSheet("""
-                QWidget {
-                    background: transparent;
-                    border-radius: 5px;
-                }
-            """)
+            self.setStyleSheet("QWidget {background-color:" + f"{color.name()};" + "border-radius: 5px;}")
 
     def showInfo(self):
         """显示记录详情"""

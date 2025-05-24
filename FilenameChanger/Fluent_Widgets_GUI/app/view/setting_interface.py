@@ -14,6 +14,7 @@ from FilenameChanger.log.log_recorder import *
 class SettingInterface(QWidget):
     """应用设置界面"""
     ruleChanged = pyqtSignal()
+    themeColorChanged = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -29,6 +30,8 @@ class SettingInterface(QWidget):
         self.scrollArea.setWidgetResizable(True)
         self.viewLayout.setAlignment(Qt.AlignmentFlag.AlignTop)  # 顶部对齐
         self.interfaceLayout.addWidget(self.scrollArea)
+
+        cfg.themeColorChanged.connect(lambda: self.themeColorChanged.emit())
 
         # 将背景设置为透明
         self.scrollArea.setStyleSheet("QScrollArea{background: transparent; border: none}")
@@ -69,7 +72,7 @@ class SettingInterface(QWidget):
             cfg.themeColor,
             FluentIcon.PALETTE,
             '主题颜色',
-            '调整你的应用主题颜色',
+            '调整应用的主题颜色',
             parent=self.personalizationGroup
         )
         self.personalizationGroup.addSettingCard(self.themeColorCard)

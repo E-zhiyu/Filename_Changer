@@ -128,7 +128,9 @@ class CustomColorSettingCard(ExpandGroupSettingCard):
     def __showColorDialog(self):
         """ show color dialog """
         w = ColorDialog(
-            qconfig.get(self.configItem), self.tr('Choose color'), self.window(), self.enableAlpha)
+            qconfig.get(self.configItem), '选择颜色', self.window(), self.enableAlpha)
+        w.yesButton.setText('确定')
+        w.cancelButton.setText('取消')
         w.colorChanged.connect(self.__onCustomColorChanged)
         w.exec()
 
