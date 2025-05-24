@@ -84,10 +84,16 @@ class MainWindow(FluentWindow):
             self.homeInterface.setStyleSheet(light_scrollBackground)
             self.ruleListInterface.setStyleSheet(light_scrollBackground)
             self.historyListInterface.setStyleSheet(light_scrollBackground)
+
+            for card in self.ruleListInterface.ruleCardList:
+                card.moreBtn.setIcon(FIF.MORE.icon(color='black'))
         else:
             self.homeInterface.setStyleSheet(dark_scrollBackground)
             self.ruleListInterface.setStyleSheet(dark_scrollBackground)
             self.historyListInterface.setStyleSheet(dark_scrollBackground)
+
+            for card in self.ruleListInterface.ruleCardList:
+                card.moreBtn.setIcon(FIF.MORE.icon(color='white'))
 
         # 设置应用主题
         setTheme(theme)

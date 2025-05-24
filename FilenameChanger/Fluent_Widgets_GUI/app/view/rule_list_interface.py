@@ -10,7 +10,7 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, se
                                                                MessageBoxBase, LineEdit, RadioButton, CheckBox,
                                                                RoundMenu, Action, BodyLabel, TextBrowser, ZhDatePicker,
                                                                InfoBar, InfoBarPosition, setCustomStyleSheet,
-                                                               ToolTipFilter, ToolTipPosition, themeColor)
+                                                               ToolTipFilter, ToolTipPosition, themeColor, isDarkTheme)
 
 from FilenameChanger.rename_rules.rule_manager import (load_rule, switch_rule, del_rules, save_new_rule, analise_rule,
                                                        revise_rule)
@@ -472,11 +472,6 @@ class RuleCard(CardWidget):
         setFont(self.titleLabel, 22)
         setFont(self.descLabel, 16)
 
-        # 自定义样式
-        label_qss = 'SubtitleLabel,BodyLabel{background-color:transparent;}'
-        setCustomStyleSheet(self.titleLabel, label_qss, label_qss)
-        setCustomStyleSheet(self.descLabel, label_qss, label_qss)
-
         # 添加控件到布局器
         self.labelLayout.addWidget(self.titleLabel)
         self.labelLayout.addWidget(self.descLabel)
@@ -511,6 +506,11 @@ class RuleCard(CardWidget):
         self.moreBtn.clicked.connect(
             lambda: self.creatMenu(self.moreBtn.mapToGlobal(QPoint(-self.moreBtn.width() - 50, 25))))
 
+        """自定义样式"""
+        label_qss = 'QLabel{background-color:transparent;}'
+        setCustomStyleSheet(self, label_qss, label_qss)
+        self.moreBtn.setStyleSheet('background-color:transparent;')
+
     def setCardSelected(self, isSelected: bool):
         """切换卡片的选中状态"""
         if isSelected == self.selected:  # 如果带切换的状态与当前状态相同则不进行操作
@@ -519,15 +519,54 @@ class RuleCard(CardWidget):
         color = themeColor()
         self.selected = isSelected
 
-        if not isSelected:
+        if isSelected:
+            # 设置卡片背景颜色
+            self.setStyleSheet("QWidget {background-color:" + f"{color.name()};" +
+                               "border-radius: 5px;}")
+
+            if isDarkTheme():
+                label_qss = """
+                    QLabel {
+                        color: black;
+                        background-color: transparent;
+                    }
+                """
+                # 设置卡片标签样式
+                self.titleLabel.setStyleSheet(label_qss)
+                self.descLabel.setStyleSheet(label_qss)
+                self.isActivatedLabel.setStyleSheet(label_qss)
+                self.moreBtn.setIcon(FluentIcon.MORE.icon(color='black'))
+            else:
+                self.moreBtn.setIcon(FluentIcon.MORE.icon(color='black'))
+
+        else:
             self.setStyleSheet("""
                 QWidget {
                     background-color: transparent;
                     border-radius: 5px;
                 }
-            """)
-        else:
-            self.setStyleSheet("QWidget {background-color:" + f"{color.name()};" + "border-radius: 5px;}")
+            """)  # 设置卡片背景
+
+            if isDarkTheme():
+                label_qss = """
+                    QLabel {
+                        color: white;
+                        background-color: transparent;
+                    }
+                """
+                self.moreBtn.setIcon(FluentIcon.MORE.icon(color='white'))
+            else:
+                label_qss = """
+                    QLabel {
+                        color: black;
+                        background-color: transparent;
+                    }
+                """
+                self.moreBtn.setIcon(FluentIcon.MORE.icon(color='black'))
+            # 设置卡片标签样式
+            self.titleLabel.setStyleSheet(label_qss)
+            self.descLabel.setStyleSheet(label_qss)
+            self.isActivatedLabel.setStyleSheet(label_qss)
 
     def setActive(self, isActive: bool):
         """设置激活状态"""
