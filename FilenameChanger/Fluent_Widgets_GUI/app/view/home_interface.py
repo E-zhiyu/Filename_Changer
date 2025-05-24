@@ -178,7 +178,7 @@ class HomeInterface(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.setObjectName('HomeInterface')  # 设置全局唯一对象名，否则不能将该界面添加至导航栏
-        self.scan_file = []
+        self.scan_file = None
         self.selected_file_tuple = None
         self.path_flag = -1  # 标记输入路径的有效性
 
@@ -255,6 +255,13 @@ class HomeInterface(QWidget):
 
         self.achieve_functions()  # 调用控件功能函数
 
+    def initFileList(self):
+        """初始化文件列表"""
+        # 扫描整个文件夹
+        directory = self.folderLineEdit.text().strip('\"')
+        self.scan_file = scan_files(directory)
+        self.selected_file_tuple = tuple(self.scan_file)  # 类型为元组，防止传值时被外部变量修改
+
     def achieve_functions(self):
         """实现各控件的功能"""
 
@@ -304,10 +311,12 @@ class HomeInterface(QWidget):
                 if confirm_operation():  # 弹出消息框确认操作
                     logging.info('用户确认重命名')
 
-                    targetDirectory = self.folderLineEdit.text().strip('\"')
-                    self.scan_file = scan_files(targetDirectory)
-                    self.selected_file_tuple = tuple(self.scan_file)
+                    # 如果还未扫描文件夹则进行扫描操作
+                    if self.scan_file is None:
+                        self.initFileList()
                     logging.info(f'已选择：{len(self.selected_file_tuple)}/{len(self.scan_file)}')
+
+                    targetDirectory = self.folderLineEdit.text().strip('\"')
                     flag = rename_operation(targetDirectory, self.selected_file_tuple)
                     # 显示一个消息提示框
                     if flag == 1:
