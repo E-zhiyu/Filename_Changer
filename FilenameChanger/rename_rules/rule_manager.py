@@ -146,7 +146,7 @@ def analise_rule(addRuleWindow):
         rule['target_str'] = addRuleWindow.oldStrLineEdit.text()
         logging.info(f'匹配字符串：{rule['target_str']}')
 
-        rule['enable_re'] = addRuleWindow.enableReCheckBox.isChecked()
+        rule['enable_re'] = addRuleWindow.useReCheckBox.isChecked()
         if rule['enable_re']:
             logging.info('使用正则表达式：是')
         else:
