@@ -847,7 +847,7 @@ class RuleInputInterface(MessageBoxBase):
 
             # 输入框
             self.newStrLineEdit = LineEdit()
-            self.newStrLineEdit.setPlaceholderText('请输入新字符串')
+            self.newStrLineEdit.setPlaceholderText('请输入新字符串（可为空）')
             self.newStrLineEdit.setFixedWidth(200)
             newStrLayout.addWidget(self.newStrLineEdit)
 
