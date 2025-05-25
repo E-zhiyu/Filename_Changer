@@ -250,16 +250,16 @@ def use_type_5(selected_rule, old_names):
         # 将编号合并至文件名
         if use_original_name:
             if position == 'head':
-                new_name = f'{serial_number}{original_file_name}{ext}'
+                generated_new_name = f'{serial_number}{original_file_name}{ext}'
             elif position == 'tail':
-                new_name = f'{original_file_name}{serial_number}{ext}'
+                generated_new_name = f'{original_file_name}{serial_number}{ext}'
         else:
             if position == 'head':
-                new_name = f'{serial_number}{new_name}{ext}'
+                generated_new_name = f'{serial_number}{new_name}{ext}'
             elif position == 'tail':
-                new_name = f'{new_name}{serial_number}{ext}'
+                generated_new_name = f'{new_name}{serial_number}{ext}'
 
-        new_name_list.append(new_name)
+        new_name_list.append(generated_new_name)
         number += step_length
 
     return new_name_list
