@@ -1,5 +1,4 @@
 # python_version == '3.13'
-import os
 
 version = "2.2.1"
 author = 'GitHub@E-zhiyu'
