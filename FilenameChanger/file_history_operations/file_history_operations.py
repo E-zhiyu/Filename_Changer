@@ -147,7 +147,7 @@ def rename_files(directory, old_names, new_name_list, with_record_history=True):
         with open(history_file_path, 'w', encoding='utf-8') as f:
             json.dump(history_list, f, ensure_ascii=False, indent=4)
             logging.info('新增的历史记录已追加至文件中')
-    elif not new_record_dict['new_name_list']:
+    elif not new_record_dict['new_name_list'] and not with_record_history:
         logging.info('未追加新的重命名记录，因为所有文件新旧文件名都相同')
 
 
