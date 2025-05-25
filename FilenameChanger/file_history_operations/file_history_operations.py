@@ -134,6 +134,9 @@ def rename_files(directory, old_names, new_name_list, with_record_history=True):
             except PermissionError:
                 logging.error(f'【文件被占用】文件“{old_name}”被其他程序占用')
                 new_record_dict['error_files'].append(f'【文件被占用】{old_name}')
+            except (OSError,WindowsError):
+                logging.error(f'【文件名语法错误】新文件名中含有非法字符')
+                new_record_dict['error_files'].append(f'【文件名语法错误】“{new_name}”中含有非法字符')
             else:
                 logging.info(f'【成功】{old_name} -> {new_name}')
                 if with_record_history:
