@@ -179,11 +179,12 @@ def analise_rule(addRuleWindow):
         logging.info(f'分隔符：{rule["split_char"] if rule["split_char"] else '无'}')
 
     elif rule['type'] == 5:
-        rule['num_type'] = addRuleWindow.numTypeComboBox.currentIndex()
+        rule['num_type'] = addRuleWindow.numTypeComboBox.text()
         logging.info(f'编号样式：{rule["num_type"]}')
 
         if addRuleWindow.fileNameComboBox.currentIndex() == 1:
             rule['new_name'] = addRuleWindow.newNameLineEdit.text()
+            rule['use_original_name'] = False
             logging.info(f'文件名：{rule["new_name"]}')
         elif addRuleWindow.fileNameComboBox.currentIndex() == 0:
             rule['use_original_name'] = True
