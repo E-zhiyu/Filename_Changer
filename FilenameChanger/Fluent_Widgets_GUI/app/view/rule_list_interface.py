@@ -229,7 +229,7 @@ class InfoDialog(MessageBoxBase):
 
             # 是否启用正则表达式
             self.useReLabel = SubtitleLabel(text='使用正则表达式：', parent=self.widget)
-            if rule['use_re']:
+            if rule['enable_re']:
                 use_re = '是'
             else:
                 use_re = '否'
