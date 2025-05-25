@@ -1508,7 +1508,7 @@ class RuleListInterface(QWidget):
             lambda: revise_rule(self.rule_dict, revised_rule, index))  # 设置信号传值连接到的函数
 
         if reviseRuleWindow.exec():  # 显示窗口
-            logging.info('用户确认修改规则')
+            logging.info('用户确认修改规则，以下为修改后的规则内容')
             revised_rule = analise_rule(reviseRuleWindow)
             reviseRuleWindow.submit_data.emit(revised_rule)  # 发送信号给规则保存函数
 

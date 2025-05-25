@@ -154,7 +154,7 @@ class SettingInterface(QWidget):
                         position=InfoBarPosition.TOP,
                         parent=self
                     )
-                    logging.info(f'用户导出规则至“{dst_path}”成功')
+                    logging.info(f'【成功】用户导出规则至“{dst_path}”')
                 else:
                     InfoBar.error(
                         '失败',
@@ -163,7 +163,7 @@ class SettingInterface(QWidget):
                         position=InfoBarPosition.TOP,
                         parent=self
                     )
-                    logging.info(f'用户导出规则至“{dst_path}”失败')
+                    logging.info(f'【失败】用户导出规则至“{dst_path}”')
                     logging.info(f'原因：{message}')
 
         self.ruleExportCard.clicked.connect(exportRule)

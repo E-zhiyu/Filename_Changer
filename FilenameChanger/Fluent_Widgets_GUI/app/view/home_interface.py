@@ -312,7 +312,7 @@ class HomeInterface(QWidget):
                     # 如果还未扫描文件夹则进行扫描操作
                     if self.scan_file is None:
                         self.initFileList()
-                    logging.info(f'已选择：{len(self.selected_file_tuple)}/{len(self.scan_file)}')
+                    logging.info(f'已选择文件数：{len(self.selected_file_tuple)}/{len(self.scan_file)}')
 
                     targetDirectory = self.folderLineEdit.text().strip('\"')
                     flag = rename_operation(targetDirectory, self.selected_file_tuple)
@@ -325,7 +325,7 @@ class HomeInterface(QWidget):
                             duration=2000,
                             parent=self
                         )
-                        logging.info('文件重命名成功！')
+                        logging.info('文件重命名完成！')
                     elif flag == 0:
                         InfoBar.error(
                             title='失败',
