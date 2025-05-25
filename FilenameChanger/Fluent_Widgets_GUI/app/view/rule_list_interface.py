@@ -850,7 +850,15 @@ class RuleInputInterface(MessageBoxBase):
             self.newStrLineEdit.setPlaceholderText('请输入新字符串')
             self.newStrLineEdit.setFixedWidth(200)
             newStrLayout.addWidget(self.newStrLineEdit)
-            self.newStrLineEdit.setValidator(char_validator)  # 设置限制器
+
+            def set_validator():
+                """设置新字符串输入框限制器"""
+                if self.useReCheckBox.isChecked():
+                    self.newStrLineEdit.setValidator(None)
+                else:
+                    self.newStrLineEdit.setValidator(char_validator)
+
+            self.useReCheckBox.checkStateChanged.connect(set_validator)
 
             # 将旧字符串相关布局添加到主布局
             self.viewLayout.addLayout(newStrLayout)
