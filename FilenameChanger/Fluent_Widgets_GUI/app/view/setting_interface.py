@@ -1,5 +1,5 @@
 from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QFileDialog
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QFileDialog, QDialog
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (FluentIcon, setFont, ScrollArea, SubtitleLabel,
                                                                OptionsSettingCard, PushSettingCard, SettingCardGroup,
@@ -133,13 +133,18 @@ class SettingInterface(QWidget):
 
         def exportRule():
             """显示文件夹选择窗口并启动导出操作"""
-            dst_path = QFileDialog.getExistingDirectory(
+            dialog = QFileDialog(
                 self,
                 '规则导出',
                 '',
-                QFileDialog.Option.ShowDirsOnly
+                'JSON文件 (*.json)',
             )
-            if dst_path:
+            dialog.setAcceptMode(QFileDialog.AcceptMode.AcceptSave)  # 对话框设置为保存文件模式
+            file_name = datetime.now().strftime('%Y_%m_%d_') + 'FC_rule.json'
+            dialog.selectFile(file_name)  # 设置默认文件名
+
+            if dialog.exec() == QDialog.DialogCode.Accepted:
+                dst_path = dialog.selectedFiles()[0]
                 flag, message = export_rule(dst_path)
                 if flag:
                     InfoBar.success(

@@ -284,9 +284,8 @@ def export_rule(dst_path):
     参数 dst_path：导出到的文件夹路径
     返回：导出结果和提示语
     """
-    file_name = datetime.now().strftime('%Y_%m_%d_') + 'FC_rule.json'
     try:
-        shutil.copy(rule_path, os.path.join(dst_path, file_name))
+        shutil.copy(rule_path, dst_path)
     except FileNotFoundError:
         return False, '规则文件不存在'
     else:
