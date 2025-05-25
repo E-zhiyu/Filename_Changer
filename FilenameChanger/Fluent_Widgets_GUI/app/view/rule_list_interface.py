@@ -1436,7 +1436,7 @@ class RuleListInterface(QWidget):
             new_str = rule['new_str']
 
             reviseRuleWindow.oldStrLineEdit.setText(target_str)
-            reviseRuleWindow.useReCheckBox.setChecked(rule.get('use_re', False))
+            reviseRuleWindow.useReCheckBox.setChecked(rule.get('enable_re', False))
             reviseRuleWindow.newStrLineEdit.setText(new_str)
         elif type == 4:
             split_char = rule['split_char']
