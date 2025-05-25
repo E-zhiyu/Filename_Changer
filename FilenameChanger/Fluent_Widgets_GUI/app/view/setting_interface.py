@@ -5,7 +5,7 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (FluentIcon, setFo
                                                                OptionsSettingCard, PushSettingCard, SettingCardGroup,
                                                                InfoBar, InfoBarPosition, CustomColorSettingCard,
                                                                ExpandLayout)
-from FilenameChanger.Fluent_Widgets_GUI.app.common.config import cfg
+from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets.common.config import QConfig
 
 from FilenameChanger.rename_rules.rule_manager import (import_rule, export_rule)
 from FilenameChanger.log.log_recorder import *
@@ -14,7 +14,6 @@ from FilenameChanger.log.log_recorder import *
 class SettingInterface(QWidget):
     """应用设置界面"""
     ruleChanged = pyqtSignal()
-    themeColorChanged = pyqtSignal()
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -30,8 +29,6 @@ class SettingInterface(QWidget):
         self.scrollArea.setWidgetResizable(True)
         self.viewLayout.setAlignment(Qt.AlignmentFlag.AlignTop)  # 顶部对齐
         self.interfaceLayout.addWidget(self.scrollArea)
-
-        cfg.themeColorChanged.connect(lambda: self.themeColorChanged.emit())
 
         # 将背景设置为透明
         self.scrollArea.setStyleSheet("QScrollArea{background: transparent; border: none}")
@@ -55,7 +52,7 @@ class SettingInterface(QWidget):
 
         # 修改应用主题
         self.themeCard = OptionsSettingCard(
-            cfg.themeMode,
+            QConfig.themeMode,
             FluentIcon.BRUSH,
             '应用主题',
             '修改你的应用主题',
@@ -69,7 +66,7 @@ class SettingInterface(QWidget):
 
         # 修改主题颜色
         self.themeColorCard = CustomColorSettingCard(
-            cfg.themeColor,
+            QConfig.themeColor,
             FluentIcon.PALETTE,
             '主题颜色',
             '调整应用的主题颜色',
