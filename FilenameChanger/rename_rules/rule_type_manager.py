@@ -176,7 +176,7 @@ def use_type_4(selected_rule, old_names, directory):
 
         """添加指定日期"""
         if time_type == 4:  # 判断该规则是否填充自定义日期
-            if customize_date:  # 自定义规则不为空才填充日期
+            if customize_date:  # 自定义日期不为空才填充日期
                 if position == 'head':
                     new_name = f'{customize_date}{split_char}{date_removed_name}{ext}' if split_char != '年月日' \
                         else f'{customize_date}-{date_removed_name}{ext}'
