@@ -12,7 +12,7 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, se
                                                                InfoBar, InfoBarPosition, setCustomStyleSheet,
                                                                ToolTipFilter, ToolTipPosition, themeColor, isDarkTheme)
 
-from FilenameChanger.rename_rules.rule_manager import (load_rule, switch_rule, del_rules, save_new_rule, analise_rule,
+from FilenameChanger.rename_rules.rule_manager import (load_rule, activate_rule, del_rules, save_new_rule, analise_rule,
                                                        revise_rule)
 
 from FilenameChanger.log.log_recorder import *
@@ -1293,7 +1293,7 @@ class RuleListInterface(QWidget):
                 self.ruleCardList[current_index].setActive(False)
 
                 index = self.currentIndex
-                switch_rule(self.rule_dict, index)  # 切换规则并保存至配置文件
+                activate_rule(self.rule_dict, index)  # 切换规则并保存至配置文件
 
                 # 并新的规则卡片设置为已激活
                 current_index = self.rule_dict['selected_index']
@@ -1333,23 +1333,23 @@ class RuleListInterface(QWidget):
                 if confirm_window.exec():
                     logging.info('用户确认删除规则')
 
-                    flag = del_rules(self.rule_dict, self.currentIndex)
-                    if flag == 1:
+                    flag, message = del_rules(self.rule_dict, self.currentIndex)
+                    if flag:
                         v_pos = self.ruleScrollArea.verticalScrollBar().value()
                         self.initRuleViewArea()  # （删除规则）刷新规则卡片布局
                         self.ruleScrollArea.verticalScrollBar().setValue(v_pos)
 
                         InfoBar.success(
                             title='成功',
-                            content='已删除选中的规则',
+                            content=message,
                             position=InfoBarPosition.TOP,
                             duration=2000,
                             parent=self
                         )
-                    elif flag == 0:
+                    else:
                         InfoBar.error(
                             title='错误',
-                            content='无法删除最后一个规则',
+                            content=message,
                             position=InfoBarPosition.TOP,
                             duration=2000,
                             parent=self

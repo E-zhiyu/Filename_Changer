@@ -384,37 +384,25 @@ class HomeInterface(QWidget):
             logging.info('用户点击撤销重命名按钮，确认操作中……')
             if confirm_operation():  # 弹出消息框确认操作
                 logging.info('用户确认撤销重命名')
-                flag = cancel_rename_operation()
+                flag, message = cancel_rename_operation()
 
-                if flag == 1:
+                if flag:
                     InfoBar.success(
                         title='成功',
-                        content='已成功撤销重命名',
+                        content=message,
                         position=InfoBarPosition.TOP,
                         duration=2000,
                         parent=self
                     )
-                    logging.info('撤销重命名成功')
-
                     self.refreshView_signal.emit()  # 将按钮点击的信号发送出去
-                elif flag == 0:
+                else:
                     InfoBar.error(
                         title='失败',
-                        content='历史记录为空，无法撤销重命名',
+                        content=message,
                         position=InfoBarPosition.TOP,
                         duration=2000,
                         parent=self
                     )
-                    logging.error('历史记录为空，无法撤销重命名')
-                elif flag == -1:
-                    InfoBar.error(
-                        title='失败',
-                        content='原文件夹被移除或移动至其他位置',
-                        position=InfoBarPosition.TOP,
-                        duration=2000,
-                        parent=self
-                    )
-                    logging.error('原文件夹被移除或移动至其他位置，无法撤销重命名')
 
             else:
                 logging.info('用户取消撤销重命名')

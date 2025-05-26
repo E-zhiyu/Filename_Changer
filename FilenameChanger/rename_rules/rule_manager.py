@@ -79,7 +79,7 @@ def del_rules(config_dict, index):
     """
     if config_dict['num'] == 1:
         logging.error('无法删除最后一个规则')
-        return 0
+        return False, '无法删除最后一个规则'
     else:
         logging.info(f'用户删除第{index + 1}个规则，剩余规则{config_dict['num'] - 1}个')
 
@@ -97,12 +97,12 @@ def del_rules(config_dict, index):
         with open(rule_path, 'w', encoding='utf-8') as f:
             json.dump(config_dict, f, ensure_ascii=False, indent=4)
 
-        return 1
+        return True, '已成功删除选中的规则'
 
 
-def switch_rule(config_dict, index):
+def activate_rule(config_dict, index):
     """
-    功能：切换需要加载的规则
+    功能：激活指定的规则
     参数 config_dict：规则配置文件根字典
     参数 index：需要切换到的规则的下标
     """
@@ -247,19 +247,20 @@ def import_rule(src_path):
     返回：导入结果和提示语
     """
 
-    class FileCopyValidator:
-        """文件内容验证器"""
+    class FileSafeCopier:
+        """文件安全复制器"""
 
         def __init__(self, src_path):
-            self.src_path = src_path
-            self.dst_path = rule_path
+            self.src_path = src_path  # 源文件位置
+            self.dst_path = rule_path  # 目标位置，即应用规则文件位置
 
         def safeCopy(self):
+            """安全复制的方法"""
             try:
                 with open(self.src_path, 'r', encoding='utf-8') as f:
                     content = json.load(f)
                     if isinstance(content, dict):
-                        if content.get('num') is not None and content.get('rules') is not None:
+                        if self.content_verify(content):
                             shutil.copy(self.src_path, self.dst_path)
                         else:
                             raise ValueError
@@ -268,7 +269,7 @@ def import_rule(src_path):
             except JSONDecodeError:
                 return False, '不是有效的JSON格式'
             except FileNotFoundError:
-                return False, '待导入的文件不存在'
+                return False, '待导入的文件不存在或被移除'
             except ValueError:
                 return False, '文件内容格式错误'
             else:
@@ -302,6 +303,6 @@ def export_rule(dst_path):
     try:
         shutil.copy(rule_path, dst_path)
     except FileNotFoundError:
-        return False, '规则文件不存在'
+        return False, '规则文件不存在或被移除'
     else:
         return True, '规则导出成功'
