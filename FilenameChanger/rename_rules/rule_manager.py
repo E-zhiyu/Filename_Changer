@@ -274,7 +274,22 @@ def import_rule(src_path):
             else:
                 return True, '文件复制成功'
 
-    validator = FileCopyValidator(src_path)
+        @staticmethod
+        def content_verify(content):
+            """验证导入的规则文件内容是否符合规范"""
+            num = content.get('num')
+            selected_index = content.get('selected_index')
+            rules = content.get('rules')
+            if not (isinstance(num, int) and isinstance(selected_index, int) and isinstance(rules, list)):
+                return False
+            elif len(rules) != num:
+                return False
+            elif selected_index < 0 or selected_index >= num:
+                return False
+            else:
+                return True
+
+    validator = FileSafeCopier(src_path)
     return validator.safeCopy()
 
 
