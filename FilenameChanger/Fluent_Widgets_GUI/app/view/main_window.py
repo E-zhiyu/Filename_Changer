@@ -34,7 +34,7 @@ class MainWindow(FluentWindow):
         self.initNavigation()
 
         # 初始化主题
-        self.changeTheme(cfg.theme, False)  # 缺少该语句可能导致滚动区域背景与主题不符
+        self.changeTheme(reset_interface=False)  # 初始化滚动区域背景色
 
         # 捕获主题切换和主题色切换的信号
         cfg.themeChanged.connect(self.changeTheme)
@@ -69,14 +69,15 @@ class MainWindow(FluentWindow):
         self.move(w // 2 - self.width() // 2, h // 2 - self.height() // 2)
         self.show()
 
-    def changeTheme(self, theme: Theme, reset_interface=True):
+    def changeTheme(self, theme=None, reset_interface=True):
         """
-        功能：切换应用主题
+        功能：切换应用主题并切换一些控件的样式
         参数 theme：待切换到的主题
         参数 reset_others：是否刷新子页面的各种布局
         """
         # 设置应用主题
-        setTheme(theme)
+        if theme is not None:
+            setTheme(theme)
 
         # 设置滚动区域背景颜色
         light_scrollBackground = """QFrame{
@@ -109,8 +110,7 @@ class MainWindow(FluentWindow):
 
     def changeThemeColor(self):
         """通过重新设置应用主题刷新控件颜色"""
-        theme = cfg.theme
-        setTheme(theme)
+        setTheme(cfg.theme)  # 使用该函数刷新控件样式
 
         # 规则卡片和历史记录卡片不会刷新样式，所以手动取消选择
         self.ruleListInterface.setSelected(-1)
