@@ -128,6 +128,10 @@ class HistoryCard(CardWidget):
         """卡片详情按钮"""
         self.infoBtn = TransparentToolButton(FluentIcon.INFO)
         self.infoBtn.setFixedSize(32, 32)
+
+        self.infoBtn.setToolTip('查看重命名详情')
+        self.infoBtn.installEventFilter(ToolTipFilter(self.infoBtn))
+
         self.cardLayout.addWidget(self.infoBtn)
 
         self.infoBtn.clicked.connect(self.showInfo)
@@ -241,12 +245,12 @@ class HistoryListInterface(QWidget):
         # 删除单条历史记录按钮
         self.delBtn = PushButton(FluentIcon.DELETE, '删除选中记录')
         self.delBtn.setToolTip('删除选中的历史记录')
-        self.delBtn.installEventFilter(ToolTipFilter(self.delBtn, showDelay=300, position=ToolTipPosition.TOP))
+        self.delBtn.installEventFilter(ToolTipFilter(self.delBtn))
 
         # 清空历史记录按钮
         self.clearBtn = PushButton(FluentIcon.BROOM, '清空所有记录')
         self.clearBtn.setToolTip('清空所有历史记录')
-        self.clearBtn.installEventFilter(ToolTipFilter(self.clearBtn, showDelay=300, position=ToolTipPosition.TOP))
+        self.clearBtn.installEventFilter(ToolTipFilter(self.clearBtn))
 
         self.btnLayout = QHBoxLayout(self)
         self.btnLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)

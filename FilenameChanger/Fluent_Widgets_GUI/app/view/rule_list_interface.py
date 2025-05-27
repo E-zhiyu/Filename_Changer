@@ -1181,18 +1181,17 @@ class RuleListInterface(QWidget):
         # 添加规则按钮
         self.addRuleBtn = PushButton(FluentIcon.ADD, '添加规则')
         self.addRuleBtn.setToolTip('添加一条新规则')
-        self.addRuleBtn.installEventFilter(ToolTipFilter(self.addRuleBtn, showDelay=300, position=ToolTipPosition.TOP))
+        self.addRuleBtn.installEventFilter(ToolTipFilter(self.addRuleBtn))
 
         # 激活规则按钮
         self.activateRuleBtn = PushButton(FluentIcon.COMPLETED, '激活规则')
         self.activateRuleBtn.setToolTip('将选中的规则设置为活跃规则')
-        self.activateRuleBtn.installEventFilter(
-            ToolTipFilter(self.activateRuleBtn, showDelay=300, position=ToolTipPosition.TOP))
+        self.activateRuleBtn.installEventFilter(ToolTipFilter(self.activateRuleBtn))
 
         # 删除规则按钮
         self.delRuleBtn = PushButton(FluentIcon.DELETE.icon(color='red'), '删除规则')
         self.delRuleBtn.setToolTip('删除选中的规则')
-        self.delRuleBtn.installEventFilter(ToolTipFilter(self.delRuleBtn, showDelay=300, position=ToolTipPosition.TOP))
+        self.delRuleBtn.installEventFilter(ToolTipFilter(self.delRuleBtn))
 
         self.btnLayout = QHBoxLayout()  # 控制顶部规则编辑按钮的布局
         self.btnLayout.setSpacing(4)
