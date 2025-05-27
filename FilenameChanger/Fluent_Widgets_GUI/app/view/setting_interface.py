@@ -4,8 +4,9 @@ from PyQt6.QtWidgets import QWidget, QVBoxLayout, QFileDialog, QDialog
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (FluentIcon, setFont, ScrollArea, SubtitleLabel,
                                                                OptionsSettingCard, PushSettingCard, SettingCardGroup,
                                                                InfoBar, InfoBarPosition, CustomColorSettingCard,
-                                                               ExpandLayout)
+                                                               ExpandLayout, SwitchSettingCard)
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets.common.config import QConfig
+from FilenameChanger.Fluent_Widgets_GUI.app.common.config import Config
 
 from FilenameChanger.rename_rules.rule_manager import (import_rule, export_rule)
 from FilenameChanger.log.log_recorder import *
@@ -165,3 +166,15 @@ class SettingInterface(QWidget):
 
         self.ruleExportCard.clicked.connect(exportRule)
         self.ruleIOGroup.addSettingCard(self.ruleExportCard)
+
+        """重命名模式切换"""
+        self.modeGroup = SettingCardGroup('重命名模式', self.widget)
+        self.viewLayout.addWidget(self.modeGroup)
+
+        self.modeCard = SwitchSettingCard(
+            FluentIcon.FOLDER,
+            '文件夹模式',
+            '启用后对文件夹进行重命名',
+            Config.folderMode
+        )
+        self.modeGroup.addSettingCard(self.modeCard)
