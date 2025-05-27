@@ -5,8 +5,6 @@ import stat  # 判断文件属性
 from FilenameChanger import history_file_path
 from FilenameChanger.rename_rules.rule_type_manager import *
 
-from FilenameChanger.Fluent_Widgets_GUI.app.common.config import Config as cfg
-
 """
 文件操作模块
 """
@@ -60,16 +58,10 @@ def scan_files(directory) -> list:
     参数 directory：目标路径
     返回：旧文件名列表
     """
-    folder_mode = cfg.get(cfg, cfg.folderMode)
     try:
-        if folder_mode:
-            old_name = [folder for folder in os.listdir(directory) if
-                        os.path.isdir(os.path.join(directory, folder)) and not hidden_or_protected(
-                            os.path.join(directory, folder))]
-        else:
-            old_name = [file for file in os.listdir(directory) if
-                        os.path.isfile(os.path.join(directory, file)) and not hidden_or_protected(
-                            os.path.join(directory, file))]
+        old_name = [f for f in os.listdir(directory) if
+                    os.path.isfile(os.path.join(directory, f)) and not hidden_or_protected(
+                        os.path.join(directory, f))]
         logging.info('文件名列表获取成功')
         if not old_name:
             raise FileNotFoundError
