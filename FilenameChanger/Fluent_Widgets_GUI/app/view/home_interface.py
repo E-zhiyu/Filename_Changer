@@ -294,8 +294,22 @@ class HomeInterface(QWidget):
             logging.info('判断路径有效性……')
             self.path_flag = self.initFileList()  # 扫描整个文件夹
             if self.path_flag == 1:
+                InfoBar.success(
+                    '有效',
+                    '文件夹路径有效',
+                    duration=2000,
+                    position=InfoBarPosition.TOP,
+                    parent=self
+                )
                 logging.info('路径有效')
             elif self.path_flag == 0:
+                InfoBar.error(
+                    '无效',
+                    '文件夹路径无效',
+                    duration=2000,
+                    position=InfoBarPosition.TOP,
+                    parent=self
+                )
                 logging.warning('路径无效')
             elif self.path_flag == -1:
                 logging.info('用户清空目标路径')
