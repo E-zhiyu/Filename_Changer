@@ -204,7 +204,7 @@ class HomeInterface(QWidget):
 
         self.folderLineEdit.setFixedWidth(250)
         self.folderLineEdit.setClearButtonEnabled(True)
-        self.folderLineEdit.setPlaceholderText('请选择一个文件夹')  # 设置文本框提示文本
+        self.folderLineEdit.setPlaceholderText('请选择目标对象的父级文件夹')  # 设置文本框提示文本
 
         self.lineEditLayout.addWidget(self.folderLineEdit)
 
@@ -218,7 +218,7 @@ class HomeInterface(QWidget):
 
         # 文件查看按钮
         self.fileListBtn = ToolButton(FluentIcon.ALIGNMENT)
-        self.fileListBtn.setToolTip('选择需要重命名的文件')
+        self.fileListBtn.setToolTip('选择需要重命名的对象')
         self.fileListBtn.installEventFilter(
             ToolTipFilter(self.fileListBtn, showDelay=300, position=ToolTipPosition.TOP))
         self.fileListBtn.setFixedHeight(34)
@@ -414,7 +414,7 @@ class HomeInterface(QWidget):
                 # 显示一个气泡弹窗
                 InfoBar.warning(
                     title='提示',
-                    content='请先输入有效文件夹路径',
+                    content='请先输入有效的文件夹路径',
                     position=InfoBarPosition.TOP,
                     duration=2000,
                     parent=self
