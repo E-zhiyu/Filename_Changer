@@ -143,7 +143,7 @@ class SwitchSettingCard(SettingCard):
         super().__init__(icon, title, content, parent)
         self.configItem = configItem
         self.switchButton = SwitchButton(
-            self.tr('Off'), self, IndicatorPosition.RIGHT)
+            '关', self, IndicatorPosition.RIGHT)
 
         if configItem:
             self.setValue(qconfig.get(configItem))
@@ -166,7 +166,7 @@ class SwitchSettingCard(SettingCard):
 
         self.switchButton.setChecked(isChecked)
         self.switchButton.setText(
-            self.tr('On') if isChecked else self.tr('Off'))
+            '开' if isChecked else '关')
 
     def setChecked(self, isChecked: bool):
         self.setValue(isChecked)
