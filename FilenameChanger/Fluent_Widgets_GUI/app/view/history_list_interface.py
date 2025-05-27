@@ -54,7 +54,7 @@ class InfoWindow(MessageBoxBase):
             message = '文件夹'
         else:
             message = '文件'
-        self.modeLabel = SubtitleLabel(text=f'模式：{message}', parent=self.widget)
+        self.modeLabel = SubtitleLabel(text=f'重命名对象：{message}', parent=self.widget)
         setFont(self.modeLabel, 15)
 
         self.viewLayout.addWidget(self.modeLabel)
