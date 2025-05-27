@@ -315,53 +315,26 @@ class HomeInterface(QWidget):
                     logging.info(f'已选择文件数：{len(self.selected_file_tuple)}/{len(self.scan_file)}')
 
                     targetDirectory = self.folderLineEdit.text().strip('\"')
-                    flag = rename_operation(targetDirectory, self.selected_file_tuple)
+                    flag, message = rename_operation(targetDirectory, self.selected_file_tuple)
                     # 显示一个消息提示框
-                    if flag == 1:
+                    if flag:
                         InfoBar.success(
-                            title='成功',
-                            content='所有文件已成功重命名！',
+                            title='完成',
+                            content=message,
                             position=InfoBarPosition.TOP,
                             duration=2000,
                             parent=self
                         )
                         logging.info('文件重命名完成！')
-                    elif flag == 0:
+                    else:
                         InfoBar.error(
                             title='失败',
-                            content='文件夹为空或未选中任何文件！',
+                            content=message,
                             position=InfoBarPosition.TOP,
                             duration=2000,
                             parent=self
                         )
                         logging.error('文件重命名失败：文件夹为空或未选中文件')
-                    elif flag == -1:
-                        InfoBar.error(
-                            title='失败',
-                            content='规则列表为空，请先写入规则！',
-                            position=InfoBarPosition.TOP,
-                            duration=2000,
-                            parent=self
-                        )
-                        logging.error('文件重命名失败：规则列表为空')
-                    elif flag == -2:
-                        InfoBar.warning(
-                            title='警告',
-                            content='重命名前后所有文件名都相同',
-                            position=InfoBarPosition.TOP,
-                            duration=2000,
-                            parent=self
-                        )
-                        logging.warning('文件重命名异常：前后文件名都相同')
-                    elif flag == -3:  # 仅用于调试
-                        InfoBar.error(
-                            title='严重错误',
-                            content='新文件名列表为空，请检查代码逻辑！',
-                            position=InfoBarPosition.TOP,
-                            duration=2000,
-                            parent=self
-                        )
-                        logging.fatal('严重错误：新文件名列表为空')
 
                 else:
                     logging.info('用户取消重命名')

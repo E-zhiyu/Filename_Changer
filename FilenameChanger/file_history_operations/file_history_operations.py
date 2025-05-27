@@ -80,13 +80,13 @@ def rename_operation(directory, old_file_names):
     """
     if not old_file_names:
         logging.info(f'文件夹：“{directory}”为空')
-        return 0
+        return False, '目标文件夹为空'
 
     config_dict = load_rule()  # 重命名时加载已保存的规则
     selected_rule = config_dict['rules'][config_dict['selected_index']]
     if not config_dict['rules']:  # 若规则为空，则结束本函数
-        logging.info('规则为空，请先前往规则设置写入规则！')
-        return -1
+        logging.warning('规则为空，请先前往规则设置写入规则')
+        return False, '规则为空，请先前往规则设置写入规则！'
     logging.info(
         f'当前活跃的规则为“规则{config_dict['selected_index'] + 1}”，'
         f'规则种类：{selected_rule['type']}')
@@ -96,13 +96,12 @@ def rename_operation(directory, old_file_names):
     logging.info('开始文件重命名……')
     if not new_name_list:
         logging.fatal('严重错误：新文件名列表为空')
-        return -3
-    rename_files(directory, old_file_names, new_name_list)  # 执行重命名操作
+        return False, '严重错误：新文件名列表为空'
 
-    if list(old_file_names) == new_name_list:  # 判断重命名前后文件名是否完全相同
-        return -2
-    else:
-        return 1
+    success, fail = rename_files(directory, old_file_names, new_name_list)  # 执行重命名操作
+    logging.info(f'重命名结束，成功：{success}个，失败：{fail}个')
+
+    return 1, f'重命名结束，成功：{success}个，失败：{fail}个'
 
 
 def rename_files(directory, old_names, new_name_list, with_record_history=True):
@@ -152,6 +151,10 @@ def rename_files(directory, old_names, new_name_list, with_record_history=True):
             logging.info('新增的历史记录已追加至文件中')
     elif not new_record_dict['new_name_list'] and with_record_history:
         logging.info('未追加新的重命名记录，因为所有文件新旧文件名都相同')
+
+    fail = len(new_record_dict['error_files'])
+    success = len(old_names) - fail
+    return success, fail  # 返回成功重命名和重命名时出错的文件数
 
 
 def get_new_name_list(selected_rule, old_names, directory):
