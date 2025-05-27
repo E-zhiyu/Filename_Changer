@@ -123,8 +123,9 @@ def rename_files(directory, old_names, new_name_list, with_record_history=True):
     history_list = load_history()
 
     """文件重命名"""
+    folder_mode = cfg.get(cfg, cfg.folderMode)
     new_record_dict = {'directory': directory, 'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                       'old_name_list': [], 'new_name_list': [], 'error_files': []}
+                       'old_name_list': [], 'new_name_list': [], 'error_files': [], 'folder_mode': folder_mode}
     for old_name, new_name in zip(old_names, new_name_list):
         if old_name == new_name:
             logging.info(f'【未更改】{old_name}')

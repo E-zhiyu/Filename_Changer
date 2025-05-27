@@ -46,6 +46,19 @@ class InfoWindow(MessageBoxBase):
         self.viewLayout.addWidget(self.timeLabel)
         self.viewLayout.addWidget(self.directoryLabel)
 
+        """重命名模式标签"""
+        folder_mode = history_dict.get('folder_mode', 0)
+        if folder_mode == 0:
+            message = '<无法获取>'
+        elif folder_mode:
+            message = '文件夹'
+        else:
+            message = '文件'
+        self.modeLabel = SubtitleLabel(text=f'模式：{message}', parent=self.widget)
+        setFont(self.modeLabel, 15)
+
+        self.viewLayout.addWidget(self.modeLabel)
+
         """文件名更改详情的展示区域"""
         self.infoScrollArea = SmoothScrollArea(parent=self.widget)
         self.infoWidget = QFrame(self.widget)
@@ -316,7 +329,6 @@ class HistoryListInterface(QWidget):
                 card.timeLabel.setStyleSheet(label_qss)
                 card.directoryLabel.setStyleSheet(label_qss)
                 setCustomStyleSheet(card.openFolderBtn, btn_qss, btn_qss)
-
 
                 card.clicked.connect(lambda i=card.index: self.setSelected(i))
                 self.historyCardList.append(card)
