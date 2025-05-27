@@ -4,8 +4,7 @@ from PyQt6.QtCore import Qt, pyqtSignal
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, BodyLabel, setFont, LineEdit, FluentIcon,
                                                                PrimaryPushButton, SmoothScrollArea, MessageBox, InfoBar,
                                                                ToolButton, CardWidget, CheckBox, MessageBoxBase,
-                                                               InfoBarPosition, TeachingTip, InfoBarIcon,
-                                                               TeachingTipTailPosition, ToolTipPosition, ToolTipFilter)
+                                                               InfoBarPosition, ToolTipPosition, ToolTipFilter)
 
 from FilenameChanger.file_history_operations.file_history_operations import (is_directory_usable, rename_operation,
                                                                              cancel_rename_operation, scan_files)
@@ -292,13 +291,14 @@ class HomeInterface(QWidget):
 
         def dirLineEdit_function():
             """文本框功能实现"""
+            logging.info('判断路径有效性……')
             self.path_flag = self.initFileList()  # 扫描整个文件夹
             if self.path_flag == 1:
-                logging.info('路径有效，进行下一步操作')
+                logging.info('路径有效')
             elif self.path_flag == 0:
                 logging.warning('路径无效')
             elif self.path_flag == -1:
-                logging.info('用户清空输入框的路径')
+                logging.info('用户清空目标路径')
 
         self.folderLineEdit.textChanged.connect(dirLineEdit_function)
 
@@ -411,15 +411,11 @@ class HomeInterface(QWidget):
                         parent=self
                     )
             else:
-                self.scan_file.clear()
                 # 显示一个气泡弹窗
-                TeachingTip.create(
-                    target=self.fileListBtn,
-                    icon=InfoBarIcon.WARNING,
+                InfoBar.warning(
                     title='提示',
                     content='请先输入有效文件夹路径',
-                    isClosable=True,
-                    tailPosition=TeachingTipTailPosition.LEFT,
+                    position=InfoBarPosition.TOP,
                     duration=2000,
                     parent=self
                 )
