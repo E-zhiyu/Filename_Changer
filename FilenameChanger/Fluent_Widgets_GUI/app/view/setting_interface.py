@@ -174,7 +174,7 @@ class SettingInterface(QWidget):
         self.modeCard = SwitchSettingCard(
             FluentIcon.FOLDER,
             '文件夹模式',
-            '重命名对象由文件修改为文件夹',
+            '重命名对象由文件更改为文件夹',
             cfg.folderMode
         )
         self.modeGroup.addSettingCard(self.modeCard)
