@@ -16,16 +16,16 @@ def is_directory_usable(directory):
     """
     功能：判断文件夹路径是否有效
     参数 directory：目标文件夹路径
-    返回：响应代码
+    返回：判断结果和消息
     """
     if directory:
         # 路径有效性的异常处理
         if os.path.isdir(directory):
-            return 1
+            return True, '路径有效'
         else:
-            return 0
+            return False, '路径无效'
     else:
-        return -1
+        return False, '用户清空路径'
 
 
 def hidden_or_protected(directory):

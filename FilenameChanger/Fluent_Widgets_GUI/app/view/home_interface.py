@@ -258,12 +258,12 @@ class HomeInterface(QWidget):
         """初始化文件列表"""
         # 扫描整个文件夹
         directory = self.folderLineEdit.text().strip('\"')
-        flag = is_directory_usable(directory)
+        flag, message = is_directory_usable(directory)
         if flag == 1:  # 路径有效才扫描
             self.scan_file = scan_files(directory)
             self.selected_file_tuple = tuple(self.scan_file)  # 类型为元组，防止传值时被外部变量修改
 
-        return flag
+        return flag, message
 
     def achieve_functions(self):
         """实现各控件的功能"""
@@ -293,12 +293,12 @@ class HomeInterface(QWidget):
         def dirLineEdit_function():
             """文本框功能实现"""
             logging.info('判断路径有效性……')
-            self.path_flag = self.initFileList()  # 扫描整个文件夹
+            self.path_flag, message = self.initFileList()  # 扫描整个文件夹
             if cfg.get(cfg, cfg.folderMode):
                 rename_object = '文件夹'
             else:
                 rename_object = '文件'
-            if self.path_flag == 1:
+            if self.path_flag:
                 InfoBar.success(
                     '有效',
                     '文件夹路径有效，'f'对象：{rename_object}',
@@ -306,8 +306,8 @@ class HomeInterface(QWidget):
                     position=InfoBarPosition.TOP,
                     parent=self
                 )
-                logging.info('路径有效')
-            elif self.path_flag == 0:
+                logging.info(message)
+            else:
                 InfoBar.error(
                     '无效',
                     '文件夹路径无效',
@@ -315,9 +315,7 @@ class HomeInterface(QWidget):
                     position=InfoBarPosition.TOP,
                     parent=self
                 )
-                logging.warning('路径无效')
-            elif self.path_flag == -1:
-                logging.info('用户清空目标路径')
+                logging.info(message)
 
         self.folderLineEdit.textChanged.connect(dirLineEdit_function)
 
