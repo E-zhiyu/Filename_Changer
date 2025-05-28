@@ -5,6 +5,7 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, Bo
                                                                PrimaryPushButton, SmoothScrollArea, MessageBox, InfoBar,
                                                                ToolButton, CardWidget, CheckBox, MessageBoxBase,
                                                                InfoBarPosition, ToolTipPosition, ToolTipFilter)
+from FilenameChanger.Fluent_Widgets_GUI.app.common.config import Config as cfg
 
 from FilenameChanger.file_history_operations.file_history_operations import (is_directory_usable, rename_operation,
                                                                              cancel_rename_operation, scan_files)
@@ -204,7 +205,7 @@ class HomeInterface(QWidget):
 
         self.folderLineEdit.setFixedWidth(250)
         self.folderLineEdit.setClearButtonEnabled(True)
-        self.folderLineEdit.setPlaceholderText('请选择目标对象的父级文件夹')  # 设置文本框提示文本
+        self.folderLineEdit.setPlaceholderText('请选择目标的父级文件夹')  # 设置文本框提示文本
 
         self.lineEditLayout.addWidget(self.folderLineEdit)
 
@@ -293,10 +294,14 @@ class HomeInterface(QWidget):
             """文本框功能实现"""
             logging.info('判断路径有效性……')
             self.path_flag = self.initFileList()  # 扫描整个文件夹
+            if cfg.get(cfg, cfg.folderMode):
+                rename_object = '文件夹'
+            else:
+                rename_object = '文件'
             if self.path_flag == 1:
                 InfoBar.success(
                     '有效',
-                    '文件夹路径有效',
+                    '文件夹路径有效，'f'对象：{rename_object}',
                     duration=2000,
                     position=InfoBarPosition.TOP,
                     parent=self
