@@ -106,7 +106,8 @@ class HistoryCard(CardWidget):
     def __init__(self, history_dict, index, parent=None):
         super().__init__(parent=parent)
         self.history_dict = history_dict
-        self.index = index
+        self.index = index  # 卡片在卡片列表中的下标
+        self.history_index = index  # 卡片对应的历史记录的下标
         self.parentInterface = parent  # 记录卡片的父亲容器
         self.selected = False  # 默认没有选中该卡片
 
@@ -362,9 +363,13 @@ class HistoryListInterface(QWidget):
         def delHistory():
             if self.history_list:
                 if self.currentIndex != -1:
-                    history_del(self.history_list, self.currentIndex)
-                    self.initCardView()  # （删除历史记录）刷新卡片布局
-                    self.setSelected(-1)  # 取消选中任何卡片
+                    history_del(self.history_list, self.historyCardList[self.currentIndex].history_index)  # 删除文件中的历史记录
+                    self.historyCardList[self.currentIndex].deleteLater()  # 删除界面中的历史记录卡片
+
+                    for card in self.historyCardList[self.currentIndex:]:
+                        card.history_index -= 1
+
+                    self.setSelected(-1)  # 将选中的卡片下标归位
 
                     # 创建操作成功的消息框
                     InfoBar.success(
