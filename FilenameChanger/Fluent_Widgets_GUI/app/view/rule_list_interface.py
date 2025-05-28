@@ -1342,8 +1342,16 @@ class RuleListInterface(QWidget):
 
                     flag, message = del_rules(self.rule_dict, self.currentIndex)
                     if flag:
+                        del_card = self.ruleCardLayout.takeAt(self.currentIndex).widget()
+                        for card in self.ruleCardList[self.currentIndex:]:
+                            card.index -= 1
+                        self.ruleCardList[self.currentIndex].deleteLater()
+                        del self.ruleCardList[self.currentIndex]
+
+                        if del_card.isActive:
+                            self.ruleCardList[0].setActive(True)
+
                         v_pos = self.ruleScrollArea.verticalScrollBar().value()
-                        self.initRuleViewArea()  # （删除规则）刷新规则卡片布局
                         self.ruleScrollArea.verticalScrollBar().setValue(v_pos)
 
                         InfoBar.success(
