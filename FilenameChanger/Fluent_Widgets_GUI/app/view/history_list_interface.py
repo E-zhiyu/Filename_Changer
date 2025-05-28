@@ -1,11 +1,11 @@
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFrame
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, BodyLabel, PushButton, FluentIcon,
                                                                setFont, SmoothScrollArea, CardWidget, themeColor,
                                                                TransparentToolButton, MessageBoxBase, MessageBox,
-                                                               InfoBarPosition, InfoBar, ToolTipFilter, ToolTipPosition,
-                                                               isDarkTheme, setCustomStyleSheet)
+                                                               InfoBarPosition, InfoBar, ToolTipFilter, isDarkTheme,
+                                                               setCustomStyleSheet)
 
 from FilenameChanger.file_history_operations.file_history_operations import (load_history, history_del, history_clear)
 from FilenameChanger.log.log_recorder import *
@@ -103,6 +103,7 @@ class InfoWindow(MessageBoxBase):
 
 class HistoryCard(CardWidget):
     """历史记录卡片"""
+    clicked = pyqtSignal(int)
 
     def __init__(self, history_dict, index, parent=None):
         super().__init__(parent=parent)
@@ -148,6 +149,11 @@ class HistoryCard(CardWidget):
         self.cardLayout.addWidget(self.infoBtn)
 
         self.infoBtn.clicked.connect(self.showInfo)
+
+    def mouseReleaseEvent(self, e):
+        """重写clicked信号触发逻辑，使其发送卡片位置"""
+        super(CardWidget, self).mouseReleaseEvent(e)
+        self.clicked.emit(self.index)
 
     def setCardSelected(self, isSelected: bool):
         """切换卡片的选中状态"""
@@ -306,8 +312,7 @@ class HistoryListInterface(QWidget):
         if self.history_list:
             self.historyCardLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
-            index = 0
-            for history in self.history_list:
+            for index, history in enumerate(self.history_list):
                 card = HistoryCard(history, index, self)
 
                 if isDarkTheme():
@@ -330,11 +335,9 @@ class HistoryListInterface(QWidget):
                 card.directoryLabel.setStyleSheet(label_qss)
                 setCustomStyleSheet(card.openFolderBtn, btn_qss, btn_qss)
 
-                card.clicked.connect(lambda i=card.index: self.setSelected(i))
+                card.clicked.connect(self.setSelected)
                 self.historyCardList.append(card)
                 self.historyCardLayout.addWidget(card)  # 将父亲设置为历史界面，以便历史详情界面正常显示
-
-                index += 1
         else:
             self.historyCardLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
             tipLabel = SubtitleLabel(text='历史记录为空', parent=self.historyWidget)
