@@ -291,7 +291,7 @@ class HistoryListInterface(QWidget):
 
     def initCardView(self):
         """刷新化卡片展示区域"""
-        logging.info('开始更新历史记录卡片布局')
+        logging.info('开始更新历史记录卡片布局……')
         self.currentIndex = -1  # 先将目前选中的卡片下标置为-1，否则会有下标越界风险
         self.history_list = load_history()  # 加载历史记录
 

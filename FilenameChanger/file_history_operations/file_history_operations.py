@@ -61,6 +61,7 @@ def scan_files(directory) -> list:
     返回：旧文件名列表
     """
     folder_mode = cfg.get(cfg, cfg.folderMode)
+    logging.info('获取文件名列表中……')
     try:
         if folder_mode:
             old_name = [folder for folder in os.listdir(directory) if
@@ -70,9 +71,10 @@ def scan_files(directory) -> list:
             old_name = [file for file in os.listdir(directory) if
                         os.path.isfile(os.path.join(directory, file)) and not hidden_or_protected(
                             os.path.join(directory, file))]
-        logging.info('文件名列表获取成功')
         if not old_name:
             raise FileNotFoundError
+
+        logging.info('文件名列表获取成功')
     except FileNotFoundError:
         logging.error('文件名获取失败：目标文件夹不存在或为空')
         return []
@@ -120,6 +122,7 @@ def rename_files(directory, old_names, new_name_list, with_record_history=True):
     参数 new_name_list：新文件名序列
     参数 with_record_history：是否记录重命名记录
     """
+    logging.info('进行文件名修改操作中……')
     history_list = load_history()
 
     """文件重命名"""
@@ -200,6 +203,7 @@ def load_history():
     获取已保存的历史记录
     返回：历史记录列表
     """
+    logging.info('正在读取历史记录……')
     # 创建历史记录文件夹
     if not os.path.isdir(os.path.dirname(history_file_path)):
         os.mkdir(os.path.dirname(history_file_path))
