@@ -47,10 +47,8 @@ class InfoWindow(MessageBoxBase):
         self.viewLayout.addWidget(self.directoryLabel)
 
         """重命名模式标签"""
-        folder_mode = history_dict.get('folder_mode', 0)
-        if folder_mode == 0:
-            message = '<无法获取>'
-        elif folder_mode:
+        folder_mode = history_dict.get('folder_mode')
+        if folder_mode:
             message = '文件夹'
         else:
             message = '文件'
