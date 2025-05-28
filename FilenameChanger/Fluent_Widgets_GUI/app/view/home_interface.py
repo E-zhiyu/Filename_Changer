@@ -171,7 +171,7 @@ class FileListInterface(MessageBoxBase):
 
 class HomeInterface(QWidget):
     """定义主页布局"""
-    refreshView_signal = pyqtSignal()  # 定义触发历史记录列表刷新布局方法的信号
+    refreshHistoryCardView = pyqtSignal()  # 定义触发历史记录列表刷新布局方法的信号
     filenameChanged = pyqtSignal()  # 重命名或者撤销重命名后发送的信号
 
     def __init__(self, parent=None):
@@ -324,7 +324,11 @@ class HomeInterface(QWidget):
             if self.path_flag == 1:
                 logging.info('用户点击重命名按钮，确认操作中……')
                 if confirm_operation():  # 弹出消息框确认操作
-                    logging.info('用户确认重命名')
+                    if cfg.get(cfg, cfg.folderMode):
+                        folder_mode = '文件夹模式：开'
+                    else:
+                        folder_mode = '文件夹模式：关'
+                    logging.info(f'用户确认重命名，{folder_mode}')
 
                     # 如果还未扫描文件夹则进行扫描操作
                     if self.scan_file is None:
@@ -334,10 +338,6 @@ class HomeInterface(QWidget):
                     targetDirectory = self.folderLineEdit.text().strip('\"')
                     flag, message = rename_operation(targetDirectory, self.selected_file_tuple)
 
-                    if cfg.get(cfg, cfg.folderMode):
-                        folder_mode = '文件夹模式：开'
-                    else:
-                        folder_mode = '文件夹模式：关'
                     # 显示一个消息提示框
                     if flag:
                         InfoBar.success(
@@ -347,7 +347,9 @@ class HomeInterface(QWidget):
                             duration=2000,
                             parent=self
                         )
-                        logging.info(f'文件重命名完成，{folder_mode}')
+                        self.refreshHistoryCardView.emit()
+                        self.initFileList()  # 文件名改变后重新扫描目标文件夹
+                        logging.info('文件重命名完成')
                     else:
                         InfoBar.error(
                             title='失败',
@@ -356,8 +358,7 @@ class HomeInterface(QWidget):
                             duration=2000,
                             parent=self
                         )
-                        logging.error(f'文件重命名失败：文件夹为空或未选中文件，{folder_mode}')
-
+                        logging.error(f'{message}')
                 else:
                     logging.info('用户取消重命名')
             else:
@@ -368,9 +369,6 @@ class HomeInterface(QWidget):
                     duration=2000,
                     parent=self
                 )
-
-            self.refreshView_signal.emit()
-            self.initFileList()  # 文件名改变后重新扫描目标文件夹
 
         self.renameBtn.clicked.connect(rename_button_callback)
 
@@ -389,7 +387,8 @@ class HomeInterface(QWidget):
                         duration=2000,
                         parent=self
                     )
-                    self.refreshView_signal.emit()  # 将按钮点击的信号发送出去
+                    self.initFileList()  # 文件名修改后重新扫描文件夹
+                    self.refreshHistoryCardView.emit()  # 将按钮点击的信号发送出去
                 else:
                     InfoBar.error(
                         title='失败',
@@ -401,8 +400,6 @@ class HomeInterface(QWidget):
 
             else:
                 logging.info('用户取消撤销重命名')
-
-            self.initFileList()  # 文件名修改后重新扫描文件夹
 
         self.cancelOperationBtn.clicked.connect(cancel_button_callback)
 
