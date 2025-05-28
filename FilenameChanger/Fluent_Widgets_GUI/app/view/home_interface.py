@@ -333,6 +333,11 @@ class HomeInterface(QWidget):
 
                     targetDirectory = self.folderLineEdit.text().strip('\"')
                     flag, message = rename_operation(targetDirectory, self.selected_file_tuple)
+
+                    if cfg.get(cfg, cfg.folderMode):
+                        folder_mode = '文件夹模式：开'
+                    else:
+                        folder_mode = '文件夹模式：关'
                     # 显示一个消息提示框
                     if flag:
                         InfoBar.success(
@@ -342,7 +347,7 @@ class HomeInterface(QWidget):
                             duration=2000,
                             parent=self
                         )
-                        logging.info('文件重命名完成！')
+                        logging.info(f'文件重命名完成，{folder_mode}')
                     else:
                         InfoBar.error(
                             title='失败',
@@ -351,7 +356,7 @@ class HomeInterface(QWidget):
                             duration=2000,
                             parent=self
                         )
-                        logging.error('文件重命名失败：文件夹为空或未选中文件')
+                        logging.error(f'文件重命名失败：文件夹为空或未选中文件，{folder_mode}')
 
                 else:
                     logging.info('用户取消重命名')
