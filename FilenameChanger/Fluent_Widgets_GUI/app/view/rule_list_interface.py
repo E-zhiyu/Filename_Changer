@@ -453,7 +453,8 @@ class RuleCard(CardWidget):
     def __init__(self, rule, index, isActive=False, parent=None):
         super().__init__(parent=parent)
         """定义该卡片的属性"""
-        self.index = index  # 记录规则对应的下标
+        self.index = index  # 卡片在卡片列表的下标
+        self.rule_index = index  # 卡片对应的规则的下标
         self.parentInterface = parent  # 保存父亲界面到属性，便于调用父亲界面的方法
         self.rule = rule  # 保存所有规则参数为一个属性
         self.type = rule['type']  # 单独保存一份规则类型，便于外部函数调用
@@ -1339,7 +1340,14 @@ class RuleListInterface(QWidget):
                 if confirm_window.exec():
                     logging.info('用户确认删除规则')
 
-                    flag, message = del_rules(self.rule_dict, self.currentIndex)
+                    flag, message = del_rules(self.rule_dict, self.currentIndex)  # 删除文件中的规则
+                    self.ruleCardList[self.currentIndex].deleteLater()  # 删除界面中的规则卡片
+
+                    for card in self.ruleCardList[self.currentIndex:]:
+                        card.rule_index -= 1
+
+                    self.setSelected(-1)  # 无论是否删除成功都将选中的下标归位
+
                     if flag:
                         v_pos = self.ruleScrollArea.verticalScrollBar().value()
                         self.initRuleViewArea()  # （删除规则）刷新规则卡片布局
@@ -1360,8 +1368,6 @@ class RuleListInterface(QWidget):
                             duration=2000,
                             parent=self
                         )
-
-                    self.setSelected(-1)  # 无论是否删除成功都取消选中卡片
                 else:
                     logging.info('用户取消删除规则')
             else:
