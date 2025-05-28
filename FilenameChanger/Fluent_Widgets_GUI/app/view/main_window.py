@@ -43,6 +43,7 @@ class MainWindow(FluentWindow):
         # 将各窗口的信号连接至对应方法
         self.homeInterface.refreshView_signal.connect(self.historyListInterface.initCardView)
         self.settingInterface.ruleChanged.connect(self.ruleListInterface.initRuleViewArea)
+        self.settingInterface.modeCard.checkedChanged.connect(self.homeInterface.initFileList)  # 切换重命名模式后刷新文件列表
 
     def initNavigation(self):
         """初始化导航栏"""
