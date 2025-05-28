@@ -369,7 +369,7 @@ class HistoryListInterface(QWidget):
                     for card in self.historyCardList[self.currentIndex:]:
                         card.history_index -= 1
 
-                    self.setSelected(-1)  # 将选中的卡片下标归位
+                    self.currentIndex = -1  # 将选中规则的下标归位
 
                     # 创建操作成功的消息框
                     InfoBar.success(

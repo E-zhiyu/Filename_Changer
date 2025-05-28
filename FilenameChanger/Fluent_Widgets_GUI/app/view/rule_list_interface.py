@@ -452,7 +452,9 @@ class RuleCard(CardWidget):
 
     def __init__(self, rule, index, isActive=False, parent=None):
         super().__init__(parent=parent)
+
         """定义该卡片的属性"""
+        self.isActive = isActive
         self.index = index  # 记录规则对应的下标
         self.parentInterface = parent  # 保存父亲界面到属性，便于调用父亲界面的方法
         self.rule = rule  # 保存所有规则参数为一个属性
@@ -481,8 +483,8 @@ class RuleCard(CardWidget):
         """激规则激活状态"""
         self.isActivatedWidget = QWidget(self)  # 定义存放图标和文本标签的容器
         self.activatedLayout = QHBoxLayout(self.isActivatedWidget)
-        self.isActivatedIcon = IconWidget()  # 显示激活信息的图标
-        self.isActivatedLabel = SubtitleLabel(text='', parent=self)
+        self.isActivatedIcon = IconWidget(InfoBarIcon.SUCCESS)  # 显示激活信息的图标
+        self.isActivatedLabel = SubtitleLabel(text='已激活', parent=self)
 
         setFont(self.isActivatedLabel, 15)
         self.isActivatedWidget.setStyleSheet('background-color:transparent')  # 将背景色设为透明，防止选择规则卡片的时候影响美观
@@ -577,11 +579,10 @@ class RuleCard(CardWidget):
     def setActive(self, isActive: bool):
         """设置激活状态"""
         if isActive:
-            self.isActivatedIcon.setIcon(InfoBarIcon.SUCCESS)
-            self.isActivatedLabel.setText('已激活')
+            self.isActivatedWidget.setHidden(False)
         else:
-            self.isActivatedIcon.setIcon(None)
-            self.isActivatedLabel.setText('')
+            self.isActivatedWidget.setHidden(True)
+        self.isActive = isActive
 
     def creatMenu(self, pos):
         """实现更多按钮的功能"""
@@ -1271,7 +1272,7 @@ class RuleListInterface(QWidget):
         参数 index：调用该方法的卡片下标，即鼠标点击的卡片下标
         """
         # 先将当前已选中的卡片切换为未选中状态
-        if self.currentIndex >= 0:
+        if self.currentIndex > -1:
             self.ruleCardList[self.currentIndex].setCardSelected(False)
 
         # 再将选中的卡片切换为选中状态
@@ -1360,8 +1361,7 @@ class RuleListInterface(QWidget):
                             duration=2000,
                             parent=self
                         )
-
-                    self.setSelected(-1)  # 无论是否删除成功都取消选中卡片
+                    self.currentIndex = -1  # 无论是否删除成功都取消选中卡片
                 else:
                     logging.info('用户取消删除规则')
             else:
