@@ -10,7 +10,7 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, se
                                                                MessageBoxBase, LineEdit, RadioButton, CheckBox,
                                                                RoundMenu, Action, BodyLabel, TextBrowser, ZhDatePicker,
                                                                InfoBar, InfoBarPosition, setCustomStyleSheet,
-                                                               ToolTipFilter, ToolTipPosition, themeColor, isDarkTheme)
+                                                               ToolTipFilter,themeColor, isDarkTheme)
 
 from FilenameChanger.rename_rules.rule_manager import (load_rule, activate_rule, del_rules, save_new_rule, analise_rule,
                                                        revise_rule)
