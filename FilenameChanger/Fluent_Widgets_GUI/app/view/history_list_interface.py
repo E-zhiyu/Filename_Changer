@@ -355,15 +355,12 @@ class HistoryListInterface(QWidget):
         if self.currentIndex > -1:
             self.historyCardList[self.currentIndex].setCardSelected(True)
 
-    def achieveFunctions(self):
-        """实现控件功能"""
+    def delHistory(self):
+        if self.history_list:
+            if self.currentIndex != -1:
+                history_del(self.history_list, self.currentIndex)  # 删除文件中的历史记录
 
-        # 删除历史记录
-        def delHistory():
-            if self.history_list:
-                if self.currentIndex != -1:
-                    history_del(self.history_list, self.currentIndex)  # 删除文件中的历史记录
-
+                if self.history_list:  # 判断删除后是否还有历史记录
                     self.historyCardLayout.takeAt(self.currentIndex)  # 从界面中取出选中的卡片
                     for card in self.historyCardList[self.currentIndex:]:  # 其后的卡片的下标都减一
                         card.index -= 1
@@ -376,34 +373,40 @@ class HistoryListInterface(QWidget):
                     # 设置滚动条位置为删除前的位置
                     v_pos = self.historyScrollArea.verticalScrollBar().value()
                     self.historyScrollArea.verticalScrollBar().setValue(v_pos)
-
-                    # 创建操作成功的消息框
-                    InfoBar.success(
-                        title='成功',
-                        content='已删除选中的历史记录',
-                        position=InfoBarPosition.TOP,
-                        duration=2000,
-                        parent=self
-                    )
                 else:
-                    # 显示一个气泡弹窗
-                    InfoBar.warning(
-                        title='提示',
-                        content='请先选择一条历史记录',
-                        position=InfoBarPosition.TOP,
-                        duration=2000,
-                        parent=self
-                    )
-            else:
-                InfoBar.error(
-                    title='错误',
-                    content='历史记录为空',
+                    self.initCardView()  # 若删除后没有历史记录，则直接刷新界面（以此显示历史记录为空的文本标签）
+
+                # 创建操作成功的消息框
+                InfoBar.success(
+                    title='成功',
+                    content='已删除选中的历史记录',
                     position=InfoBarPosition.TOP,
                     duration=2000,
                     parent=self
                 )
+            else:
+                # 显示一个气泡弹窗
+                InfoBar.warning(
+                    title='提示',
+                    content='请先选择一条历史记录',
+                    position=InfoBarPosition.TOP,
+                    duration=2000,
+                    parent=self
+                )
+        else:
+            InfoBar.error(
+                title='错误',
+                content='历史记录为空',
+                position=InfoBarPosition.TOP,
+                duration=2000,
+                parent=self
+            )
 
-        self.delBtn.clicked.connect(delHistory)
+    def achieveFunctions(self):
+        """实现控件功能"""
+
+        # 删除历史记录
+        self.delBtn.clicked.connect(self.delHistory)
 
         # 清空历史记录
         def clearHistory():
