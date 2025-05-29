@@ -629,7 +629,8 @@ class RuleInputInterface(MessageBoxBase):
     """规则参数输入窗口"""
 
     """定义发送给外部变量的信号"""
-    rule_submit = pyqtSignal(dict, dict)  # 定义发射字典的信号对象，用于发射所有输入的内容
+    addNewRule = pyqtSignal(dict, dict)  # 增加规则的信号
+    reviseRule = pyqtSignal(dict, dict, int)  # 修改规则的信号
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -1395,11 +1396,11 @@ class RuleListInterface(QWidget):
             """添加规则"""
             logging.info('进行操作：添加规则')
             addRuleWindow = RuleInputInterface(self)
-            addRuleWindow.rule_submit.connect(save_new_rule)  # 将发射的信号传递给信号处理函数
+            addRuleWindow.addNewRule.connect(save_new_rule)  # 将发射的信号传递给信号处理函数
             if addRuleWindow.exec():
                 logging.info('用户确认添加规则')
                 rule = analise_rule(addRuleWindow)  # 解析添加规则时输入的内容
-                addRuleWindow.rule_submit.emit(self.rule_dict, rule)  # 发送规则种类、名称和描述的信号
+                addRuleWindow.addNewRule.emit(self.rule_dict, rule)  # 发送规则种类、名称和描述的信号
 
                 # 将新卡片添加到界面中
                 new_card = RuleCard(rule, len(self.ruleCardList), parent=self)
@@ -1527,13 +1528,12 @@ class RuleListInterface(QWidget):
                 reviseRuleWindow.posLayout.tailBtn.setChecked(True)
 
         """窗口关闭后执行的操作"""
-        reviseRuleWindow.rule_submit.connect(
-            lambda: revise_rule(self.rule_dict, revised_rule, index))  # 设置信号传值连接到的函数
+        reviseRuleWindow.reviseRule.connect(revise_rule)  # 设置信号传值连接到的函数
 
         if reviseRuleWindow.exec():  # 显示窗口
             logging.info('用户确认修改规则，以下为修改后的规则内容')
             revised_rule = analise_rule(reviseRuleWindow)
-            reviseRuleWindow.rule_submit.emit(revised_rule)  # 发送信号给规则保存函数
+            reviseRuleWindow.reviseRule.emit(self.rule_dict, revised_rule, index)  # 发送信号给规则保存函数
 
             v_pos = self.ruleScrollArea.verticalScrollBar().value()
             self.initRuleViewArea()  # （修改规则）刷新规则卡片布局
