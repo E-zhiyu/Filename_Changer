@@ -629,7 +629,7 @@ class RuleInputInterface(MessageBoxBase):
     """规则参数输入窗口"""
 
     """定义发送给外部变量的信号"""
-    submit_data = pyqtSignal(dict)  # 定义发射字典的信号对象，用于发射所有输入的内容
+    rule_submit = pyqtSignal(dict, dict)  # 定义发射字典的信号对象，用于发射所有输入的内容
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -1232,6 +1232,12 @@ class RuleListInterface(QWidget):
         """实现控件功能"""
         self.achieve_functions()
 
+    def addNewCard(self, card: RuleCard):
+        """添加新卡片到界面中"""
+        card.clicked.connect(self.setSelected)  # 将点击卡片的动作连接至选中卡片方法
+        self.ruleCardList.append(card)  # 将规则以卡片的形式添加至卡片列表
+        self.ruleCardLayout.addWidget(card, 0)  # 依此将卡片添加至卡片布局器中
+
     def initRuleViewArea(self):
         """初始化规则卡片显示区域"""
         logging.info('开始更新规则卡片布局')
@@ -1258,9 +1264,8 @@ class RuleListInterface(QWidget):
                     activated = False
 
                 card = RuleCard(rule, index, activated, parent=self)
-                card.clicked.connect(self.setSelected)  # 将点击卡片的动作连接至选中卡片方法
-                self.ruleCardList.append(card)  # 将规则以卡片的形式添加至卡片列表
-                self.ruleCardLayout.addWidget(card, 0)  # 依此将卡片添加至卡片布局器中
+                self.addNewCard(card)
+
         else:
             ruleEmptyLabel = SubtitleLabel(text='规则列表空空如也', parent=self.ruleCardWidget)
             self.ruleCardLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -1390,13 +1395,16 @@ class RuleListInterface(QWidget):
             """添加规则"""
             logging.info('进行操作：添加规则')
             addRuleWindow = RuleInputInterface(self)
-            addRuleWindow.submit_data.connect(lambda: save_new_rule(self.rule_dict, rule))  # 将发射的信号传递给信号处理函数
+            addRuleWindow.rule_submit.connect(save_new_rule)  # 将发射的信号传递给信号处理函数
             if addRuleWindow.exec():
                 logging.info('用户确认添加规则')
                 rule = analise_rule(addRuleWindow)  # 解析添加规则时输入的内容
-                addRuleWindow.submit_data.emit(rule)  # 发送规则种类、名称和描述的信号
+                addRuleWindow.rule_submit.emit(self.rule_dict, rule)  # 发送规则种类、名称和描述的信号
 
-                self.initRuleViewArea()  # （添加规则）刷新规则卡片布局
+                # 将新卡片添加到界面中
+                new_card = RuleCard(rule, len(self.ruleCardList), parent=self)
+                self.addNewCard(new_card)
+
                 QTimer.singleShot(10, lambda: self.ruleScrollArea.verticalScrollBar().setValue(
                     self.ruleScrollArea.verticalScrollBar().maximum()))  # 增加10ms延迟，防止UI未更新完全就滚动
 
@@ -1519,13 +1527,13 @@ class RuleListInterface(QWidget):
                 reviseRuleWindow.posLayout.tailBtn.setChecked(True)
 
         """窗口关闭后执行的操作"""
-        reviseRuleWindow.submit_data.connect(
+        reviseRuleWindow.rule_submit.connect(
             lambda: revise_rule(self.rule_dict, revised_rule, index))  # 设置信号传值连接到的函数
 
         if reviseRuleWindow.exec():  # 显示窗口
             logging.info('用户确认修改规则，以下为修改后的规则内容')
             revised_rule = analise_rule(reviseRuleWindow)
-            reviseRuleWindow.submit_data.emit(revised_rule)  # 发送信号给规则保存函数
+            reviseRuleWindow.rule_submit.emit(revised_rule)  # 发送信号给规则保存函数
 
             v_pos = self.ruleScrollArea.verticalScrollBar().value()
             self.initRuleViewArea()  # （修改规则）刷新规则卡片布局
