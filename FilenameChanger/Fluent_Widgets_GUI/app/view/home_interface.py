@@ -135,18 +135,27 @@ class FileListInterface(MessageBoxBase):
 
     def initView(self):
         """初始化文件展示"""
-        index = 0
-        for file_name in self.scan_file_list:
-            if file_name in self.selected_file_list:
-                selected = True
-            else:
-                selected = False
-            card = FileCard(file_name, selected, index, self)
-            card.selectSignal.connect(self.setCheckBoxState)
-            self.file_card_list.append(card)
-            card.clicked.connect(lambda card_index=card.index: self.file_card_list[card_index].switchSelected())
-            self.fileViewLayout.addWidget(card)
-            index += 1
+        if self.scan_file_list:
+            self.fileViewLayout.setAlignment(Qt.AlignmentFlag.AlignTop)  # 设置为顶部对齐
+
+            for index, file_name in enumerate(self.scan_file_list):
+                if file_name in self.selected_file_list:
+                    selected = True
+                else:
+                    selected = False
+                card = FileCard(file_name, selected, index, self.widget)
+                card.selectSignal.connect(self.setCheckBoxState)
+                self.file_card_list.append(card)
+                card.clicked.connect(lambda card_index=card.index: self.file_card_list[card_index].switchSelected())
+                self.fileViewLayout.addWidget(card)
+        else:
+            self.fileViewLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            label = BodyLabel(text='该文件夹为空', parent=self.widget)
+            setFont(label, 20)
+            self.fileViewLayout.addWidget(label, 0, Qt.AlignmentFlag.AlignCenter)
+
+            # 将全选复选框设置为未选中
+            self.selectAllCheckBox.setChecked(False)
 
     def setCheckBoxState(self):
         """设置全选复选框的状态和文件数量标签的文本"""
@@ -178,8 +187,8 @@ class HomeInterface(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.setObjectName('HomeInterface')  # 设置全局唯一对象名，否则不能将该界面添加至导航栏
-        self.scan_file = None
-        self.selected_file_tuple = None
+        self.scanned_objects = None
+        self.selected_object_tuple = None
         self.path_flag = -1  # 标记输入路径的有效性
 
         """基本布局设置"""
@@ -261,8 +270,8 @@ class HomeInterface(QWidget):
         directory = self.folderLineEdit.text().strip('\"')
         flag, message = is_directory_usable(directory)
         if flag == 1:  # 路径有效才扫描
-            self.scan_file = scan_files(directory)
-            self.selected_file_tuple = tuple(self.scan_file)  # 类型为元组，防止传值时被外部变量修改
+            self.scanned_objects = scan_files(directory)
+            self.selected_object_tuple = tuple(self.scanned_objects)  # 类型为元组，防止传值时被外部变量修改
 
         return flag, message
 
@@ -332,12 +341,12 @@ class HomeInterface(QWidget):
                     logging.info(f'用户确认重命名，{folder_mode}')
 
                     # 如果还未扫描文件夹则进行扫描操作
-                    if self.scan_file is None:
+                    if self.scanned_objects is None:
                         self.initFileList()
-                    logging.info(f'已选择文件数：{len(self.selected_file_tuple)}/{len(self.scan_file)}')
+                    logging.info(f'已选择文件数：{len(self.selected_object_tuple)}/{len(self.scanned_objects)}')
 
                     targetDirectory = self.folderLineEdit.text().strip('\"')
-                    flag, message, new_history_dict = rename_operation(targetDirectory, self.selected_file_tuple)
+                    flag, message, new_history_dict = rename_operation(targetDirectory, self.selected_object_tuple)
 
                     # 显示一个消息提示框
                     if flag:
@@ -420,9 +429,9 @@ class HomeInterface(QWidget):
         def file_list_callback():
             """文件列表按钮功能实现"""
             if self.path_flag == 1:
-                fileListInterface = FileListInterface(self.scan_file, self.selected_file_tuple, self)
-                if fileListInterface.exec():
-                    self.selected_file_tuple = tuple(sorted(fileListInterface.selected_file_list))
+                fileListInterface = FileListInterface(self.scanned_objects, self.selected_object_tuple, self)
+                if fileListInterface.exec() and self.scanned_objects:  # 用户点击确认按钮并且文件夹内有文件才执行
+                    self.selected_object_tuple = tuple(sorted(fileListInterface.selected_file_list))
                     InfoBar.success(
                         title='成功',
                         content='重命名作用域修改成功',
