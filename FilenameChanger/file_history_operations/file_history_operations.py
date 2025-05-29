@@ -5,6 +5,8 @@ import stat  # 判断文件属性
 from FilenameChanger import history_file_path
 from FilenameChanger.rename_rules.rule_type_manager import *
 
+from FilenameChanger.Fluent_Widgets_GUI.app.common.config import Config as cfg
+
 """
 文件操作模块
 """
@@ -14,16 +16,16 @@ def is_directory_usable(directory):
     """
     功能：判断文件夹路径是否有效
     参数 directory：目标文件夹路径
-    返回：响应代码
+    返回：判断结果和消息
     """
     if directory:
         # 路径有效性的异常处理
         if os.path.isdir(directory):
-            return 1
+            return True, '路径有效'
         else:
-            return 0
+            return False, '路径无效'
     else:
-        return -1
+        return False, '用户清空路径'
 
 
 def hidden_or_protected(directory):
@@ -58,13 +60,21 @@ def scan_files(directory) -> list:
     参数 directory：目标路径
     返回：旧文件名列表
     """
+    folder_mode = cfg.get(cfg, cfg.folderMode)
+    logging.info('获取文件名列表中……')
     try:
-        old_name = [f for f in os.listdir(directory) if
-                    os.path.isfile(os.path.join(directory, f)) and not hidden_or_protected(
-                        os.path.join(directory, f))]
-        logging.info('文件名列表获取成功')
+        if folder_mode:
+            old_name = [folder for folder in os.listdir(directory) if
+                        os.path.isdir(os.path.join(directory, folder)) and not hidden_or_protected(
+                            os.path.join(directory, folder))]
+        else:
+            old_name = [file for file in os.listdir(directory) if
+                        os.path.isfile(os.path.join(directory, file)) and not hidden_or_protected(
+                            os.path.join(directory, file))]
         if not old_name:
             raise FileNotFoundError
+
+        logging.info('文件名列表获取成功')
     except FileNotFoundError:
         logging.error('文件名获取失败：目标文件夹不存在或为空')
         return []
@@ -80,13 +90,13 @@ def rename_operation(directory, old_file_names):
     """
     if not old_file_names:
         logging.info(f'文件夹：“{directory}”为空')
-        return 0
+        return False, '目标文件夹为空', {}
 
     config_dict = load_rule()  # 重命名时加载已保存的规则
     selected_rule = config_dict['rules'][config_dict['selected_index']]
     if not config_dict['rules']:  # 若规则为空，则结束本函数
-        logging.info('规则为空，请先前往规则设置写入规则！')
-        return -1
+        logging.warning('规则为空，请先前往规则设置写入规则')
+        return False, '规则为空，请先前往规则设置写入规则！', {}
     logging.info(
         f'当前活跃的规则为“规则{config_dict['selected_index'] + 1}”，'
         f'规则种类：{selected_rule['type']}')
@@ -96,13 +106,12 @@ def rename_operation(directory, old_file_names):
     logging.info('开始文件重命名……')
     if not new_name_list:
         logging.fatal('严重错误：新文件名列表为空')
-        return -3
-    rename_files(directory, old_file_names, new_name_list)  # 执行重命名操作
+        return False, '严重错误：新文件名列表为空', {}
 
-    if list(old_file_names) == new_name_list:  # 判断重命名前后文件名是否完全相同
-        return -2
-    else:
-        return 1
+    success, fail, new_history_dict = rename_files(directory, old_file_names, new_name_list)  # 执行重命名操作
+    logging.info(f'重命名结束，成功：{success}个，失败：{fail}个')
+
+    return 1, f'重命名结束，成功：{success}个，失败：{fail}个', new_history_dict
 
 
 def rename_files(directory, old_names, new_name_list, with_record_history=True):
@@ -113,45 +122,51 @@ def rename_files(directory, old_names, new_name_list, with_record_history=True):
     参数 new_name_list：新文件名序列
     参数 with_record_history：是否记录重命名记录
     """
+    logging.info('进行文件名修改操作中……')
     history_list = load_history()
 
     """文件重命名"""
-    new_record_dict = {'directory': directory, 'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                       'old_name_list': [], 'new_name_list': [], 'error_files': []}
+    folder_mode = cfg.get(cfg, cfg.folderMode)
+    new_history_dict = {'directory': directory, 'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                        'old_name_list': [], 'new_name_list': [], 'error_files': [], 'folder_mode': folder_mode}
     for old_name, new_name in zip(old_names, new_name_list):
         if old_name == new_name:
             logging.info(f'【未更改】{old_name}')
-            new_record_dict['error_files'].append(f'【前后文件名相同】{old_name}')
+            new_history_dict['error_files'].append(f'【前后文件名相同】{old_name}')
         else:
             try:
                 os.rename(os.path.join(directory, old_name), os.path.join(directory, new_name))
             except FileNotFoundError:
                 logging.error(f'【错误】文件“{old_name}”不存在')
-                new_record_dict['error_files'].append(f'【文件不存在】{old_name}')
+                new_history_dict['error_files'].append(f'【文件不存在】{old_name}')
             except FileExistsError:
                 logging.error(f'【错误】文件“{old_name}”重命名后将导致重名')
-                new_record_dict['error_files'].append(f'【文件重名】{old_name}')
+                new_history_dict['error_files'].append(f'【文件重名】{old_name}')
             except PermissionError:
                 logging.error(f'【文件被占用】文件“{old_name}”被其他程序占用')
-                new_record_dict['error_files'].append(f'【文件被占用】{old_name}')
-            except (OSError,WindowsError):
+                new_history_dict['error_files'].append(f'【文件被占用】{old_name}')
+            except (OSError, WindowsError):
                 logging.error(f'【文件名语法错误】新文件名中含有非法字符')
-                new_record_dict['error_files'].append(f'【文件名语法错误】“{new_name}”中含有非法字符')
+                new_history_dict['error_files'].append(f'【文件名语法错误】“{new_name}”中含有非法字符')
             else:
                 logging.info(f'【成功】{old_name} -> {new_name}')
                 if with_record_history:
-                    new_record_dict['old_name_list'].append(old_name)
-                    new_record_dict['new_name_list'].append(new_name)
+                    new_history_dict['old_name_list'].append(old_name)
+                    new_history_dict['new_name_list'].append(new_name)
 
     """将重命名历史记录保存至文件中"""
-    if (new_record_dict['new_name_list'] or new_record_dict['error_files']
+    if (new_history_dict['new_name_list'] or new_history_dict['error_files']
             and with_record_history):
-        history_list.insert(0, new_record_dict)
+        history_list.insert(0, new_history_dict)
         with open(history_file_path, 'w', encoding='utf-8') as f:
             json.dump(history_list, f, ensure_ascii=False, indent=4)
             logging.info('新增的历史记录已追加至文件中')
-    elif not new_record_dict['new_name_list'] and with_record_history:
+    elif not new_history_dict['new_name_list'] and with_record_history:
         logging.info('未追加新的重命名记录，因为所有文件新旧文件名都相同')
+
+    fail = len(new_history_dict['error_files'])
+    success = len(old_names) - fail
+    return success, fail, new_history_dict  # 返回成功重命名和重命名时出错的文件数，以及新增加的历史记录
 
 
 def get_new_name_list(selected_rule, old_names, directory):
@@ -188,6 +203,7 @@ def load_history():
     获取已保存的历史记录
     返回：历史记录列表
     """
+    logging.info('正在读取历史记录……')
     # 创建历史记录文件夹
     if not os.path.isdir(os.path.dirname(history_file_path)):
         os.mkdir(os.path.dirname(history_file_path))
@@ -217,7 +233,7 @@ def cancel_rename_operation():
     # 判断历史记录是否为空
     if not history_list:
         logging.error('历史记录为空，无法撤销重命名')
-        return 0
+        return False, '历史记录为空，无法撤销重命名'
 
     # 加载上一次的重命名记录
     last_history_dict = history_list.pop(0)
@@ -228,9 +244,9 @@ def cancel_rename_operation():
     # 判断旧文件夹路径是否可用
     if not os.path.isdir(directory):
         logging.error('无法撤销：旧文件夹路径无效')
-        return -1  # 若历史记录中的文件夹不存在，则不会执行下面的文件写入操作，无需担心历史记录被删除
+        return False, '无法撤销：旧文件夹路径无效'
 
-    # 删除最近一条重命名记录
+    # 正常运行到此处则删除最近一条重命名记录
     if not os.path.isdir(os.path.dirname(history_file_path)):  # 若该记录对应的文件夹被删除则不将删除一条记录的列表覆写到文件中
         os.mkdir(os.path.dirname(history_file_path))
     with open(history_file_path, 'w', encoding='utf-8') as f:
@@ -239,8 +255,9 @@ def cancel_rename_operation():
     # 撤销上一次重命名
     logging.info('开始撤销重命名……')
     rename_files(directory, new_name_list, old_name_list, False)  # 把新旧文件名反过来
+    logging.info('撤销重命名成功')
 
-    return 1
+    return True, '已成功撤销重命名'
 
 
 def history_clear():

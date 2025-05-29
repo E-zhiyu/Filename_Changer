@@ -4,8 +4,8 @@ from PyQt6.QtCore import Qt, pyqtSignal
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, BodyLabel, setFont, LineEdit, FluentIcon,
                                                                PrimaryPushButton, SmoothScrollArea, MessageBox, InfoBar,
                                                                ToolButton, CardWidget, CheckBox, MessageBoxBase,
-                                                               InfoBarPosition, TeachingTip, InfoBarIcon,
-                                                               TeachingTipTailPosition, ToolTipPosition, ToolTipFilter)
+                                                               InfoBarPosition, ToolTipPosition, ToolTipFilter)
+from FilenameChanger.Fluent_Widgets_GUI.app.common.config import Config as cfg
 
 from FilenameChanger.file_history_operations.file_history_operations import (is_directory_usable, rename_operation,
                                                                              cancel_rename_operation, scan_files)
@@ -135,18 +135,27 @@ class FileListInterface(MessageBoxBase):
 
     def initView(self):
         """初始化文件展示"""
-        index = 0
-        for file_name in self.scan_file_list:
-            if file_name in self.selected_file_list:
-                selected = True
-            else:
-                selected = False
-            card = FileCard(file_name, selected, index, self)
-            card.selectSignal.connect(self.setCheckBoxState)
-            self.file_card_list.append(card)
-            card.clicked.connect(lambda card_index=card.index: self.file_card_list[card_index].switchSelected())
-            self.fileViewLayout.addWidget(card)
-            index += 1
+        if self.scan_file_list:
+            self.fileViewLayout.setAlignment(Qt.AlignmentFlag.AlignTop)  # 设置为顶部对齐
+
+            for index, file_name in enumerate(self.scan_file_list):
+                if file_name in self.selected_file_list:
+                    selected = True
+                else:
+                    selected = False
+                card = FileCard(file_name, selected, index, self.widget)
+                card.selectSignal.connect(self.setCheckBoxState)
+                self.file_card_list.append(card)
+                card.clicked.connect(lambda card_index=card.index: self.file_card_list[card_index].switchSelected())
+                self.fileViewLayout.addWidget(card)
+        else:
+            self.fileViewLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            label = BodyLabel(text='该文件夹为空', parent=self.widget)
+            setFont(label, 20)
+            self.fileViewLayout.addWidget(label, 0, Qt.AlignmentFlag.AlignCenter)
+
+            # 将全选复选框设置为未选中
+            self.selectAllCheckBox.setChecked(False)
 
     def setCheckBoxState(self):
         """设置全选复选框的状态和文件数量标签的文本"""
@@ -171,14 +180,15 @@ class FileListInterface(MessageBoxBase):
 
 class HomeInterface(QWidget):
     """定义主页布局"""
-    refreshView_signal = pyqtSignal()  # 定义触发历史记录列表刷新布局方法的信号
+    addNewHistory = pyqtSignal(dict)  # 定义触发历史记录列表刷新布局方法的信号
+    cancelRename = pyqtSignal(int)  # 撤销重命名发送的信号
     filenameChanged = pyqtSignal()  # 重命名或者撤销重命名后发送的信号
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.setObjectName('HomeInterface')  # 设置全局唯一对象名，否则不能将该界面添加至导航栏
-        self.scan_file = None
-        self.selected_file_tuple = None
+        self.scanned_objects = None
+        self.selected_object_tuple = None
         self.path_flag = -1  # 标记输入路径的有效性
 
         """基本布局设置"""
@@ -205,7 +215,7 @@ class HomeInterface(QWidget):
 
         self.folderLineEdit.setFixedWidth(250)
         self.folderLineEdit.setClearButtonEnabled(True)
-        self.folderLineEdit.setPlaceholderText('请选择一个文件夹')  # 设置文本框提示文本
+        self.folderLineEdit.setPlaceholderText('请选择目标的父级文件夹')  # 设置文本框提示文本
 
         self.lineEditLayout.addWidget(self.folderLineEdit)
 
@@ -219,7 +229,7 @@ class HomeInterface(QWidget):
 
         # 文件查看按钮
         self.fileListBtn = ToolButton(FluentIcon.ALIGNMENT)
-        self.fileListBtn.setToolTip('选择需要重命名的文件')
+        self.fileListBtn.setToolTip('选择需要重命名的对象')
         self.fileListBtn.installEventFilter(
             ToolTipFilter(self.fileListBtn, showDelay=300, position=ToolTipPosition.TOP))
         self.fileListBtn.setFixedHeight(34)
@@ -258,12 +268,12 @@ class HomeInterface(QWidget):
         """初始化文件列表"""
         # 扫描整个文件夹
         directory = self.folderLineEdit.text().strip('\"')
-        flag = is_directory_usable(directory)
+        flag, message = is_directory_usable(directory)
         if flag == 1:  # 路径有效才扫描
-            self.scan_file = scan_files(directory)
-            self.selected_file_tuple = tuple(self.scan_file)  # 类型为元组，防止传值时被外部变量修改
+            self.scanned_objects = scan_files(directory)
+            self.selected_object_tuple = tuple(self.scanned_objects)  # 类型为元组，防止传值时被外部变量修改
 
-        return flag
+        return flag, message
 
     def achieve_functions(self):
         """实现各控件的功能"""
@@ -292,13 +302,30 @@ class HomeInterface(QWidget):
 
         def dirLineEdit_function():
             """文本框功能实现"""
-            self.path_flag = self.initFileList()  # 扫描整个文件夹
-            if self.path_flag == 1:
-                logging.info('路径有效，进行下一步操作')
-            elif self.path_flag == 0:
-                logging.warning('路径无效')
-            elif self.path_flag == -1:
-                logging.info('用户清空输入框的路径')
+            logging.info('判断路径有效性……')
+            self.path_flag, message = self.initFileList()  # 扫描整个文件夹
+            if cfg.get(cfg, cfg.folderMode):
+                rename_object = '文件夹'
+            else:
+                rename_object = '文件'
+            if self.path_flag:
+                InfoBar.success(
+                    '有效',
+                    '文件夹路径有效，'f'对象：{rename_object}',
+                    duration=2000,
+                    position=InfoBarPosition.TOP,
+                    parent=self
+                )
+                logging.info(message)
+            else:
+                InfoBar.error(
+                    '无效',
+                    '文件夹路径无效',
+                    duration=2000,
+                    position=InfoBarPosition.TOP,
+                    parent=self
+                )
+                logging.info(message)
 
         self.folderLineEdit.textChanged.connect(dirLineEdit_function)
 
@@ -307,62 +334,41 @@ class HomeInterface(QWidget):
             if self.path_flag == 1:
                 logging.info('用户点击重命名按钮，确认操作中……')
                 if confirm_operation():  # 弹出消息框确认操作
-                    logging.info('用户确认重命名')
+                    if cfg.get(cfg, cfg.folderMode):
+                        folder_mode = '文件夹模式：开'
+                    else:
+                        folder_mode = '文件夹模式：关'
+                    logging.info(f'用户确认重命名，{folder_mode}')
 
                     # 如果还未扫描文件夹则进行扫描操作
-                    if self.scan_file is None:
+                    if self.scanned_objects is None:
                         self.initFileList()
-                    logging.info(f'已选择文件数：{len(self.selected_file_tuple)}/{len(self.scan_file)}')
+                    logging.info(f'已选择文件数：{len(self.selected_object_tuple)}/{len(self.scanned_objects)}')
 
                     targetDirectory = self.folderLineEdit.text().strip('\"')
-                    flag = rename_operation(targetDirectory, self.selected_file_tuple)
-                    # 显示一个消息提示框
-                    if flag == 1:
-                        InfoBar.success(
-                            title='成功',
-                            content='所有文件已成功重命名！',
-                            position=InfoBarPosition.TOP,
-                            duration=2000,
-                            parent=self
-                        )
-                        logging.info('文件重命名完成！')
-                    elif flag == 0:
-                        InfoBar.error(
-                            title='失败',
-                            content='文件夹为空或未选中任何文件！',
-                            position=InfoBarPosition.TOP,
-                            duration=2000,
-                            parent=self
-                        )
-                        logging.error('文件重命名失败：文件夹为空或未选中文件')
-                    elif flag == -1:
-                        InfoBar.error(
-                            title='失败',
-                            content='规则列表为空，请先写入规则！',
-                            position=InfoBarPosition.TOP,
-                            duration=2000,
-                            parent=self
-                        )
-                        logging.error('文件重命名失败：规则列表为空')
-                    elif flag == -2:
-                        InfoBar.warning(
-                            title='警告',
-                            content='重命名前后所有文件名都相同',
-                            position=InfoBarPosition.TOP,
-                            duration=2000,
-                            parent=self
-                        )
-                        logging.warning('文件重命名异常：前后文件名都相同')
-                    elif flag == -3:  # 仅用于调试
-                        InfoBar.error(
-                            title='严重错误',
-                            content='新文件名列表为空，请检查代码逻辑！',
-                            position=InfoBarPosition.TOP,
-                            duration=2000,
-                            parent=self
-                        )
-                        logging.fatal('严重错误：新文件名列表为空')
+                    flag, message, new_history_dict = rename_operation(targetDirectory, self.selected_object_tuple)
 
+                    # 显示一个消息提示框
+                    if flag:
+                        InfoBar.success(
+                            title='完成',
+                            content=message,
+                            position=InfoBarPosition.TOP,
+                            duration=2000,
+                            parent=self
+                        )
+                        self.addNewHistory.emit(new_history_dict)
+                        self.initFileList()  # 文件名改变后重新扫描目标文件夹
+                        logging.info('文件重命名完成')
+                    else:
+                        InfoBar.error(
+                            title='失败',
+                            content=message,
+                            position=InfoBarPosition.TOP,
+                            duration=2000,
+                            parent=self
+                        )
+                        logging.error(f'{message}')
                 else:
                     logging.info('用户取消重命名')
             else:
@@ -374,9 +380,6 @@ class HomeInterface(QWidget):
                     parent=self
                 )
 
-            self.refreshView_signal.emit()
-            self.initFileList()  # 文件名改变后重新扫描目标文件夹
-
         self.renameBtn.clicked.connect(rename_button_callback)
 
         def cancel_button_callback():
@@ -384,42 +387,29 @@ class HomeInterface(QWidget):
             logging.info('用户点击撤销重命名按钮，确认操作中……')
             if confirm_operation():  # 弹出消息框确认操作
                 logging.info('用户确认撤销重命名')
-                flag = cancel_rename_operation()
+                flag, message = cancel_rename_operation()
 
-                if flag == 1:
+                if flag:
                     InfoBar.success(
                         title='成功',
-                        content='已成功撤销重命名',
+                        content=message,
                         position=InfoBarPosition.TOP,
                         duration=2000,
                         parent=self
                     )
-                    logging.info('撤销重命名成功')
-
-                    self.refreshView_signal.emit()  # 将按钮点击的信号发送出去
-                elif flag == 0:
+                    self.initFileList()  # 文件名修改后重新扫描文件夹
+                    self.cancelRename.emit(0)  # 将按钮点击的信号发送出去
+                else:
                     InfoBar.error(
                         title='失败',
-                        content='历史记录为空，无法撤销重命名',
+                        content=message,
                         position=InfoBarPosition.TOP,
                         duration=2000,
                         parent=self
                     )
-                    logging.error('历史记录为空，无法撤销重命名')
-                elif flag == -1:
-                    InfoBar.error(
-                        title='失败',
-                        content='原文件夹被移除或移动至其他位置',
-                        position=InfoBarPosition.TOP,
-                        duration=2000,
-                        parent=self
-                    )
-                    logging.error('原文件夹被移除或移动至其他位置，无法撤销重命名')
 
             else:
                 logging.info('用户取消撤销重命名')
-
-            self.initFileList()  # 文件名修改后重新扫描文件夹
 
         self.cancelOperationBtn.clicked.connect(cancel_button_callback)
 
@@ -439,9 +429,9 @@ class HomeInterface(QWidget):
         def file_list_callback():
             """文件列表按钮功能实现"""
             if self.path_flag == 1:
-                fileListInterface = FileListInterface(self.scan_file, self.selected_file_tuple, self)
-                if fileListInterface.exec():
-                    self.selected_file_tuple = tuple(sorted(fileListInterface.selected_file_list))
+                fileListInterface = FileListInterface(self.scanned_objects, self.selected_object_tuple, self)
+                if fileListInterface.exec() and self.scanned_objects:  # 用户点击确认按钮并且文件夹内有文件才执行
+                    self.selected_object_tuple = tuple(sorted(fileListInterface.selected_file_list))
                     InfoBar.success(
                         title='成功',
                         content='重命名作用域修改成功',
@@ -450,15 +440,11 @@ class HomeInterface(QWidget):
                         parent=self
                     )
             else:
-                self.scan_file.clear()
                 # 显示一个气泡弹窗
-                TeachingTip.create(
-                    target=self.fileListBtn,
-                    icon=InfoBarIcon.WARNING,
+                InfoBar.warning(
                     title='提示',
-                    content='请先输入有效文件夹路径',
-                    isClosable=True,
-                    tailPosition=TeachingTipTailPosition.LEFT,
+                    content='请先输入有效的文件夹路径',
+                    position=InfoBarPosition.TOP,
                     duration=2000,
                     parent=self
                 )

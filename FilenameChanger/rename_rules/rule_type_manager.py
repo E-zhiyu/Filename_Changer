@@ -3,13 +3,14 @@ import re
 import time
 
 from FilenameChanger.rename_rules.rule_manager import *
+from FilenameChanger.Fluent_Widgets_GUI.app.common.config import Config as cfg
 
 """
 规则调用模块
 """
 
 
-def use_type_1(selected_rule, old_names):
+def use_type_1(selected_rule, old_name_list):
     """
     功能：应用类型一的规则（交换分隔符前后内容）
     参数 selected_rule：当前激活的规则
@@ -20,15 +21,18 @@ def use_type_1(selected_rule, old_names):
     enable_re = selected_rule.get('enable_re', False)
 
     new_name_list = []
-    for file in old_names:
-        file_name, ext = os.path.splitext(file)  # 分离文件名和扩展名
+    for old_name in old_name_list:
+        name, ext = os.path.splitext(old_name)  # 分离文件名和扩展名
+        # 如果是文件夹模式，则不分离扩展名
+        if cfg.get(cfg, cfg.folderMode):
+            name, ext = old_name, ''
 
         if enable_re:
-            parts = re.split(split_char, file_name, maxsplit=1)
+            parts = re.split(split_char, name, maxsplit=1)
             if len(parts) == 2:
-                result = re.findall(split_char, file_name)[0]
+                result = re.findall(split_char, name)[0]
         else:
-            parts = file_name.split(split_char, maxsplit=1)
+            parts = name.split(split_char, maxsplit=1)
         front = parts[0]
         behind = parts[1] if len(parts) > 1 else ''  # 默认第二部分为空，用于处理无法拆分的文件名
 
@@ -47,7 +51,7 @@ def use_type_1(selected_rule, old_names):
     return new_name_list
 
 
-def use_type_2(selected_rule, old_names):
+def use_type_2(selected_rule, old_name_list):
     """
     功能：应用类型二的规则（扩展名替换）
     参数 selected_rule：当前激活的规则
@@ -57,19 +61,23 @@ def use_type_2(selected_rule, old_names):
     new_ext = selected_rule['new_ext']
 
     name_list = []  # 文件名（排除扩展名）列表
-    for file in old_names:
-        signal_name = os.path.splitext(file)[0]
-        name_list.append(signal_name)
+    for old_name in old_name_list:
+        name = os.path.splitext(old_name)[0]
+        # 如果是文件夹模式，则不分离扩展名
+        if cfg.get(cfg, cfg.folderMode):
+            name = old_name
+
+        name_list.append(name)
 
     new_name_list = []
-    for signal_name in name_list:
-        new_name = f'{signal_name}.{new_ext}'
+    for name in name_list:
+        new_name = f'{name}.{new_ext}'
         new_name_list.append(new_name)
 
     return new_name_list
 
 
-def use_type_3(selected_rule, old_names):
+def use_type_3(selected_rule, old_name_list):
     """
     功能：应用类型三的规则（字符串替换）
     参数 selected_rule：当前激活的规则
@@ -80,21 +88,17 @@ def use_type_3(selected_rule, old_names):
     new_str = selected_rule['new_str']  # 新字符串
     enable_re = selected_rule.get('enable_re', False)  # 判断是否使用正则表达式
 
-    # 分离文件名和扩展名
-    old_file_name_list = []  # 文件名（排除扩展名）列表
-    old_file_ext_list = []  # 文件扩展名列表
-    for file in old_names:
-        name, ext = os.path.splitext(file)
-
-        old_file_name_list.append(name)
-        old_file_ext_list.append(ext)
-
     new_name_list = []
-    for file_name, ext in zip(old_file_name_list, old_file_ext_list):
+    for old_name in old_name_list:
+        name, ext = os.path.splitext(old_name)
+        # 如果是文件夹模式，则不分离扩展名
+        if cfg.get(cfg, cfg.folderMode):
+            name, ext = old_name, ''
+
         if enable_re:
-            new_name = f'{re.sub(target_str, new_str, file_name)}{ext}'
+            new_name = f'{re.sub(target_str, new_str, name)}{ext}'
         else:
-            new_name = f'{file_name.replace(target_str, new_str)}{ext}'
+            new_name = f'{name.replace(target_str, new_str)}{ext}'
 
         new_name_list.append(new_name)
 
@@ -129,7 +133,7 @@ def get_file_time(file_path, time_type, split_char):
     return format_date
 
 
-def use_type_4(selected_rule, old_names, directory):
+def use_type_4(selected_rule, old_name_list, directory):
     """
     功能：应用类型四的规则（添加或删除日期）
     参数 selected_rule：当前激活的规则
@@ -154,7 +158,7 @@ def use_type_4(selected_rule, old_names, directory):
     new_name_list = []
 
     """遍历文件名列表，循环对单个文件名进行操作"""
-    for old_name in old_names:
+    for old_name in old_name_list:
         # 获取文件日期
         if time_type != 4:
             file_date = get_file_time(os.path.join(directory, old_name), time_type, split_char)
@@ -164,15 +168,18 @@ def use_type_4(selected_rule, old_names, directory):
                 logging.info('待填充的日期：自定义日期')
             file_date = customize_date
 
-        file_name, ext = os.path.splitext(old_name)  # 分离文件名和扩展名
+        name, ext = os.path.splitext(old_name)  # 分离文件名和扩展名
+        # 如果是文件夹模式，则不分离扩展名
+        if cfg.get(cfg, cfg.folderMode):
+            name, ext = old_name, ''
         date_re = r'[-_ ]?\d{4}[-_ 年]\d{1,2}[-_ 月]\d{1,2}日?[-_ ]?'  # 日期匹配的模式串
 
         """删除文件名中的日期"""
-        date_removed_name = re.sub(date_re, '', file_name)
-        if re.findall(date_re, file_name):
-            logging.info(f'“{file_name}”含有日期，已将其删除')
+        date_removed_name = re.sub(date_re, '', name)
+        if re.findall(date_re, name):
+            logging.info(f'“{name}”含有日期，已将其删除')
         else:
-            logging.info(f'“{file_name}”不含日期')
+            logging.info(f'“{name}”不含日期')
 
         """添加指定日期"""
         if time_type == 4:  # 判断该规则是否填充自定义日期
@@ -204,7 +211,7 @@ def use_type_4(selected_rule, old_names, directory):
     return new_name_list
 
 
-def use_type_5(selected_rule, old_names):
+def use_type_5(selected_rule, old_name_list):
     """
     功能：应用类型五的规则（重命名并编号）
     参数 selected_rule：当前激活的规则
@@ -219,10 +226,12 @@ def use_type_5(selected_rule, old_names):
     use_original_name = selected_rule.get('use_original_name', True)  # v2.2.1之前只能启用重命名
 
     new_name_list = []
-
-    for old_name in old_names:
+    for old_name in old_name_list:
         # 分离文件名和扩展名
-        original_file_name, ext = os.path.splitext(old_name)
+        original_name, ext = os.path.splitext(old_name)
+        # 如果是文件夹模式，则不分离扩展名
+        if cfg.get(cfg, cfg.folderMode):
+            original_name, ext = old_name, ''
 
         # 生成编号
         if position == 'head':
@@ -250,9 +259,9 @@ def use_type_5(selected_rule, old_names):
         # 将编号合并至文件名
         if use_original_name:
             if position == 'head':
-                generated_new_name = f'{serial_number}{original_file_name}{ext}'
+                generated_new_name = f'{serial_number}{original_name}{ext}'
             elif position == 'tail':
-                generated_new_name = f'{original_file_name}{serial_number}{ext}'
+                generated_new_name = f'{original_name}{serial_number}{ext}'
         else:
             if position == 'head':
                 generated_new_name = f'{serial_number}{new_name}{ext}'
@@ -265,7 +274,7 @@ def use_type_5(selected_rule, old_names):
     return new_name_list
 
 
-def use_type_6(selected_rule, old_names):
+def use_type_6(selected_rule, old_name_list):
     """
     功能：应用类型六的规则（字母大小写转换）
     参数 selected_rule：当前激活的规则
@@ -286,16 +295,19 @@ def use_type_6(selected_rule, old_names):
         modify_ext = True
 
     new_name_list = []
-    for file in old_names:
-        file_name, ext = os.path.splitext(file)
+    for old_name in old_name_list:
+        name, ext = os.path.splitext(old_name)
+        # 如果是文件夹模式，则不分离扩展名
+        if cfg.get(cfg, cfg.folderMode):
+            name, ext = old_name, ''
 
         if modify_name:
             if function == 1:
-                file_name = file_name.upper()
+                name = name.upper()
             elif function == 2:
-                file_name = file_name.lower()
+                name = name.lower()
             elif function == 3:
-                file_name = file_name.title()
+                name = name.title()
 
         if modify_ext:
             if function == 1:
@@ -305,13 +317,13 @@ def use_type_6(selected_rule, old_names):
             elif function == 3:
                 ext = ext.title()
 
-        new_name = f'{file_name}{ext}'
+        new_name = f'{name}{ext}'
         new_name_list.append(new_name)
 
     return new_name_list
 
 
-def use_type_7(selected_rule, old_names):
+def use_type_7(selected_rule, old_name_list):
     """
     功能：应用类型七的规则（添加字符串）
     参数 selected_rule：当前激活的规则
@@ -322,13 +334,16 @@ def use_type_7(selected_rule, old_names):
     position = selected_rule['position']
 
     new_name_list = []
-    for file in old_names:
-        file_name, ext = os.path.splitext(file)
+    for old_name in old_name_list:
+        name, ext = os.path.splitext(old_name)
+        # 如果是文件夹模式，则不分离扩展名
+        if cfg.get(cfg, cfg.folderMode):
+            name, ext = old_name, ''
 
         if position == 'head':
-            new_name = f'{string}{file_name}{ext}'
+            new_name = f'{string}{name}{ext}'
         elif position == 'tail':
-            new_name = f'{file_name}{string}{ext}'
+            new_name = f'{name}{string}{ext}'
 
         new_name_list.append(new_name)
 

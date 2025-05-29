@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import QApplication
 from PyQt6.QtGui import QIcon
 
 from FilenameChanger.Fluent_Widgets_GUI.app.common.config import cfg
-from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import FluentIcon as FIF, setTheme, Theme, isDarkTheme
+from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import FluentIcon as FIF, setTheme, isDarkTheme
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (NavigationItemPosition, FluentWindow,
                                                                setCustomStyleSheet)
 
@@ -34,15 +34,17 @@ class MainWindow(FluentWindow):
         self.initNavigation()
 
         # 初始化主题
-        self.changeTheme(cfg.theme, False)  # 缺少该语句可能导致滚动区域背景与主题不符
+        self.changeTheme(reset_interface=False)  # 初始化滚动区域背景色
 
         # 捕获主题切换和主题色切换的信号
         cfg.themeChanged.connect(self.changeTheme)
         cfg.themeColorChanged.connect(self.changeThemeColor)
 
         # 将各窗口的信号连接至对应方法
-        self.homeInterface.refreshView_signal.connect(self.historyListInterface.initCardView)
+        self.homeInterface.addNewHistory.connect(self.historyListInterface.addHistory)
+        self.homeInterface.cancelRename.connect(self.historyListInterface.delHistory)
         self.settingInterface.ruleChanged.connect(self.ruleListInterface.initRuleViewArea)
+        self.settingInterface.modeCard.checkedChanged.connect(self.homeInterface.initFileList)  # 切换重命名模式后刷新文件列表
 
     def initNavigation(self):
         """初始化导航栏"""
@@ -51,7 +53,7 @@ class MainWindow(FluentWindow):
         # 创建导航栏选项
         self.addSubInterface(self.homeInterface, FIF.HOME, '主页')
         self.addSubInterface(self.ruleListInterface, FIF.LAYOUT, '规则列表')
-        self.addSubInterface(self.historyListInterface, FIF.HISTORY, '重命名记录')
+        self.addSubInterface(self.historyListInterface, FIF.HISTORY, '历史记录')
 
         # 添加导航栏底部按钮
         self.addSubInterface(self.settingInterface, FIF.SETTING, '设置', NavigationItemPosition.BOTTOM)
@@ -69,14 +71,15 @@ class MainWindow(FluentWindow):
         self.move(w // 2 - self.width() // 2, h // 2 - self.height() // 2)
         self.show()
 
-    def changeTheme(self, theme: Theme, reset_interface=True):
+    def changeTheme(self, theme=None, reset_interface=True):
         """
-        功能：切换应用主题
+        功能：切换应用主题并切换一些控件的样式
         参数 theme：待切换到的主题
         参数 reset_others：是否刷新子页面的各种布局
         """
         # 设置应用主题
-        setTheme(theme)
+        if theme is not None:
+            setTheme(theme)
 
         # 设置滚动区域背景颜色
         light_scrollBackground = """QFrame{
@@ -109,8 +112,7 @@ class MainWindow(FluentWindow):
 
     def changeThemeColor(self):
         """通过重新设置应用主题刷新控件颜色"""
-        theme = cfg.theme
-        setTheme(theme)
+        setTheme(cfg.theme)  # 使用该函数刷新控件样式
 
         # 规则卡片和历史记录卡片不会刷新样式，所以手动取消选择
         self.ruleListInterface.setSelected(-1)

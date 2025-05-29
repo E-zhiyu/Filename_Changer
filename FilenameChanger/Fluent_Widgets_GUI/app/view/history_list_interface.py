@@ -1,11 +1,11 @@
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFrame
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, BodyLabel, PushButton, FluentIcon,
                                                                setFont, SmoothScrollArea, CardWidget, themeColor,
                                                                TransparentToolButton, MessageBoxBase, MessageBox,
-                                                               InfoBarPosition, InfoBar, ToolTipFilter, ToolTipPosition,
-                                                               isDarkTheme, setCustomStyleSheet)
+                                                               InfoBarPosition, InfoBar, ToolTipFilter, isDarkTheme,
+                                                               setCustomStyleSheet)
 
 from FilenameChanger.file_history_operations.file_history_operations import (load_history, history_del, history_clear)
 from FilenameChanger.log.log_recorder import *
@@ -45,6 +45,17 @@ class InfoWindow(MessageBoxBase):
 
         self.viewLayout.addWidget(self.timeLabel)
         self.viewLayout.addWidget(self.directoryLabel)
+
+        """重命名模式标签"""
+        folder_mode = history_dict.get('folder_mode')
+        if folder_mode:
+            message = '文件夹'
+        else:
+            message = '文件'
+        self.modeLabel = SubtitleLabel(text=f'重命名对象：{message}', parent=self.widget)
+        setFont(self.modeLabel, 15)
+
+        self.viewLayout.addWidget(self.modeLabel)
 
         """文件名更改详情的展示区域"""
         self.infoScrollArea = SmoothScrollArea(parent=self.widget)
@@ -90,11 +101,12 @@ class InfoWindow(MessageBoxBase):
 
 class HistoryCard(CardWidget):
     """历史记录卡片"""
+    clicked = pyqtSignal(int)
 
     def __init__(self, history_dict, index, parent=None):
         super().__init__(parent=parent)
         self.history_dict = history_dict
-        self.index = index
+        self.index = index  # 卡片在卡片列表中的下标
         self.parentInterface = parent  # 记录卡片的父亲容器
         self.selected = False  # 默认没有选中该卡片
 
@@ -128,9 +140,40 @@ class HistoryCard(CardWidget):
         """卡片详情按钮"""
         self.infoBtn = TransparentToolButton(FluentIcon.INFO)
         self.infoBtn.setFixedSize(32, 32)
+
+        self.infoBtn.setToolTip('查看重命名详情')
+        self.infoBtn.installEventFilter(ToolTipFilter(self.infoBtn))
+
         self.cardLayout.addWidget(self.infoBtn)
 
         self.infoBtn.clicked.connect(self.showInfo)
+
+        """设置卡片标签控件的样式"""
+        self.setStyle()
+
+    def setStyle(self):
+        # 设置卡片中标签控件的样式
+        if isDarkTheme():
+            label_qss = """
+                QLabel {
+                    color: white;
+                    background-color: transparent;
+                }
+            """
+        else:
+            label_qss = """
+                QLabel {
+                    color: black;
+                    background-color: transparent;
+                }
+            """
+        self.timeLabel.setStyleSheet(label_qss)
+        self.directoryLabel.setStyleSheet(label_qss)
+
+    def mouseReleaseEvent(self, e):
+        """重写clicked信号触发逻辑，使其发送卡片位置"""
+        super(CardWidget, self).mouseReleaseEvent(e)
+        self.clicked.emit(self.index)
 
     def setCardSelected(self, isSelected: bool):
         """切换卡片的选中状态"""
@@ -241,12 +284,12 @@ class HistoryListInterface(QWidget):
         # 删除单条历史记录按钮
         self.delBtn = PushButton(FluentIcon.DELETE, '删除选中记录')
         self.delBtn.setToolTip('删除选中的历史记录')
-        self.delBtn.installEventFilter(ToolTipFilter(self.delBtn, showDelay=300, position=ToolTipPosition.TOP))
+        self.delBtn.installEventFilter(ToolTipFilter(self.delBtn))
 
         # 清空历史记录按钮
         self.clearBtn = PushButton(FluentIcon.BROOM, '清空所有记录')
         self.clearBtn.setToolTip('清空所有历史记录')
-        self.clearBtn.installEventFilter(ToolTipFilter(self.clearBtn, showDelay=300, position=ToolTipPosition.TOP))
+        self.clearBtn.installEventFilter(ToolTipFilter(self.clearBtn))
 
         self.btnLayout = QHBoxLayout(self)
         self.btnLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
@@ -274,7 +317,7 @@ class HistoryListInterface(QWidget):
 
     def initCardView(self):
         """刷新化卡片展示区域"""
-        logging.info('开始更新历史记录卡片布局')
+        logging.info('开始更新历史记录卡片布局……')
         self.currentIndex = -1  # 先将目前选中的卡片下标置为-1，否则会有下标越界风险
         self.history_list = load_history()  # 加载历史记录
 
@@ -289,36 +332,12 @@ class HistoryListInterface(QWidget):
         if self.history_list:
             self.historyCardLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
-            index = 0
-            for history in self.history_list:
+            for index, history in enumerate(self.history_list):
                 card = HistoryCard(history, index, self)
 
-                if isDarkTheme():
-                    label_qss = """
-                        QLabel {
-                            color: white;
-                            background-color: transparent;
-                        }
-                    """
-                    btn_qss = 'QPushButton {color: white;}'  # 深色模式未选中时文字为白色
-                else:
-                    label_qss = """
-                        QLabel {
-                            color: black;
-                            background-color: transparent;
-                        }
-                    """
-                    btn_qss = 'QPushButton {color: black;}'  # 浅色模式未选中时文字为黑色
-                card.timeLabel.setStyleSheet(label_qss)
-                card.directoryLabel.setStyleSheet(label_qss)
-                setCustomStyleSheet(card.openFolderBtn, btn_qss, btn_qss)
-
-
-                card.clicked.connect(lambda i=card.index: self.setSelected(i))
+                card.clicked.connect(self.setSelected)  # 将卡片点击动作连接至选中卡片方法
                 self.historyCardList.append(card)
                 self.historyCardLayout.addWidget(card)  # 将父亲设置为历史界面，以便历史详情界面正常显示
-
-                index += 1
         else:
             self.historyCardLayout.setAlignment(Qt.AlignmentFlag.AlignCenter)
             tipLabel = SubtitleLabel(text='历史记录为空', parent=self.historyWidget)
@@ -338,18 +357,63 @@ class HistoryListInterface(QWidget):
         if self.currentIndex > -1:
             self.historyCardList[self.currentIndex].setCardSelected(True)
 
-    def achieveFunctions(self):
-        """实现控件功能"""
+    def addHistory(self, new_history: dict):
+        """
+        功能：界面中添加新增的历史记录卡片（仅从类外部调用时）
+        参数 new_history：新增的历史记录字典
+        """
+        self.setSelected(-1)  # 先取消选中卡片
 
-        # 删除历史记录
-        def delHistory():
-            if self.history_list:
-                if self.currentIndex != -1:
-                    history_del(self.history_list, self.currentIndex)
-                    self.initCardView()  # （删除历史记录）刷新卡片布局
-                    self.setSelected(-1)  # 取消选中任何卡片
+        if new_history.get('new_name_list') or new_history.get('error_files'):
+            if self.history_list:  # 如果历史记录不为空，则将新卡片插入到列表首位
+                self.history_list.insert(0, new_history)  # 将新历史记录插入到历史记录列表首位
 
-                    # 创建操作成功的消息框
+                new_card = HistoryCard(new_history, 0, self)  # 创建新卡片实例对象
+                new_card.clicked.connect(self.setSelected)  # 将点击动作连接至选中卡片方法
+
+                for existing_card in self.historyCardList:  # 将现存的所有卡片所保存的下标加一
+                    existing_card.index += 1
+
+                self.historyCardList.insert(0, new_card)  # 将现存卡片下标加一后再将新卡片插入列表
+
+                # 向界面中添加新卡片
+                self.historyCardLayout.insertWidget(0, new_card)
+            else:
+                self.initCardView()  # 如果历史记录为空，则直接强制刷新界面
+
+    def delHistory(self, index: int = -1):
+        """
+        功能：删除指定的历史记录
+        参数 index：从外部调用时传递的下标值
+        """
+        if self.history_list:
+            if index != -1:  # 外部参数优先级高于历史记录列表界面选择卡片的下标
+                del_index = index
+            else:
+                del_index = self.currentIndex
+
+            self.setSelected(-1)  # 取消选中卡片防止出现显示BUG
+
+            if del_index != -1:
+                history_del(self.history_list, del_index)  # 删除文件中的历史记录
+
+                if self.history_list:  # 判断删除后是否还有历史记录
+                    self.historyCardLayout.takeAt(del_index)  # 从界面中取出选中的卡片
+                    for card in self.historyCardList[del_index:]:  # 其后的卡片的下标都减一
+                        card.index -= 1
+                    self.historyCardList[del_index].deleteLater()  # 将选中的卡片删除
+                    del self.historyCardList[del_index]  # 删除列表中对应的卡片
+
+                    self.currentIndex = -1  # 将选中规则的下标归位
+
+                    # 设置滚动条位置为删除前的位置
+                    v_pos = self.historyScrollArea.verticalScrollBar().value()
+                    self.historyScrollArea.verticalScrollBar().setValue(v_pos)
+                else:
+                    self.initCardView()  # 若删除后没有历史记录，则直接刷新界面（以此显示历史记录为空的文本标签）
+
+                # 创建操作成功的消息框
+                if index == -1:  # 当该方法从外部调用并传值时不显示该消息
                     InfoBar.success(
                         title='成功',
                         content='已删除选中的历史记录',
@@ -357,25 +421,29 @@ class HistoryListInterface(QWidget):
                         duration=2000,
                         parent=self
                     )
-                else:
-                    # 显示一个气泡弹窗
-                    InfoBar.warning(
-                        title='提示',
-                        content='请先选择一条历史记录',
-                        position=InfoBarPosition.TOP,
-                        duration=2000,
-                        parent=self
-                    )
             else:
-                InfoBar.error(
-                    title='错误',
-                    content='历史记录为空',
+                # 显示一个气泡弹窗
+                InfoBar.warning(
+                    title='提示',
+                    content='请先选择一条历史记录',
                     position=InfoBarPosition.TOP,
                     duration=2000,
                     parent=self
                 )
+        else:
+            InfoBar.error(
+                title='错误',
+                content='历史记录为空',
+                position=InfoBarPosition.TOP,
+                duration=2000,
+                parent=self
+            )
 
-        self.delBtn.clicked.connect(delHistory)
+    def achieveFunctions(self):
+        """实现控件功能"""
+
+        # 删除历史记录
+        self.delBtn.clicked.connect(lambda: self.delHistory())
 
         # 清空历史记录
         def clearHistory():

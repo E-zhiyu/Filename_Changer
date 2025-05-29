@@ -121,10 +121,10 @@ class NavigationPanel(QFrame):
 
         # add tool tip
         self.returnButton.installEventFilter(ToolTipFilter(self.returnButton, 1000))
-        self.returnButton.setToolTip(self.tr('Back'))
+        self.returnButton.setToolTip('返回上一个界面')
 
         self.menuButton.installEventFilter(ToolTipFilter(self.menuButton, 1000))
-        self.menuButton.setToolTip(self.tr('Open Navigation'))
+        self.menuButton.setToolTip('展开导航栏')
 
         self.setProperty('menu', False)
         self.scrollWidget.setObjectName('scrollWidget')
@@ -445,7 +445,7 @@ class NavigationPanel(QFrame):
         """ expand navigation panel """
         self._setWidgetCompacted(False)
         self.expandAni.setProperty('expand', True)
-        self.menuButton.setToolTip(self.tr('Close Navigation'))
+        self.menuButton.setToolTip('收纳导航栏')
 
         # determine the display mode according to the width of window
         # https://learn.microsoft.com/en-us/windows/apps/design/controls/navigationview#default
@@ -498,7 +498,7 @@ class NavigationPanel(QFrame):
         self.expandAni.setProperty('expand', False)
         self.expandAni.start()
 
-        self.menuButton.setToolTip(self.tr('Open Navigation'))
+        self.menuButton.setToolTip('展开导航栏')
 
     def toggle(self):
         """ toggle navigation panel """
