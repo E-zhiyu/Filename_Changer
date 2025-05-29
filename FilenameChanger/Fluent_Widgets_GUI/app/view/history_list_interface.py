@@ -362,6 +362,8 @@ class HistoryListInterface(QWidget):
         功能：界面中添加新增的历史记录卡片（仅从类外部调用时）
         参数 new_history：新增的历史记录字典
         """
+        self.setSelected(-1)  # 先取消选中卡片
+
         if new_history.get('new_name_list') or new_history.get('error_files'):
             if self.history_list:  # 如果历史记录不为空，则将新卡片插入到列表首位
                 self.history_list.insert(0, new_history)  # 将新历史记录插入到历史记录列表首位
@@ -389,6 +391,8 @@ class HistoryListInterface(QWidget):
                 del_index = index
             else:
                 del_index = self.currentIndex
+
+            self.setSelected(-1)  # 取消选中卡片防止出现显示BUG
 
             if del_index != -1:
                 history_del(self.history_list, del_index)  # 删除文件中的历史记录
