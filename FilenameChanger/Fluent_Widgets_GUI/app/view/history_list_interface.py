@@ -373,7 +373,6 @@ class HistoryListInterface(QWidget):
                     self.historyCardLayout.takeAt(del_index)  # 从界面中取出选中的卡片
                     for card in self.historyCardList[del_index:]:  # 其后的卡片的下标都减一
                         card.index -= 1
-
                     self.historyCardList[del_index].deleteLater()  # 将选中的卡片删除
                     del self.historyCardList[del_index]  # 删除列表中对应的卡片
 
@@ -416,7 +415,7 @@ class HistoryListInterface(QWidget):
         """实现控件功能"""
 
         # 删除历史记录
-        self.delBtn.clicked.connect(self.delHistory)
+        self.delBtn.clicked.connect(lambda: self.delHistory(self.currentIndex))
 
         # 清空历史记录
         def clearHistory():
