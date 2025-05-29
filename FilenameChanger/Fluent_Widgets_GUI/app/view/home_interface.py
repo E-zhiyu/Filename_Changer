@@ -172,6 +172,7 @@ class FileListInterface(MessageBoxBase):
 class HomeInterface(QWidget):
     """定义主页布局"""
     refreshHistoryCardView = pyqtSignal()  # 定义触发历史记录列表刷新布局方法的信号
+    cancelRename = pyqtSignal(int)  # 撤销重命名发送的信号
     filenameChanged = pyqtSignal()  # 重命名或者撤销重命名后发送的信号
 
     def __init__(self, parent=None):
@@ -388,7 +389,7 @@ class HomeInterface(QWidget):
                         parent=self
                     )
                     self.initFileList()  # 文件名修改后重新扫描文件夹
-                    self.refreshHistoryCardView.emit()  # 将按钮点击的信号发送出去
+                    self.cancelRename.emit(0)  # 将按钮点击的信号发送出去
                 else:
                     InfoBar.error(
                         title='失败',

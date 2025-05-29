@@ -355,18 +355,27 @@ class HistoryListInterface(QWidget):
         if self.currentIndex > -1:
             self.historyCardList[self.currentIndex].setCardSelected(True)
 
-    def delHistory(self):
+    def delHistory(self, index: int = -1):
+        """
+        功能：删除指定的历史记录
+        参数 index：从外部调用时传递的下标值
+        """
         if self.history_list:
-            if self.currentIndex != -1:
-                history_del(self.history_list, self.currentIndex)  # 删除文件中的历史记录
+            if index != -1:  # 外部参数优先级高于历史记录列表界面选择卡片的下标
+                del_index = index
+            else:
+                del_index = self.currentIndex
+
+            if del_index != -1:
+                history_del(self.history_list, del_index)  # 删除文件中的历史记录
 
                 if self.history_list:  # 判断删除后是否还有历史记录
-                    self.historyCardLayout.takeAt(self.currentIndex)  # 从界面中取出选中的卡片
-                    for card in self.historyCardList[self.currentIndex:]:  # 其后的卡片的下标都减一
+                    self.historyCardLayout.takeAt(del_index)  # 从界面中取出选中的卡片
+                    for card in self.historyCardList[del_index:]:  # 其后的卡片的下标都减一
                         card.index -= 1
 
-                    self.historyCardList[self.currentIndex].deleteLater()  # 将选中的卡片删除
-                    del self.historyCardList[self.currentIndex]  # 删除列表中对应的卡片
+                    self.historyCardList[del_index].deleteLater()  # 将选中的卡片删除
+                    del self.historyCardList[del_index]  # 删除列表中对应的卡片
 
                     self.currentIndex = -1  # 将选中规则的下标归位
 
@@ -377,13 +386,14 @@ class HistoryListInterface(QWidget):
                     self.initCardView()  # 若删除后没有历史记录，则直接刷新界面（以此显示历史记录为空的文本标签）
 
                 # 创建操作成功的消息框
-                InfoBar.success(
-                    title='成功',
-                    content='已删除选中的历史记录',
-                    position=InfoBarPosition.TOP,
-                    duration=2000,
-                    parent=self
-                )
+                if index == -1:  # 当该方法从外部调用并传值时不显示该消息
+                    InfoBar.success(
+                        title='成功',
+                        content='已删除选中的历史记录',
+                        position=InfoBarPosition.TOP,
+                        duration=2000,
+                        parent=self
+                    )
             else:
                 # 显示一个气泡弹窗
                 InfoBar.warning(
