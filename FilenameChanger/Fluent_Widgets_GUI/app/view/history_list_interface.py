@@ -364,14 +364,18 @@ class HistoryListInterface(QWidget):
                 if self.currentIndex != -1:
                     history_del(self.history_list, self.currentIndex)  # 删除文件中的历史记录
 
-                    self.historyCardLayout.takeAt(self.currentIndex).widget()  # 从界面中取出选中的卡片
-                    for card in self.historyCardList[self.currentIndex:]:
+                    self.historyCardLayout.takeAt(self.currentIndex)  # 从界面中取出选中的卡片
+                    for card in self.historyCardList[self.currentIndex:]:  # 其后的卡片的下标都减一
                         card.index -= 1
 
                     self.historyCardList[self.currentIndex].deleteLater()  # 将选中的卡片删除
-                    del self.historyCardList[self.currentIndex]
+                    del self.historyCardList[self.currentIndex]  # 删除列表中对应的卡片
 
                     self.currentIndex = -1  # 将选中规则的下标归位
+
+                    # 设置滚动条位置为删除前的位置
+                    v_pos = self.historyScrollArea.verticalScrollBar().value()
+                    self.historyScrollArea.verticalScrollBar().setValue(v_pos)
 
                     # 创建操作成功的消息框
                     InfoBar.success(

@@ -1340,17 +1340,18 @@ class RuleListInterface(QWidget):
                 if confirm_window.exec():
                     logging.info('用户确认删除规则')
 
-                    flag, message = del_rules(self.rule_dict, self.currentIndex)
+                    flag, message = del_rules(self.rule_dict, self.currentIndex)  # 删除文件中的规则
                     if flag:
-                        del_card = self.ruleCardLayout.takeAt(self.currentIndex).widget()
-                        for card in self.ruleCardList[self.currentIndex:]:
+                        del_card = self.ruleCardLayout.takeAt(self.currentIndex).widget()  # 从界面中取出选中的卡片
+                        for card in self.ruleCardList[self.currentIndex:]:  # 将其后的卡片的下标减一
                             card.index -= 1
-                        self.ruleCardList[self.currentIndex].deleteLater()
-                        del self.ruleCardList[self.currentIndex]
+                        self.ruleCardList[self.currentIndex].deleteLater()  # 删除选中的卡片控件
+                        del self.ruleCardList[self.currentIndex]  # 删除对应在列表中的对象
 
-                        if del_card.isActive:
+                        if del_card.isActive:  # 若删除的是激活的卡片，则将删除后列表中的第一个卡片设置为激活
                             self.ruleCardList[0].setActive(True)
 
+                        # 设置滚动条为删除前的位置
                         v_pos = self.ruleScrollArea.verticalScrollBar().value()
                         self.ruleScrollArea.verticalScrollBar().setValue(v_pos)
 
