@@ -41,7 +41,7 @@ class MainWindow(FluentWindow):
         cfg.themeColorChanged.connect(self.changeThemeColor)
 
         # 将各窗口的信号连接至对应方法
-        self.homeInterface.refreshHistoryCardView.connect(self.historyListInterface.initCardView)
+        self.homeInterface.addNewHistory.connect(self.historyListInterface.addHistory)
         self.homeInterface.cancelRename.connect(self.historyListInterface.delHistory)
         self.settingInterface.ruleChanged.connect(self.ruleListInterface.initRuleViewArea)
         self.settingInterface.modeCard.checkedChanged.connect(self.homeInterface.initFileList)  # 切换重命名模式后刷新文件列表

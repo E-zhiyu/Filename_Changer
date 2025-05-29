@@ -148,6 +148,28 @@ class HistoryCard(CardWidget):
 
         self.infoBtn.clicked.connect(self.showInfo)
 
+        """设置卡片标签控件的样式"""
+        self.setStyle()
+
+    def setStyle(self):
+        # 设置卡片中标签控件的样式
+        if isDarkTheme():
+            label_qss = """
+                QLabel {
+                    color: white;
+                    background-color: transparent;
+                }
+            """
+        else:
+            label_qss = """
+                QLabel {
+                    color: black;
+                    background-color: transparent;
+                }
+            """
+        self.timeLabel.setStyleSheet(label_qss)
+        self.directoryLabel.setStyleSheet(label_qss)
+
     def mouseReleaseEvent(self, e):
         """重写clicked信号触发逻辑，使其发送卡片位置"""
         super(CardWidget, self).mouseReleaseEvent(e)
@@ -313,27 +335,7 @@ class HistoryListInterface(QWidget):
             for index, history in enumerate(self.history_list):
                 card = HistoryCard(history, index, self)
 
-                if isDarkTheme():
-                    label_qss = """
-                        QLabel {
-                            color: white;
-                            background-color: transparent;
-                        }
-                    """
-                    btn_qss = 'QPushButton {color: white;}'  # 深色模式未选中时文字为白色
-                else:
-                    label_qss = """
-                        QLabel {
-                            color: black;
-                            background-color: transparent;
-                        }
-                    """
-                    btn_qss = 'QPushButton {color: black;}'  # 浅色模式未选中时文字为黑色
-                card.timeLabel.setStyleSheet(label_qss)
-                card.directoryLabel.setStyleSheet(label_qss)
-                setCustomStyleSheet(card.openFolderBtn, btn_qss, btn_qss)
-
-                card.clicked.connect(self.setSelected)
+                card.clicked.connect(self.setSelected)  # 将卡片点击动作连接至选中卡片方法
                 self.historyCardList.append(card)
                 self.historyCardLayout.addWidget(card)  # 将父亲设置为历史界面，以便历史详情界面正常显示
         else:
@@ -354,6 +356,28 @@ class HistoryListInterface(QWidget):
         self.currentIndex = index
         if self.currentIndex > -1:
             self.historyCardList[self.currentIndex].setCardSelected(True)
+
+    def addHistory(self, new_history: dict):
+        """
+        功能：界面中添加新增的历史记录卡片（仅从类外部调用时）
+        参数 new_history：新增的历史记录字典
+        """
+        if new_history.get('new_name_list') or new_history.get('error_files'):
+            if self.history_list:  # 如果历史记录不为空，则将新卡片插入到列表首位
+                self.history_list.insert(0, new_history)  # 将新历史记录插入到历史记录列表首位
+
+                new_card = HistoryCard(new_history, 0, self)  # 创建新卡片实例对象
+                new_card.clicked.connect(self.setSelected)  # 将点击动作连接至选中卡片方法
+
+                for existing_card in self.historyCardList:  # 将现存的所有卡片所保存的下标加一
+                    existing_card.index += 1
+
+                self.historyCardList.insert(0, new_card)  # 将现存卡片下标加一后再将新卡片插入列表
+
+                # 向界面中添加新卡片
+                self.historyCardLayout.insertWidget(0, new_card)
+            else:
+                self.initCardView()  # 如果历史记录为空，则直接强制刷新界面
 
     def delHistory(self, index: int = -1):
         """
@@ -415,7 +439,7 @@ class HistoryListInterface(QWidget):
         """实现控件功能"""
 
         # 删除历史记录
-        self.delBtn.clicked.connect(lambda: self.delHistory(self.currentIndex))
+        self.delBtn.clicked.connect(lambda: self.delHistory())
 
         # 清空历史记录
         def clearHistory():

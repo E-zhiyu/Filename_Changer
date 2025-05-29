@@ -171,7 +171,7 @@ class FileListInterface(MessageBoxBase):
 
 class HomeInterface(QWidget):
     """定义主页布局"""
-    refreshHistoryCardView = pyqtSignal()  # 定义触发历史记录列表刷新布局方法的信号
+    addNewHistory = pyqtSignal(dict)  # 定义触发历史记录列表刷新布局方法的信号
     cancelRename = pyqtSignal(int)  # 撤销重命名发送的信号
     filenameChanged = pyqtSignal()  # 重命名或者撤销重命名后发送的信号
 
@@ -337,7 +337,7 @@ class HomeInterface(QWidget):
                     logging.info(f'已选择文件数：{len(self.selected_file_tuple)}/{len(self.scan_file)}')
 
                     targetDirectory = self.folderLineEdit.text().strip('\"')
-                    flag, message = rename_operation(targetDirectory, self.selected_file_tuple)
+                    flag, message, new_history_dict = rename_operation(targetDirectory, self.selected_file_tuple)
 
                     # 显示一个消息提示框
                     if flag:
@@ -348,7 +348,7 @@ class HomeInterface(QWidget):
                             duration=2000,
                             parent=self
                         )
-                        self.refreshHistoryCardView.emit()
+                        self.addNewHistory.emit(new_history_dict)
                         self.initFileList()  # 文件名改变后重新扫描目标文件夹
                         logging.info('文件重命名完成')
                     else:

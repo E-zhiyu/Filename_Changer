@@ -1245,8 +1245,7 @@ class RuleListInterface(QWidget):
             self.ruleCardLayout.addWidget(card, 0)  # 将卡片追加至卡片布局
         else:
             self.ruleCardLayout.insertWidget(index, card)  # 向界面中插入卡片
-            del self.ruleCardList[index]
-            self.ruleCardList.insert(index, card)  # 修改列表中的对象
+            self.ruleCardList[index] = card  # 修改列表中的对象
 
     def initRuleViewArea(self):
         """初始化规则卡片显示区域"""

@@ -90,13 +90,13 @@ def rename_operation(directory, old_file_names):
     """
     if not old_file_names:
         logging.info(f'文件夹：“{directory}”为空')
-        return False, '目标文件夹为空'
+        return False, '目标文件夹为空', {}
 
     config_dict = load_rule()  # 重命名时加载已保存的规则
     selected_rule = config_dict['rules'][config_dict['selected_index']]
     if not config_dict['rules']:  # 若规则为空，则结束本函数
         logging.warning('规则为空，请先前往规则设置写入规则')
-        return False, '规则为空，请先前往规则设置写入规则！'
+        return False, '规则为空，请先前往规则设置写入规则！', {}
     logging.info(
         f'当前活跃的规则为“规则{config_dict['selected_index'] + 1}”，'
         f'规则种类：{selected_rule['type']}')
@@ -106,12 +106,12 @@ def rename_operation(directory, old_file_names):
     logging.info('开始文件重命名……')
     if not new_name_list:
         logging.fatal('严重错误：新文件名列表为空')
-        return False, '严重错误：新文件名列表为空'
+        return False, '严重错误：新文件名列表为空', {}
 
-    success, fail = rename_files(directory, old_file_names, new_name_list)  # 执行重命名操作
+    success, fail, new_history_dict = rename_files(directory, old_file_names, new_name_list)  # 执行重命名操作
     logging.info(f'重命名结束，成功：{success}个，失败：{fail}个')
 
-    return 1, f'重命名结束，成功：{success}个，失败：{fail}个'
+    return 1, f'重命名结束，成功：{success}个，失败：{fail}个', new_history_dict
 
 
 def rename_files(directory, old_names, new_name_list, with_record_history=True):
@@ -127,46 +127,46 @@ def rename_files(directory, old_names, new_name_list, with_record_history=True):
 
     """文件重命名"""
     folder_mode = cfg.get(cfg, cfg.folderMode)
-    new_record_dict = {'directory': directory, 'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                       'old_name_list': [], 'new_name_list': [], 'error_files': [], 'folder_mode': folder_mode}
+    new_history_dict = {'directory': directory, 'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                        'old_name_list': [], 'new_name_list': [], 'error_files': [], 'folder_mode': folder_mode}
     for old_name, new_name in zip(old_names, new_name_list):
         if old_name == new_name:
             logging.info(f'【未更改】{old_name}')
-            new_record_dict['error_files'].append(f'【前后文件名相同】{old_name}')
+            new_history_dict['error_files'].append(f'【前后文件名相同】{old_name}')
         else:
             try:
                 os.rename(os.path.join(directory, old_name), os.path.join(directory, new_name))
             except FileNotFoundError:
                 logging.error(f'【错误】文件“{old_name}”不存在')
-                new_record_dict['error_files'].append(f'【文件不存在】{old_name}')
+                new_history_dict['error_files'].append(f'【文件不存在】{old_name}')
             except FileExistsError:
                 logging.error(f'【错误】文件“{old_name}”重命名后将导致重名')
-                new_record_dict['error_files'].append(f'【文件重名】{old_name}')
+                new_history_dict['error_files'].append(f'【文件重名】{old_name}')
             except PermissionError:
                 logging.error(f'【文件被占用】文件“{old_name}”被其他程序占用')
-                new_record_dict['error_files'].append(f'【文件被占用】{old_name}')
+                new_history_dict['error_files'].append(f'【文件被占用】{old_name}')
             except (OSError, WindowsError):
                 logging.error(f'【文件名语法错误】新文件名中含有非法字符')
-                new_record_dict['error_files'].append(f'【文件名语法错误】“{new_name}”中含有非法字符')
+                new_history_dict['error_files'].append(f'【文件名语法错误】“{new_name}”中含有非法字符')
             else:
                 logging.info(f'【成功】{old_name} -> {new_name}')
                 if with_record_history:
-                    new_record_dict['old_name_list'].append(old_name)
-                    new_record_dict['new_name_list'].append(new_name)
+                    new_history_dict['old_name_list'].append(old_name)
+                    new_history_dict['new_name_list'].append(new_name)
 
     """将重命名历史记录保存至文件中"""
-    if (new_record_dict['new_name_list'] or new_record_dict['error_files']
+    if (new_history_dict['new_name_list'] or new_history_dict['error_files']
             and with_record_history):
-        history_list.insert(0, new_record_dict)
+        history_list.insert(0, new_history_dict)
         with open(history_file_path, 'w', encoding='utf-8') as f:
             json.dump(history_list, f, ensure_ascii=False, indent=4)
             logging.info('新增的历史记录已追加至文件中')
-    elif not new_record_dict['new_name_list'] and with_record_history:
+    elif not new_history_dict['new_name_list'] and with_record_history:
         logging.info('未追加新的重命名记录，因为所有文件新旧文件名都相同')
 
-    fail = len(new_record_dict['error_files'])
+    fail = len(new_history_dict['error_files'])
     success = len(old_names) - fail
-    return success, fail  # 返回成功重命名和重命名时出错的文件数
+    return success, fail, new_history_dict  # 返回成功重命名和重命名时出错的文件数，以及新增加的历史记录
 
 
 def get_new_name_list(selected_rule, old_names, directory):
