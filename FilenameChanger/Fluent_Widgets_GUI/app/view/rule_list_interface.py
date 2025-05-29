@@ -1233,11 +1233,20 @@ class RuleListInterface(QWidget):
         """实现控件功能"""
         self.achieve_functions()
 
-    def addNewCard(self, card: RuleCard):
-        """添加新卡片到界面中"""
+    def addNewCard(self, card: RuleCard, index=-1):
+        """
+        功能：添加新卡片到界面中并设置卡片的点击动作
+        参数 card：待添加的卡片
+        参数 index：待添加到的位置下标（默认为-1，即追加到末尾）
+        """
         card.clicked.connect(self.setSelected)  # 将点击卡片的动作连接至选中卡片方法
-        self.ruleCardList.append(card)  # 将规则以卡片的形式添加至卡片列表
-        self.ruleCardLayout.addWidget(card, 0)  # 依此将卡片添加至卡片布局器中
+        if index == -1:
+            self.ruleCardList.append(card)  # 将规则卡片追加至卡片列表尾部
+            self.ruleCardLayout.addWidget(card, 0)  # 将卡片追加至卡片布局
+        else:
+            self.ruleCardLayout.insertWidget(index, card)  # 向界面中插入卡片
+            del self.ruleCardList[index]
+            self.ruleCardList.insert(index, card)  # 修改列表中的对象
 
     def initRuleViewArea(self):
         """初始化规则卡片显示区域"""
@@ -1265,7 +1274,7 @@ class RuleListInterface(QWidget):
                     activated = False
 
                 card = RuleCard(rule, index, activated, parent=self)
-                self.addNewCard(card)
+                self.addNewCard(card)  # 初始化时循环添加卡片到布局中
 
         else:
             ruleEmptyLabel = SubtitleLabel(text='规则列表空空如也', parent=self.ruleCardWidget)
@@ -1348,7 +1357,7 @@ class RuleListInterface(QWidget):
 
                     flag, message = del_rules(self.rule_dict, self.currentIndex)  # 删除文件中的规则
                     if flag:
-                        del_card = self.ruleCardLayout.takeAt(self.currentIndex).widget()  # 从界面中取出选中的卡片
+                        del_card = self.ruleCardLayout.itemAt(self.currentIndex).widget()  # 从界面中取出选中的卡片
                         for card in self.ruleCardList[self.currentIndex:]:  # 将其后的卡片的下标减一
                             card.index -= 1
                         self.ruleCardList[self.currentIndex].deleteLater()  # 删除选中的卡片控件
@@ -1402,9 +1411,8 @@ class RuleListInterface(QWidget):
                 rule = analise_rule(addRuleWindow)  # 解析添加规则时输入的内容
                 addRuleWindow.addNewRule.emit(self.rule_dict, rule)  # 发送规则种类、名称和描述的信号
 
-                # 将新卡片添加到界面中
                 new_card = RuleCard(rule, len(self.ruleCardList), parent=self)
-                self.addNewCard(new_card)
+                self.addNewCard(new_card)  # 新卡片添加至布局
 
                 QTimer.singleShot(10, lambda: self.ruleScrollArea.verticalScrollBar().setValue(
                     self.ruleScrollArea.verticalScrollBar().maximum()))  # 增加10ms延迟，防止UI未更新完全就滚动
@@ -1535,8 +1543,16 @@ class RuleListInterface(QWidget):
             revised_rule = analise_rule(reviseRuleWindow)
             reviseRuleWindow.reviseRule.emit(self.rule_dict, revised_rule, index)  # 发送信号给规则保存函数
 
+            old_card = self.ruleCardLayout.itemAt(index).widget()
+            if old_card.isActive:
+                isActive = True
+            else:
+                isActive = False
+            old_card.deleteLater()  # 删除界面中的卡片
+            revised_card = RuleCard(revised_rule, index, isActive, self)
+            self.addNewCard(revised_card, index)  # 修改后的卡片添加至布局
+
             v_pos = self.ruleScrollArea.verticalScrollBar().value()
-            self.initRuleViewArea()  # （修改规则）刷新规则卡片布局
             self.ruleScrollArea.verticalScrollBar().setValue(v_pos)
 
             # 创建修改成功的消息框
