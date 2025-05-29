@@ -53,7 +53,7 @@ class MainWindow(FluentWindow):
         # 创建导航栏选项
         self.addSubInterface(self.homeInterface, FIF.HOME, '主页')
         self.addSubInterface(self.ruleListInterface, FIF.LAYOUT, '规则列表')
-        self.addSubInterface(self.historyListInterface, FIF.HISTORY, '重命名记录')
+        self.addSubInterface(self.historyListInterface, FIF.HISTORY, '历史记录')
 
         # 添加导航栏底部按钮
         self.addSubInterface(self.settingInterface, FIF.SETTING, '设置', NavigationItemPosition.BOTTOM)
