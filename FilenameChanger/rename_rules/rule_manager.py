@@ -273,7 +273,7 @@ def import_rule(src_path):
             except ValueError:
                 return False, '文件内容格式错误'
             else:
-                return True, '文件复制成功'
+                return True, '规则导入成功'
 
         @staticmethod
         def content_verify(content):
