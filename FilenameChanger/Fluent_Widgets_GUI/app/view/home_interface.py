@@ -317,7 +317,7 @@ class HomeInterface(QWidget):
                     parent=self
                 )
                 logging.info(message)
-            else:
+            elif message != '用户清空路径':
                 InfoBar.error(
                     '无效',
                     '文件夹路径无效',
