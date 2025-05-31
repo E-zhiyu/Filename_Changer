@@ -32,17 +32,17 @@ def load_rule():
             return json.load(f)
 
 
-def save_new_rule(config_dict, new_rule):
+def save_new_rule(rule_dict, new_rule):
     """
     功能：将新规则并入已存在的规则列表
-    参数 config_dict：规则配置文件根字典
+    参数 rule_dict：规则文件根字典
     参数 new_rule：新规则字典
     """
-    config_dict['num'] += 1
-    config_dict['rules'].append(new_rule)  # 将新规则字典并入现有的规则
+    rule_dict['num'] += 1
+    rule_dict['rules'].append(new_rule)  # 将新规则字典并入现有的规则
 
     with open(rule_path, 'w', encoding='utf-8') as f:
-        json.dump(config_dict, f, ensure_ascii=False, indent=4)
+        json.dump(rule_dict, f, ensure_ascii=False, indent=4)
         logging.info('新规则已成功保存')
 
 
@@ -78,7 +78,7 @@ def del_rules(config_dict, index):
     参数 index：需要删除的规则的下标
     """
     if config_dict['num'] == 1:
-        logging.error('无法删除最后一个规则')
+        logging.warning('无法删除最后一个规则')
         return False, '无法删除最后一个规则'
     else:
         logging.info(f'用户删除第{index + 1}个规则，剩余规则{config_dict['num'] - 1}个')

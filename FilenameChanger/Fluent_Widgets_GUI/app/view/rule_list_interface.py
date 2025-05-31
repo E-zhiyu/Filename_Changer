@@ -10,7 +10,7 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, se
                                                                MessageBoxBase, LineEdit, RadioButton, CheckBox,
                                                                RoundMenu, Action, BodyLabel, TextBrowser, ZhDatePicker,
                                                                InfoBar, InfoBarPosition, setCustomStyleSheet,
-                                                               ToolTipFilter,themeColor, isDarkTheme)
+                                                               ToolTipFilter, themeColor, isDarkTheme)
 
 from FilenameChanger.rename_rules.rule_manager import (load_rule, activate_rule, del_rules, save_new_rule, analise_rule,
                                                        revise_rule)
@@ -1154,7 +1154,7 @@ class RuleInputInterface(MessageBoxBase):
 
 class RuleListInterface(QWidget):
     """定义规则列表界面布局"""
-    rule_dict = None
+    rule_list = []
 
     def __init__(self, text: str, parent=None):
         super().__init__(parent)
@@ -1239,19 +1239,22 @@ class RuleListInterface(QWidget):
         参数 card：待添加的卡片
         参数 index：待添加到的位置下标（默认为-1，即追加到末尾）
         """
-        card.clicked.connect(self.setSelected)  # 将点击卡片的动作连接至选中卡片方法
-        if index == -1:
-            self.ruleCardList.append(card)  # 将规则卡片追加至卡片列表尾部
-            self.ruleCardLayout.addWidget(card, 0)  # 将卡片追加至卡片布局
+        if self.rule_dict['num'] != 1:  # 如果当前只有一个规则，则通过刷新界面的方式添加卡片，防止添加卡片后布局管理器的对齐方式错误
+            card.clicked.connect(self.setSelected)  # 将点击卡片的动作连接至选中卡片方法
+            if index == -1:
+                self.ruleCardList.append(card)  # 将规则卡片追加至卡片列表尾部
+                self.ruleCardLayout.addWidget(card, 0)  # 将卡片追加至卡片布局
+            else:
+                self.ruleCardLayout.insertWidget(index, card)  # 向界面中插入卡片
+                self.ruleCardList[index] = card  # 修改列表中的对象
         else:
-            self.ruleCardLayout.insertWidget(index, card)  # 向界面中插入卡片
-            self.ruleCardList[index] = card  # 修改列表中的对象
+            self.initRuleViewArea()
 
     def initRuleViewArea(self):
         """初始化规则卡片显示区域"""
-        logging.info('开始更新规则卡片布局')
-        self.rule_dict = load_rule()  # 更新现存规则
-        rule_list = self.rule_dict['rules']
+        logging.info('开始更新规则卡片布局……')
+        self.rule_dict = load_rule()
+        self.rule_list = self.rule_dict['rules']
         selected_index = self.rule_dict['selected_index']
         self.currentIndex = -1  # 先将目前选中的卡片下标置为-1，否则会有下标越界风险
 
@@ -1263,17 +1266,19 @@ class RuleListInterface(QWidget):
         self.ruleCardList.clear()  # 清空列表中已保存的规则卡片
 
         """添加新的布局"""
-        if self.rule_dict['rules']:
+        if self.rule_list:
             self.ruleCardLayout.setAlignment(Qt.AlignmentFlag.AlignTop)  # 卡片默认顶部对齐
 
-            for index, rule in enumerate(rule_list):  # 添加至卡片列表，便于其他函数调用
+            for index, rule in enumerate(self.rule_list):  # 添加至卡片列表，便于其他函数调用
                 if index == selected_index:
                     activated = True
                 else:
                     activated = False
 
                 card = RuleCard(rule, index, activated, parent=self)
-                self.addNewCard(card)  # 初始化时循环添加卡片到布局中
+                card.clicked.connect(self.setSelected)  # 将点击卡片的动作连接至选中卡片方法
+                self.ruleCardList.append(card)  # 将规则卡片追加至卡片列表尾部
+                self.ruleCardLayout.addWidget(card, 0)  # 将卡片追加至卡片布局
 
         else:
             ruleEmptyLabel = SubtitleLabel(text='规则列表空空如也', parent=self.ruleCardWidget)
@@ -1376,6 +1381,7 @@ class RuleListInterface(QWidget):
                             duration=2000,
                             parent=self
                         )
+                        self.currentIndex = -1  # 若删除成功，则直接将选中的下标置为-1
                     else:
                         InfoBar.error(
                             title='错误',
@@ -1384,7 +1390,7 @@ class RuleListInterface(QWidget):
                             duration=2000,
                             parent=self
                         )
-                    self.currentIndex = -1  # 无论是否删除成功都取消选中卡片
+                        self.setSelected(-1)  # 若删除失败，则取消选中卡片
                 else:
                     logging.info('用户取消删除规则')
             else:
@@ -1407,6 +1413,7 @@ class RuleListInterface(QWidget):
             addRuleWindow.addNewRule.connect(save_new_rule)  # 将发射的信号传递给信号处理函数
             if addRuleWindow.exec():
                 logging.info('用户确认添加规则')
+
                 rule = analise_rule(addRuleWindow)  # 解析添加规则时输入的内容
                 addRuleWindow.addNewRule.emit(self.rule_dict, rule)  # 发送规则种类、名称和描述的信号
 
