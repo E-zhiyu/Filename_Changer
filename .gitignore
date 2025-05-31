@@ -3,7 +3,4 @@ FilenameChanger/rename_rules/rename_rules.json
 dist
 build
 filenamechanger.egg-info
-FilenameChanger/logs
-FilenameChanger/rename_history
-app/
 TodoList.md
