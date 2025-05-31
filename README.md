@@ -9,7 +9,7 @@
 
 ## 效果展览
 
-![程序主页](assets/imagines/程序主页.png "程序主页")
+![程序主页](https://github.com/user-attachments/assets/744cb830-810c-455e-a35d-950d7411ea86)
 
 ## 已支持的规则类型
 
