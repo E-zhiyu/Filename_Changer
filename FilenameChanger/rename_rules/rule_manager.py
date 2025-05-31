@@ -78,7 +78,7 @@ def del_rules(config_dict, index):
     参数 index：需要删除的规则的下标
     """
     if config_dict['num'] == 1:
-        logging.error('无法删除最后一个规则')
+        logging.warning('无法删除最后一个规则')
         return False, '无法删除最后一个规则'
     else:
         logging.info(f'用户删除第{index + 1}个规则，剩余规则{config_dict['num'] - 1}个')
