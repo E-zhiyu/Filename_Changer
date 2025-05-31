@@ -143,7 +143,7 @@ class FileListInterface(MessageBoxBase):
                     selected = True
                 else:
                     selected = False
-                card = FileCard(file_name, selected, index, self.widget)
+                card = FileCard(file_name, selected, index, self)
                 card.selectSignal.connect(self.setCheckBoxState)
                 self.file_card_list.append(card)
                 card.clicked.connect(lambda card_index=card.index: self.file_card_list[card_index].switchSelected())
@@ -317,7 +317,7 @@ class HomeInterface(QWidget):
                     parent=self
                 )
                 logging.info(message)
-            else:
+            elif message != '用户清空路径':
                 InfoBar.error(
                     '无效',
                     '文件夹路径无效',

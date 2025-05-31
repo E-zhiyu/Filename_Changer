@@ -90,7 +90,7 @@ def rename_operation(directory, old_file_names):
     """
     if not old_file_names:
         logging.info(f'文件夹：“{directory}”为空')
-        return False, '目标文件夹为空', {}
+        return False, '文件夹为空或未选择任何文件', {}
 
     config_dict = load_rule()  # 重命名时加载已保存的规则
     selected_rule = config_dict['rules'][config_dict['selected_index']]

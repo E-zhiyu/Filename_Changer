@@ -882,7 +882,7 @@ class RuleInputInterface(MessageBoxBase):
                 dateTypeLayout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
                 # 文本标签
-                dateLabel = SubtitleLabel(text='填充的日期', parent=self)
+                dateLabel = SubtitleLabel(text='填充的日期\n（可留空）', parent=self)
                 dateLayout.addWidget(dateLabel)
 
                 # 日期种类下拉框
@@ -963,6 +963,7 @@ class RuleInputInterface(MessageBoxBase):
                 fileNameLayout = QHBoxLayout()
                 fileNameInputLayout = QVBoxLayout()
                 self.new_layout_list.append(fileNameLayout)
+                self.new_layout_list.append(fileNameInputLayout)
 
                 # 文本标签
                 newNameLabel = SubtitleLabel(text='文件名', parent=self)
