@@ -701,8 +701,6 @@ class RuleInputInterface(MessageBoxBase):
 
     def validate(self):
         """重写验证输入数据的方法"""
-
-        """将需要检测的文本框的内容存放至列表"""
         if not self.ruleNameLineEdit.text():
             self.errorInfoLabel.setText('未输入规则名称！')
             self.errorInfoLabel.setHidden(False)
@@ -725,14 +723,6 @@ class RuleInputInterface(MessageBoxBase):
                 self.errorInfoLabel.setText('未输入匹配字符串！')
                 self.errorInfoLabel.setHidden(False)
                 return False
-
-        elif self.new_rule_type == 4:
-            if self.dateTypeComboBox.currentIndex() == 4:
-                if (self.customDatePicker.text()
-                        and not re.findall(r'[-_ ]?\d{4} ?\d{1,2} ?\d{1,2}[-_ ]?', self.customDatePicker.text())):
-                    self.errorInfoLabel.setText('自定义日期格式无效！')
-                    self.errorInfoLabel.setHidden(False)
-                    return False
 
         elif self.new_rule_type == 5:
             if not self.newNameLineEdit.text() and self.fileNameComboBox.currentIndex() == 1:
