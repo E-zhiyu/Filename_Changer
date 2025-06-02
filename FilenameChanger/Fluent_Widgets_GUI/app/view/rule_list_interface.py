@@ -9,8 +9,8 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, se
                                                                IconWidget, InfoBarIcon, MessageBox, ComboBox,
                                                                MessageBoxBase, LineEdit, RadioButton, CheckBox,
                                                                RoundMenu, Action, BodyLabel, TextBrowser, ZhDatePicker,
-                                                               InfoBar, InfoBarPosition, setCustomStyleSheet,
-                                                               ToolTipFilter, themeColor, isDarkTheme)
+                                                               InfoBar, InfoBarPosition, ToolTipFilter, themeColor,
+                                                               isDarkTheme)
 
 from FilenameChanger.rename_rules.rule_manager import (load_rule, activate_rule, del_rules, save_new_rule, analise_rule,
                                                        revise_rule)
@@ -510,8 +510,6 @@ class RuleCard(CardWidget):
             lambda: self.creatMenu(self.moreBtn.mapToGlobal(QPoint(-self.moreBtn.width() - 50, 25))))
 
         """自定义样式"""
-        label_qss = 'QLabel{background-color:transparent;}'
-        setCustomStyleSheet(self, label_qss, label_qss)
         self.moreBtn.setStyleSheet('background-color:transparent;')
 
     def mouseReleaseEvent(self, e):
@@ -528,7 +526,7 @@ class RuleCard(CardWidget):
         self.selected = isSelected
 
         if isSelected:
-            # 设置卡片背景颜色
+            # 设置卡片背景颜色为选中状态
             self.setStyleSheet("QWidget {background-color:" + f"{color.name()};" +
                                "border-radius: 5px;}")
 
@@ -553,7 +551,7 @@ class RuleCard(CardWidget):
                     background-color: transparent;
                     border-radius: 5px;
                 }
-            """)  # 设置卡片背景
+            """)  # 设置卡片背景为未选中状态
 
             if isDarkTheme():
                 label_qss = """
@@ -1211,7 +1209,6 @@ class RuleListInterface(QWidget):
         self.ruleScrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)  # 水平滚动条永远不显示
         self.ruleCardWidget.setStyleSheet('border-radius: 5px;')
 
-        self.ruleCardLayout.setAlignment(Qt.AlignmentFlag.AlignTop)  # 设置卡片对齐方式为顶对齐
         self.ruleCardLayout.setSpacing(7)  # 设置卡片布局器间隔：每个卡片间隔距离为7
 
         self.widgetVLayout.addWidget(self.ruleScrollArea)
