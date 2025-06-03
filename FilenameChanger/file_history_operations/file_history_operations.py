@@ -93,10 +93,10 @@ def rename_operation(directory, old_file_names):
         return False, '文件夹为空或未选择任何文件', {}
 
     config_dict = load_rule()  # 重命名时加载已保存的规则
-    selected_rule = config_dict['rules'][config_dict['selected_index']]
     if not config_dict['rules']:  # 若规则为空，则结束本函数
         logging.warning('规则为空，请先前往规则设置写入规则')
         return False, '规则为空，请先前往规则设置写入规则！', {}
+    selected_rule = config_dict['rules'][config_dict['selected_index']]
     logging.info(
         f'当前活跃的规则为“规则{config_dict['selected_index'] + 1}”，'
         f'规则种类：{selected_rule['type']}')
