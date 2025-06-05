@@ -30,7 +30,8 @@ class DailyFileHandler(logging.FileHandler):
 
 
 def setup_logger():
-    formatter = logging.Formatter('%(asctime)s - [%(filename)s-%(lineno)d/%(levelname)s] : %(message)s')
+    formatter = logging.Formatter('%(asctime)s - [%(filename)s-%(lineno)d/%(levelname)s] : %(message)s',
+                                  datefmt='%H:%M:%S')
     handler = DailyFileHandler()
     handler.setFormatter(formatter)
 
