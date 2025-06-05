@@ -172,22 +172,22 @@ class SettingInterface(QWidget):
         self.viewLayout.addWidget(self.modeGroup)
 
         # 扫描全部文件
-        self.safeScanCard = SwitchSettingCard(
+        self.secureScanningCard = SwitchSettingCard(
             FluentIcon.VPN,
             '安全扫描模式（建议开启）',
             '扫描目标文件夹时忽略隐藏、只读、系统文件',
-            cfg.safeScan
+            cfg.secureScanning
         )
-        self.modeGroup.addSettingCard(self.safeScanCard)
+        self.modeGroup.addSettingCard(self.secureScanningCard)
 
-        def safeScanMode_log():
+        def secureScanning_log():
             """安全扫描模式值改变时写入日志"""
-            if cfg.get(cfg, cfg.safeScan):
+            if cfg.get(cfg, cfg.secureScanning):
                 logging.info('设置项改变，安全扫描模式：开')
             else:
                 logging.info('设置项改变，安全扫描模式：关')
 
-        self.safeScanCard.checkedChanged.connect(safeScanMode_log)
+        self.secureScanningCard.checkedChanged.connect(secureScanning_log)
 
         # 文件夹模式
         self.folderModeCard = SwitchSettingCard(

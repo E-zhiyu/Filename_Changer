@@ -304,7 +304,7 @@ class HomeInterface(QWidget):
             """文本框功能实现"""
             logging.info('判断路径有效性……')
             self.path_flag, message = self.initFileList()  # 扫描整个文件夹
-            if cfg.get(cfg, cfg.safeScan):
+            if cfg.get(cfg, cfg.secureScanning):
                 safe_scan = '开'
             else:
                 safe_scan = '关'
@@ -338,7 +338,7 @@ class HomeInterface(QWidget):
                         object = '对象：文件夹'
                     else:
                         object = '对象：文件'
-                    if cfg.get(cfg, cfg.safeScan):
+                    if cfg.get(cfg, cfg.secureScanning):
                         safe_scan = '安全扫描模式：开'
                     else:
                         safe_scan = '安全扫描模式：关'

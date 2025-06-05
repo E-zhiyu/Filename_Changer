@@ -61,7 +61,7 @@ def scan_files(directory) -> list:
     返回：旧文件名列表
     """
     folder_mode = cfg.get(cfg, cfg.folderMode)
-    safe_scan = cfg.get(cfg, cfg.safeScan)
+    safe_scan = cfg.get(cfg, cfg.secureScanning)
     logging.info('获取文件名列表中……')
     try:
         if folder_mode:

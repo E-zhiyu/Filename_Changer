@@ -14,7 +14,7 @@ class Config(QConfig):
 
     # 重命名设置项
     folderMode = ConfigItem('RenameConfigs', 'FolderMode', False, BoolValidator())
-    safeScan = ConfigItem('RenameConfigs', 'SafeScan', True, BoolValidator())
+    secureScanning = ConfigItem('RenameConfigs', 'secureScanning', True, BoolValidator())
 
 
 cfg = Config()
