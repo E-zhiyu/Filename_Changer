@@ -167,24 +167,42 @@ class SettingInterface(QWidget):
         self.ruleExportCard.clicked.connect(exportRule)
         self.ruleIOGroup.addSettingCard(self.ruleExportCard)
 
-        """重命名模式切换"""
+        """重命名设置"""
         self.modeGroup = SettingCardGroup('重命名设置', self.widget)
         self.viewLayout.addWidget(self.modeGroup)
 
-        self.modeCard = SwitchSettingCard(
+        # 扫描全部文件
+        self.safeScanCard = SwitchSettingCard(
+            FluentIcon.VPN,
+            '安全扫描模式（建议开启）',
+            '扫描目标文件夹时忽略隐藏、只读、系统文件',
+            cfg.safeScan
+        )
+        self.modeGroup.addSettingCard(self.safeScanCard)
+
+        def safeScanMode_log():
+            """安全扫描模式值改变时写入日志"""
+            if cfg.get(cfg, cfg.safeScan):
+                logging.info('设置项改变，安全扫描模式：开')
+            else:
+                logging.info('设置项改变，安全扫描模式：关')
+
+        self.safeScanCard.checkedChanged.connect(safeScanMode_log)
+
+        # 文件夹模式
+        self.folderModeCard = SwitchSettingCard(
             FluentIcon.FOLDER,
             '文件夹模式',
             '重命名对象由文件更改为文件夹',
             cfg.folderMode
         )
-        self.modeGroup.addSettingCard(self.modeCard)
+        self.modeGroup.addSettingCard(self.folderModeCard)
 
-        def record_log():
-            """重命名模式改变时写入日志"""
-            logging.info('用户切换重命名模式')
+        def folderMode_log():
+            """文件夹模式改变时写入日志"""
             if cfg.get(cfg, cfg.folderMode):
-                logging.info('文件夹模式：开')
+                logging.info('设置项改变，文件夹模式：开')
             else:
-                logging.info('文件夹模式：关')
+                logging.info('设置项改变，文件夹模式：关')
 
-        self.modeCard.checkedChanged.connect(record_log)
+        self.folderModeCard.checkedChanged.connect(folderMode_log)

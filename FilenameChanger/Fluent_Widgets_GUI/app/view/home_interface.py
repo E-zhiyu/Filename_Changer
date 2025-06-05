@@ -304,14 +304,14 @@ class HomeInterface(QWidget):
             """文本框功能实现"""
             logging.info('判断路径有效性……')
             self.path_flag, message = self.initFileList()  # 扫描整个文件夹
-            if cfg.get(cfg, cfg.folderMode):
-                rename_object = '文件夹'
+            if cfg.get(cfg, cfg.safeScan):
+                safe_scan = '开'
             else:
-                rename_object = '文件'
+                safe_scan = '关'
             if self.path_flag:
                 InfoBar.success(
                     '有效',
-                    '文件夹路径有效，'f'对象：{rename_object}',
+                    '文件夹路径有效，'f'安全扫描模式：{safe_scan}',
                     duration=2000,
                     position=InfoBarPosition.TOP,
                     parent=self
@@ -335,10 +335,14 @@ class HomeInterface(QWidget):
                 logging.info('用户点击重命名按钮，确认操作中……')
                 if confirm_operation():  # 弹出消息框确认操作
                     if cfg.get(cfg, cfg.folderMode):
-                        folder_mode = '文件夹模式：开'
+                        object = '对象：文件夹'
                     else:
-                        folder_mode = '文件夹模式：关'
-                    logging.info(f'用户确认重命名，{folder_mode}')
+                        object = '对象：文件'
+                    if cfg.get(cfg, cfg.safeScan):
+                        safe_scan = '安全扫描模式：开'
+                    else:
+                        safe_scan = '安全扫描模式：关'
+                    logging.info(f'用户确认重命名，{object}；{safe_scan}')
 
                     # 如果还未扫描文件夹则进行扫描操作
                     if self.scanned_objects is None:
@@ -352,14 +356,14 @@ class HomeInterface(QWidget):
                     if flag:
                         InfoBar.success(
                             title='完成',
-                            content=message,
+                            content=f'{message}；{object}',
                             position=InfoBarPosition.TOP,
                             duration=2000,
                             parent=self
                         )
                         self.addNewHistory.emit(new_history_dict)
                         self.initFileList()  # 文件名改变后重新扫描目标文件夹
-                        logging.info('文件重命名完成')
+                        logging.info(f'文件重命名完成')
                     else:
                         InfoBar.error(
                             title='失败',

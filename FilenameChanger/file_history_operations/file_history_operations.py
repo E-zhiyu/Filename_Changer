@@ -61,16 +61,26 @@ def scan_files(directory) -> list:
     返回：旧文件名列表
     """
     folder_mode = cfg.get(cfg, cfg.folderMode)
+    safe_scan = cfg.get(cfg, cfg.safeScan)
     logging.info('获取文件名列表中……')
     try:
         if folder_mode:
-            old_name = [folder for folder in os.listdir(directory) if
-                        os.path.isdir(os.path.join(directory, folder)) and not hidden_or_protected(
-                            os.path.join(directory, folder))]
+            if safe_scan:
+                old_name = [folder for folder in os.listdir(directory) if
+                            os.path.isdir(os.path.join(directory, folder)) and not hidden_or_protected(
+                                os.path.join(directory, folder))]
+            else:
+                old_name = [folder for folder in os.listdir(directory) if
+                            os.path.isdir(os.path.join(directory, folder))]
         else:
-            old_name = [file for file in os.listdir(directory) if
-                        os.path.isfile(os.path.join(directory, file)) and not hidden_or_protected(
-                            os.path.join(directory, file))]
+            if safe_scan:
+                old_name = [file for file in os.listdir(directory) if
+                            os.path.isfile(os.path.join(directory, file)) and not hidden_or_protected(
+                                os.path.join(directory, file))]
+            else:
+                old_name = [file for file in os.listdir(directory) if
+                            os.path.isfile(os.path.join(directory, file))]
+
         if not old_name:
             raise FileNotFoundError
 
