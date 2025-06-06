@@ -18,13 +18,13 @@ def load_rule():
     try:
         with open(rule_path, 'r', encoding='utf-8') as f:
             logging.info('加载规则配置……')
-            config = json.load(f)
+            rule_dict = json.load(f)
 
-            if not config:  # 防止规则文件存在但是被修改为空
+            if not rule_dict:  # 防止规则文件存在但是被修改为空
                 raise FileNotFoundError
 
-            return config
-    except (JSONDecodeError, FileNotFoundError):  # 防止规则文件存在但是为空而导致程序无法启动
+            return rule_dict
+    except (JSONDecodeError, FileNotFoundError):  # 防止规则文件被篡改为非法值
         logging.info('配置文件为空或不存在，正在初始化……')
         init_json()
         with open(rule_path, 'r', encoding='utf-8') as f:
@@ -50,7 +50,7 @@ def revise_rule(rule_dict, revised_rule, index):
     """
     功能：修改指定下标的规则并保存
     参数 rule_dict：旧的规则字典
-    参数 revised_rule：修改后的规则列表
+    参数 revised_rule：修改后的规则
     参数 index：需要修改的规则的下标
     """
     rule_dict['rules'][index] = revised_rule
@@ -250,9 +250,8 @@ def import_rule(src_path):
     class FileSafeCopier:
         """文件安全复制器"""
 
-        def __init__(self, src_path):
-            self.src_path = src_path  # 源文件位置
-            self.dst_path = rule_path  # 目标位置，即应用规则文件位置
+        def __init__(self, path):
+            self.src_path = path  # 源文件位置
 
         def safeCopy(self):
             """安全复制的方法"""
@@ -260,8 +259,8 @@ def import_rule(src_path):
                 with open(self.src_path, 'r', encoding='utf-8') as f:
                     content = json.load(f)
                     if isinstance(content, dict):
-                        if self.content_verify(content):
-                            shutil.copy(self.src_path, self.dst_path)
+                        if self.__content_verify(content):
+                            shutil.copy(self.src_path, rule_path)
                         else:
                             raise ValueError
                     else:
@@ -276,7 +275,7 @@ def import_rule(src_path):
                 return True, '规则导入成功'
 
         @staticmethod
-        def content_verify(content):
+        def __content_verify(content):
             """验证导入的规则文件内容是否符合规范"""
             num = content.get('num')
             selected_index = content.get('selected_index')

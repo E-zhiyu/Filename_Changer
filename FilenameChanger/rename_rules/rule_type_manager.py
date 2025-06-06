@@ -12,7 +12,7 @@ from FilenameChanger.Fluent_Widgets_GUI.app.common.config import Config as cfg
 
 def use_type_1(selected_rule, old_name_list):
     """
-    功能：应用类型一的规则（交换分隔符前后内容）
+    功能：交换分隔符前后内容
     参数 selected_rule：当前激活的规则
     参数 old_names：旧文件名序列
     返回：生成的新文件名列表
@@ -27,25 +27,28 @@ def use_type_1(selected_rule, old_name_list):
         if cfg.get(cfg, cfg.folderMode):
             name, ext = old_name, ''
 
+        # 判断是否启用正则表达式
         if enable_re:
-            parts = re.split(split_char, name, maxsplit=1)
-            if len(parts) == 2:
-                result = re.findall(split_char, name)[0]
+            f_and_b = re.split(split_char, name, maxsplit=1)
+            if len(f_and_b) == 2:
+                split_char_re = re.findall(split_char, name)[0]
         else:
-            parts = name.split(split_char, maxsplit=1)
-        front = parts[0]
-        behind = parts[1] if len(parts) > 1 else ''  # 默认第二部分为空，用于处理无法拆分的文件名
+            f_and_b = name.split(split_char, maxsplit=1)
 
+        front = f_and_b[0]
+        behind = f_and_b[1] if len(f_and_b) > 1 else ''  # 默认第二部分为空，用于处理无法拆分的文件名
         front = front.strip()  # 去除前后空格
-        if behind:
+
+        if behind:  # 判断是否能够分隔
             behind = behind.strip()  # 去除前后空格
 
+            # 将前后部分调换并生成新文件名
             if enable_re:
-                new_name = f'{behind} {result} {front}{ext}'
+                new_name = f'{behind} {split_char_re} {front}{ext}'  # 无需担心split_char_re赋值前调用，因为能分隔说明它必已经赋值
             else:
-                new_name = f'{behind} {split_char} {front}{ext}'  # 将f,b前后调换生成新文件名
-        else:
-            new_name = f'{front}{ext}'  # 若没有第二部分文件名则保持原状
+                new_name = f'{behind} {split_char} {front}{ext}'
+        else:  # 不能分隔则保持原状
+            new_name = f'{front}{ext}'
         new_name_list.append(new_name)  # 将新名字并入新文件名列表
 
     return new_name_list
@@ -53,19 +56,20 @@ def use_type_1(selected_rule, old_name_list):
 
 def use_type_2(selected_rule, old_name_list):
     """
-    功能：应用类型二的规则（扩展名替换）
+    功能：扩展名替换
     参数 selected_rule：当前激活的规则
     参数 old_names：旧文件名序列
     返回：生成的新文件名列表
     """
+    # 如果是文件夹模式，则不执行该函数
+    if cfg.get(cfg, cfg.folderMode):
+        return old_name_list
+
     new_ext = selected_rule['new_ext']
 
     name_list = []  # 文件名（排除扩展名）列表
     for old_name in old_name_list:
         name = os.path.splitext(old_name)[0]
-        # 如果是文件夹模式，则不分离扩展名
-        if cfg.get(cfg, cfg.folderMode):
-            name = old_name
 
         name_list.append(name)
 
@@ -79,12 +83,12 @@ def use_type_2(selected_rule, old_name_list):
 
 def use_type_3(selected_rule, old_name_list):
     """
-    功能：应用类型三的规则（字符串替换）
+    功能：字符串替换
     参数 selected_rule：当前激活的规则
     参数 old_names：旧文件名序列
     返回：生成的新文件名列表
     """
-    target_str = selected_rule['target_str']  # 待替换的字符串
+    target_str = selected_rule['target_str']  # 被替换的字符串（或其正则表达式）
     new_str = selected_rule['new_str']  # 新字符串
     enable_re = selected_rule.get('enable_re', False)  # 判断是否使用正则表达式
 
@@ -112,6 +116,7 @@ def get_file_time(file_path, time_type, split_char):
     参数 time_type：需要返回的时间类型
     返回：创建时间、修改时间和访问时间三者之一
     """
+    # 获取相应的日期
     if time_type == 0:
         logging.info('待填充的日期：系统日期')
         date = time.time()
@@ -125,6 +130,7 @@ def get_file_time(file_path, time_type, split_char):
         logging.info('待填充的日期：文件访问日期')
         date = os.path.getatime(file_path)
 
+    # 处理特殊分隔符
     if split_char == '年月日':
         format_date = time.strftime('%Y年%m月%d日', time.localtime(date))
     else:
@@ -135,7 +141,7 @@ def get_file_time(file_path, time_type, split_char):
 
 def use_type_4(selected_rule, old_name_list, directory):
     """
-    功能：应用类型四的规则（添加或删除日期）
+    功能：添加或删除日期
     参数 selected_rule：当前激活的规则
     参数 old_names：旧文件名序列
     参数 directory：目标文件夹路径
@@ -145,7 +151,7 @@ def use_type_4(selected_rule, old_name_list, directory):
     position = selected_rule['position']
 
     try:
-        y, m, d = selected_rule['date'].split(' ')
+        y, m, d = selected_rule['date'].split(' ')  # 若自定义日期为空则引发ValueError并被捕获
         if split_char == '年月日':
             customize_date = f'{y}年{m}月{d}日'
         else:
@@ -153,25 +159,23 @@ def use_type_4(selected_rule, old_name_list, directory):
     except (KeyError, AttributeError, ValueError):  # 处理自定义日期为空的情况
         customize_date = ''
 
-    time_type = selected_rule.get('date_type', 4 if customize_date else 0)  # 处理v2.1.0及更旧版本的规则
-
-    new_name_list = []
+    time_type = selected_rule.get('date_type', 4 if customize_date else 0)  # 处理v2.1.0及更旧版本的规则（旧版只支持自定义日期）
 
     """遍历文件名列表，循环对单个文件名进行操作"""
+    new_name_list = []
     for old_name in old_name_list:
         # 获取文件日期
         if time_type != 4:
             file_date = get_file_time(os.path.join(directory, old_name), time_type, split_char)
             logging.info(f'已获取日期：“{file_date}”')
         else:
-            if customize_date:
-                logging.info('待填充的日期：自定义日期')
             file_date = customize_date
 
         name, ext = os.path.splitext(old_name)  # 分离文件名和扩展名
         # 如果是文件夹模式，则不分离扩展名
         if cfg.get(cfg, cfg.folderMode):
             name, ext = old_name, ''
+
         date_re = r'[-_ ]?\d{4}[-_ 年]\d{1,2}[-_ 月]\d{1,2}日?[-_ ]?'  # 日期匹配的模式串
 
         """删除文件名中的日期"""
@@ -182,38 +186,30 @@ def use_type_4(selected_rule, old_name_list, directory):
             logging.info(f'“{name}”不含日期')
 
         """添加指定日期"""
-        if time_type == 4:  # 判断该规则是否填充自定义日期
-            if customize_date:  # 自定义日期不为空才填充日期
-                if position == 'head':
-                    new_name = f'{customize_date}{split_char}{date_removed_name}{ext}' if split_char != '年月日' \
-                        else f'{customize_date}-{date_removed_name}{ext}'
-                    if customize_date:
-                        logging.info(f'已将日期：“{customize_date}”添加至文件名头部')
-                elif position == 'tail':
-                    new_name = f'{date_removed_name}{split_char}{customize_date}{ext}' if split_char != '年月日' \
-                        else f'{date_removed_name}-{customize_date}{ext}'
-                    if customize_date:
-                        logging.info(f'已将日期：“{customize_date}”添加至文件名尾部')
-                new_name_list.append(new_name)
-            else:  # 若自定义日期为空，则直接将删除日期的文件名作为新文件名
-                new_name_list.append(f'{date_removed_name}{ext}')
-        else:
+        if file_date:  # 日期不为空才填充日期
             if position == 'head':
                 new_name = f'{file_date}{split_char}{date_removed_name}{ext}' if split_char != '年月日' \
                     else f'{file_date}-{date_removed_name}{ext}'
-                logging.info(f'已将{file_date}添加至文件名头部')
+
+                if file_date:
+                    logging.info(f'已将日期：“{file_date}”添加至文件名头部')
             elif position == 'tail':
                 new_name = f'{date_removed_name}{split_char}{file_date}{ext}' if split_char != '年月日' \
                     else f'{date_removed_name}-{file_date}{ext}'
-                logging.info(f'已将{file_date}添加至文件名尾部')
+
+                if file_date:
+                    logging.info(f'已将日期：“{file_date}”添加至文件名尾部')
+
             new_name_list.append(new_name)
+        else:  # 若日期为空，则直接将删除日期的文件名作为新文件名
+            new_name_list.append(f'{date_removed_name}{ext}')
 
     return new_name_list
 
 
 def use_type_5(selected_rule, old_name_list):
     """
-    功能：应用类型五的规则（重命名并编号）
+    功能：文件编号编号
     参数 selected_rule：当前激活的规则
     参数 old_names：旧文件名序列
     返回：生成的新文件名列表
@@ -223,7 +219,7 @@ def use_type_5(selected_rule, old_name_list):
     position = selected_rule['position']
     number = selected_rule['start_num']
     step_length = selected_rule['step_length']
-    use_original_name = selected_rule.get('use_original_name', True)  # v2.2.1之前只能启用重命名
+    use_original_name = selected_rule.get('use_original_name', False)  # v2.2.1之前只能启用重命名
 
     new_name_list = []
     for old_name in old_name_list:
@@ -276,7 +272,7 @@ def use_type_5(selected_rule, old_name_list):
 
 def use_type_6(selected_rule, old_name_list):
     """
-    功能：应用类型六的规则（字母大小写转换）
+    功能：字母大小写转换
     参数 selected_rule：当前激活的规则
     参数 old_names：旧文件名序列
     返回：生成的新文件名列表
@@ -325,7 +321,7 @@ def use_type_6(selected_rule, old_name_list):
 
 def use_type_7(selected_rule, old_name_list):
     """
-    功能：应用类型七的规则（添加字符串）
+    功能：添加字符串
     参数 selected_rule：当前激活的规则
     参数 old_names：旧文件名序列
     返回：生成的新文件名列表
