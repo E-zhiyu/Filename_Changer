@@ -1,4 +1,6 @@
-# coding:utf-8
+"""
+主窗口内容设置模块
+"""
 from FilenameChanger import version
 
 from PyQt6.QtWidgets import QApplication

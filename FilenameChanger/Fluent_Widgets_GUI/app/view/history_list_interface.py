@@ -1,3 +1,6 @@
+"""
+历史记录列表界面内容设置模块
+"""
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFrame
 
@@ -7,7 +10,7 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, Bo
                                                                InfoBarPosition, InfoBar, ToolTipFilter, isDarkTheme,
                                                                setCustomStyleSheet)
 
-from FilenameChanger.file_history_operations.file_history_operations import (load_history, history_del, history_clear)
+from FilenameChanger.file_history_operations.file_history_operations import (load_history, history_del, clear_history)
 from FilenameChanger.log.log_recorder import *
 
 
@@ -455,7 +458,7 @@ class HistoryListInterface(QWidget):
                 logging.info('正在确认操作：清空历史记录')
                 if confirmWindow.exec():
                     logging.info('用户确认清空历史记录')
-                    history_clear()
+                    clear_history()
                     self.initCardView()  # （清空历史记录）刷新卡片布局
                     self.setSelected(-1)
 

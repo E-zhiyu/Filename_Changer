@@ -1,11 +1,10 @@
 # FilenameChanger/log/log_recorder.py
-import logging
-import os
-from datetime import datetime
-
 """
 日志记录模块
 """
+import logging
+import os
+from datetime import datetime
 
 log_dir = './logs'
 
@@ -14,7 +13,6 @@ class DailyFileHandler(logging.FileHandler):
     def __init__(self):
         """
         功能：每天动态生成YYYY-MM-DD.log
-        参数 log_dir：日志文件夹路径
         """
         os.makedirs(log_dir, exist_ok=True)
         filename = self.get_today_filename()

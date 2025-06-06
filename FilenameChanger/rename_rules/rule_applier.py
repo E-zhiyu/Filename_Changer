@@ -1,13 +1,12 @@
-# FilenameChanger/rename_rules/rule_type_manager.py
+# FilenameChanger/rename_rules/rule_applier.py
+"""
+规则应用模块：负责重命名规则的具体实现
+"""
 import re
 import time
 
 from FilenameChanger.rename_rules.rule_manager import *
 from FilenameChanger.Fluent_Widgets_GUI.app.common.config import Config as cfg
-
-"""
-规则调用模块
-"""
 
 
 def use_type_1(selected_rule, old_name_list):

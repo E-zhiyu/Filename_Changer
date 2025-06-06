@@ -1,4 +1,6 @@
-# coding:utf-8
+"""
+创建主窗口模块
+"""
 import sys
 
 from PyQt6.QtWidgets import QApplication

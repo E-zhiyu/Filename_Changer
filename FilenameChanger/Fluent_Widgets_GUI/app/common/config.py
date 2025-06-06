@@ -1,4 +1,6 @@
-# coding:utf-8
+"""
+应用设置项控制模块
+"""
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (qconfig, QConfig, OptionsConfigItem, OptionsValidator,
                                                                ConfigItem, BoolValidator)
 

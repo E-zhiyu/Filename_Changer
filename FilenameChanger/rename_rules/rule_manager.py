@@ -1,13 +1,12 @@
 # rename_rules/rule_manager.py
+"""
+规则控制模块：控制有关重命名规则的操作
+"""
 import json, shutil
 from json import JSONDecodeError
 
 from FilenameChanger import rule_path
 from FilenameChanger.log.log_recorder import *
-
-"""
-规则文件模块：控制所有有关命名规则文件的操作
-"""
 
 
 def load_rule():

@@ -1,3 +1,6 @@
+"""
+规则列表界面内容设置模块
+"""
 import re
 
 from PyQt6.QtGui import QRegularExpressionValidator

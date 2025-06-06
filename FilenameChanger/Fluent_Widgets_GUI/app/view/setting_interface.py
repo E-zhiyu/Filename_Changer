@@ -1,3 +1,6 @@
+"""
+设置界面内容设置界面
+"""
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QFileDialog, QDialog
 
