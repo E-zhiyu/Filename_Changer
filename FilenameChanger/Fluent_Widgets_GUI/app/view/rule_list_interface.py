@@ -1216,7 +1216,7 @@ class RuleListInterface(QWidget):
 
         self.widgetVLayout.addWidget(self.ruleScrollArea)
 
-        """初始化规则卡片展示区域"""
+        # 初始化规则展示区域
         self.ruleCardList = []  # 存放规则卡片的列表
         self.currentIndex = -1  # 当前鼠标选中的卡片的下标
         self.initRuleViewArea()  # 初始化布局
@@ -1230,16 +1230,18 @@ class RuleListInterface(QWidget):
         参数 card：待添加的卡片
         参数 index：待添加到的位置下标（默认为-1，即追加到末尾）
         """
+        self.setSelected(-1)  # 先取消选中规则卡片
+
         if self.rule_dict['num'] != 1:  # 如果当前只有一个规则，则通过刷新界面的方式添加卡片，防止添加卡片后布局管理器的对齐方式错误
             card.clicked.connect(self.setSelected)  # 将点击卡片的动作连接至选中卡片方法
             if index == -1:
                 self.ruleCardList.append(card)  # 将规则卡片追加至卡片列表尾部
                 self.ruleCardLayout.addWidget(card, 0)  # 将卡片追加至卡片布局
             else:
-                self.ruleCardLayout.insertWidget(index, card)  # 向界面中插入卡片
+                self.ruleCardLayout.insertWidget(index, card)  # 向指定位置插入卡片
                 self.ruleCardList[index] = card  # 修改列表中的对象
         else:
-            self.initRuleViewArea()
+            self.initRuleViewArea()  # 通过刷新布局的方式添加卡片
 
     def initRuleViewArea(self):
         """初始化规则卡片显示区域"""
