@@ -17,6 +17,7 @@ if cfg.get(cfg.dpiScale) != "Auto":
 
 
 def run_with_gui():
+    logging.info('程序启动')
     # 创建应用程序
     app = QApplication(sys.argv)
 
