@@ -48,11 +48,11 @@ class FileCard(CardWidget):
     def modifySelectFileList(self):
         """文件选中状态改变时修改选中文件列表"""
         if self.selectedCheckBox.checkState() == Qt.CheckState.Checked:
-            if self.file_name not in self.parent.selected_file_list:  # 只有文件名不在选中列表时才添加
-                self.parent.selected_file_list.append(self.file_name)
+            if self.file_name not in self.parent.selected_list:  # 只有文件名不在选中列表时才添加
+                self.parent.selected_list.append(self.file_name)
         else:
             try:
-                self.parent.selected_file_list.remove(self.file_name)
+                self.parent.selected_list.remove(self.file_name)
             except ValueError:
                 print(f'{self.file_name}不在选中列表中')  # 仅用于调试
 
@@ -76,6 +76,10 @@ class FileCard(CardWidget):
 class SelectAllCheckBox(CheckBox):
     """文件列表的全选复选框"""
 
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setTristate(True)  # 启用三态
+
     def nextCheckState(self):
         """未选中和半选中时点击切换为选中，选中时点击切换为未选中"""
         if self.checkState() == Qt.CheckState.Unchecked:
@@ -91,29 +95,32 @@ class FileListInterface(MessageBoxBase):
 
     def __init__(self, scan_file_list, selected_file_tuple, parent=None):
         super().__init__(parent)
-        self.widget.setFixedHeight(700)
-        self.widget.setFixedWidth(600)
+        self.widget.setFixedHeight(600)
+        self.widget.setFixedWidth(550)
 
-        self.scan_file_list = scan_file_list
-        self.selected_file_list = list(selected_file_tuple)
+        self.scan_list = scan_file_list
+        self.selected_list = list(selected_file_tuple)
         self.file_card_list = []
         self.yesButton.setText('确定')
         self.cancelButton.setText('取消')
 
         """标题标签"""
-        self.titleLabel = SubtitleLabel(text='文件列表', parent=self.widget)
+        if cfg.get(cfg, cfg.secureScanning):
+            title = '文件列表：安全扫描模式'
+        else:
+            title = '文件列表'
+        self.titleLabel = SubtitleLabel(text=title, parent=self.widget)
         self.viewLayout.addWidget(self.titleLabel)
 
         """全选复选框和文件数量标签"""
         self.checkBoxAndNumLabelLayout = QHBoxLayout()
 
         # 文件数量标签
-        self.numLabel = BodyLabel(text=f'已选中：{len(self.selected_file_list)}/{len(self.scan_file_list)}',
+        self.numLabel = BodyLabel(text=f'已选中：{len(self.selected_list)}/{len(self.scan_list)}',
                                   parent=self.widget)
 
         # 全选复选框
         self.selectAllCheckBox = SelectAllCheckBox('全选')
-        self.selectAllCheckBox.setTristate(True)  # 复选框启用三态
         self.setCheckBoxState()
 
         self.selectAllCheckBox.stateChanged.connect(self.selectAllFile)
@@ -138,11 +145,11 @@ class FileListInterface(MessageBoxBase):
 
     def initView(self):
         """初始化文件展示"""
-        if self.scan_file_list:
+        if self.scan_list:
             self.fileViewLayout.setAlignment(Qt.AlignmentFlag.AlignTop)  # 设置为顶部对齐
 
-            for index, file_name in enumerate(self.scan_file_list):
-                if file_name in self.selected_file_list:
+            for index, file_name in enumerate(self.scan_list):
+                if file_name in self.selected_list:
                     selected = True
                 else:
                     selected = False
@@ -161,15 +168,15 @@ class FileListInterface(MessageBoxBase):
             self.selectAllCheckBox.setChecked(False)
 
     def setCheckBoxState(self):
-        """设置全选复选框的状态和文件数量标签的文本"""
-        if len(self.scan_file_list) == len(self.selected_file_list):
+        """根据选中的文件数量设置全选复选框的状态"""
+        if len(self.scan_list) == len(self.selected_list):
             self.selectAllCheckBox.setCheckState(Qt.CheckState.Checked)
-        elif self.selected_file_list:
+        elif self.selected_list:
             self.selectAllCheckBox.setCheckState(Qt.CheckState.PartiallyChecked)
         else:
             self.selectAllCheckBox.setCheckState(Qt.CheckState.Unchecked)
 
-        self.numLabel.setText(f'已选择：{len(self.selected_file_list)}/{len(self.scan_file_list)}')
+        self.numLabel.setText(f'已选择：{len(self.selected_list)}/{len(self.scan_list)}')
 
     def selectAllFile(self):
         """文件全选或全不选"""
@@ -438,7 +445,7 @@ class HomeInterface(QWidget):
             if self.path_flag == 1:
                 fileListInterface = FileListInterface(self.scanned_objects, self.selected_object_tuple, self)
                 if fileListInterface.exec() and self.scanned_objects:  # 用户点击确认按钮并且文件夹内有文件才执行
-                    self.selected_object_tuple = tuple(sorted(fileListInterface.selected_file_list))
+                    self.selected_object_tuple = tuple(sorted(fileListInterface.selected_list))
                     InfoBar.success(
                         title='成功',
                         content='重命名作用域修改成功',
