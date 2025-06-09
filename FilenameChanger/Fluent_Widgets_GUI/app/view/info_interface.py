@@ -45,6 +45,11 @@ help_content_md = """\
 
 """
 changeLog_content_md = """\
+# v2.3.0
+
+### 新增内容
+- 新增使用MySQL保存规则和历史记录的功能
+
 # v2.2.4
 
 ### 新增内容
