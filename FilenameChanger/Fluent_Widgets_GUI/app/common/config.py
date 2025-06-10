@@ -18,6 +18,9 @@ class Config(QConfig):
     folderMode = ConfigItem('RenameConfigs', 'FolderMode', False, BoolValidator())
     secureScanning = ConfigItem('RenameConfigs', 'secureScanning', True, BoolValidator())
 
+    # 数据管理设置项
+    databaseMode = ConfigItem('DataManagement', 'databaseMode', False, BoolValidator())
+
 
 cfg = Config()
 qconfig.load(config_path, cfg)
