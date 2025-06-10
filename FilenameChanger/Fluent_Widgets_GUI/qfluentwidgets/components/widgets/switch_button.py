@@ -150,9 +150,9 @@ class SwitchButton(QWidget):
             the position of indicator
         """
         super().__init__(parent=parent)
-        self._text = self.tr('Off')
-        self._offText =  self.tr('Off')
-        self._onText =  self.tr('On')
+        self._text = '关'
+        self._offText =  '关'
+        self._onText =  '开'
         self.__spacing = 12
 
         self.indicatorPos = indicatorPos
@@ -163,7 +163,7 @@ class SwitchButton(QWidget):
         self.__initWidget()
 
     @__init__.register
-    def _(self, text: str = 'Off', parent: QWidget = None, indicatorPos=IndicatorPosition.LEFT):
+    def _(self, text: str = '关', parent: QWidget = None, indicatorPos=IndicatorPosition.LEFT):
         """
         Parameters
         ----------
