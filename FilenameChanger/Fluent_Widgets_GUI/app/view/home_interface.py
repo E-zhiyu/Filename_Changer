@@ -1,5 +1,5 @@
 """
-主页内容设置模块
+程序主页
 """
 from PyQt6.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QFileDialog, QFrame
 from PyQt6.QtCore import Qt, pyqtSignal

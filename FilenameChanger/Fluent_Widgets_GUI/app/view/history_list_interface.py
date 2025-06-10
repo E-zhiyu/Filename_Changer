@@ -1,5 +1,5 @@
 """
-历史记录列表界面内容设置模块
+历史记录列表界面
 """
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QFrame

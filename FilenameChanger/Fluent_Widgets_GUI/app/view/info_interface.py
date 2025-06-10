@@ -1,5 +1,5 @@
 """
-关于软件界面内容设置模块
+关于软件界面
 """
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QWidget, QVBoxLayout
