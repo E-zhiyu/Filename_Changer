@@ -15,7 +15,7 @@ def encrypt_password(password):
     return f.encrypt(password.encode())
 
 
-def save_connection(connection: dict):
+def saveConnectionInfos(connection: dict):
     """将连接参数写入文件"""
 
     # 若没有密钥文件则生成新密钥
