@@ -82,7 +82,7 @@ def scan_files(directory: str) -> list:
                         os.path.isfile(os.path.join(directory, file))]
 
     if not old_name:
-        logging.error('文件名获取失败：目标文件夹不存在或为空')
+        logging.warning('文件名获取失败：目标文件夹不存在或为空')
         return []
     else:
         logging.info('文件名列表获取成功')
