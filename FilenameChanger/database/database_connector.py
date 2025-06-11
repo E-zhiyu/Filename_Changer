@@ -56,7 +56,7 @@ def loadConnectionInfos():
 def create_connection():
     """
     功能：创建数据库连接
-    返回：数据库连接
+    返回：数据库连接、连接情况和提示信息
     """
     connection_infos = loadConnectionInfos()
     host = connection_infos['host']
@@ -65,13 +65,25 @@ def create_connection():
     database = connection_infos['database']
     password = connection_infos['password']
 
-    connection = pymysql.connect(
-        host=host,
-        port=port,
-        user=user,
-        password=password,
-        db=database,
-        charset='utf8'
-    )
+    try:
+        connection = pymysql.connect(
+            host=host,
+            port=port,
+            user=user,
+            password=password,
+            db=database,
+            charset='utf8'
+        )
+    except pymysql.err.OperationalError as e:
+        error_code = e.args[0]
+        if error_code == 2003:
+            message = '目标主机的数据库服务未运行'
+        elif error_code == 1045:
+            message = '用户名或密码错误'
+        elif error_code == 1049:
+            message = '目标数据库不存在'
+        else:
+            message = '连接至数据库时出错'
+        return None, False, message
 
-    return connection
+    return connection, True, '数据库连接成功'
