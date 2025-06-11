@@ -8,17 +8,19 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (FluentIcon, setFo
                                                                OptionsSettingCard, PushSettingCard, SettingCardGroup,
                                                                InfoBar, InfoBarPosition, CustomColorSettingCard,
                                                                ExpandLayout, SwitchSettingCard, MessageBoxBase,
-                                                               LineEdit)
+                                                               LineEdit, PasswordLineEdit)
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets.common.config import QConfig
 from FilenameChanger.Fluent_Widgets_GUI.app.common.config import Config as cfg
 
 from FilenameChanger.rename_rules.rule_manager import (import_rule, export_rule)
 from FilenameChanger.log.log_recorder import *
-from FilenameChanger.database.connection_recorder import save_connection
+from FilenameChanger.database.connection_recorder import saveConnectionInfos
+from FilenameChanger.database.database_connector import loadConnectionInfos
 
 
-def editDatabaseConnection(parent):
+def editDatabaseConnection(parentInterface):
     """编辑数据库连接参数"""
+    connection_infos = loadConnectionInfos()
 
     class EditWindow(MessageBoxBase):
         """创建编辑连接参数的窗口"""
@@ -30,8 +32,10 @@ def editDatabaseConnection(parent):
             'database': ''
         }  # 存放数据库连接参数的字典
 
-        def __init__(self, parent):
+        def __init__(self, info_dict, parent):
             super().__init__(parent)
+            self.info_dict = info_dict
+
             self.yesButton.setText('确定')
             self.cancelButton.setText('取消')
 
@@ -47,7 +51,7 @@ def editDatabaseConnection(parent):
             hostLineEdit = LineEdit(self.widget)
             hostLineEdit.setPlaceholderText('请输入主机地址')
             hostLineEdit.setFixedWidth(175)
-            hostLineEdit.editingFinished.connect(lambda: self.recordConnection('host', hostLineEdit.text()))
+            hostLineEdit.textChanged.connect(lambda: self.recordConnection('host', hostLineEdit.text()))
 
             hostLayout.addWidget(hostLabel)
             hostLayout.addStretch(1)
@@ -60,7 +64,7 @@ def editDatabaseConnection(parent):
             portLineEdit = LineEdit(self.widget)
             portLineEdit.setPlaceholderText('留空使用默认值3306')
             portLineEdit.setFixedWidth(175)
-            portLineEdit.editingFinished.connect(lambda: self.recordConnection('port', portLineEdit.text()))
+            portLineEdit.textChanged.connect(lambda: self.recordConnection('port', portLineEdit.text()))
 
             portLayout.addWidget(portLabel)
             portLayout.addStretch(1)
@@ -73,7 +77,7 @@ def editDatabaseConnection(parent):
             userLineEdit = LineEdit(self.widget)
             userLineEdit.setPlaceholderText('请输入用户名')
             userLineEdit.setFixedWidth(175)
-            userLineEdit.editingFinished.connect(lambda: self.recordConnection('user', userLineEdit.text()))
+            userLineEdit.textChanged.connect(lambda: self.recordConnection('user', userLineEdit.text()))
 
             userLayout.addWidget(userLabel)
             userLayout.addStretch(1)
@@ -83,10 +87,10 @@ def editDatabaseConnection(parent):
             # 密码
             passwordLayout = QHBoxLayout(self.widget)
             passwordLabel = SubtitleLabel(text='密码', parent=self.widget)
-            passwordLineEdit = LineEdit(self.widget)
+            passwordLineEdit = PasswordLineEdit(self.widget)
             passwordLineEdit.setPlaceholderText('请输入密码')
             passwordLineEdit.setFixedWidth(175)
-            passwordLineEdit.editingFinished.connect(lambda: self.recordConnection('password', passwordLineEdit.text()))
+            passwordLineEdit.textChanged.connect(lambda: self.recordConnection('password', passwordLineEdit.text()))
 
             passwordLayout.addWidget(passwordLabel)
             passwordLayout.addStretch(1)
@@ -99,21 +103,28 @@ def editDatabaseConnection(parent):
             databaseLineEdit = LineEdit(self.widget)
             databaseLineEdit.setPlaceholderText('请输入数据库')
             databaseLineEdit.setFixedWidth(175)
-            databaseLineEdit.editingFinished.connect(lambda: self.recordConnection('database', databaseLineEdit.text()))
+            databaseLineEdit.textChanged.connect(lambda: self.recordConnection('database', databaseLineEdit.text()))
 
             databaseLayout.addWidget(databaseLabel)
             databaseLayout.addStretch(1)
             databaseLayout.addWidget(databaseLineEdit)
             self.viewLayout.addLayout(databaseLayout)
 
+            """设置输入框文本"""
+            hostLineEdit.setText(self.info_dict['host'])
+            portLineEdit.setText(self.info_dict['port'])
+            userLineEdit.setText(self.info_dict['user'])
+            passwordLineEdit.setText(self.info_dict['password'])
+            databaseLineEdit.setText(self.info_dict['database'])
+
         def recordConnection(self, k, v):
             """将键值对保存至字典"""
             self.connection_dict[k] = v
 
-    window = EditWindow(parent)
+    window = EditWindow(connection_infos, parentInterface)
     if window.exec():
         connection_dict = window.connection_dict
-        save_connection(connection_dict)
+        saveConnectionInfos(connection_dict)
 
         logging.info('数据库连接参数保存成功')
         InfoBar.success(
@@ -121,7 +132,7 @@ def editDatabaseConnection(parent):
             '数据库连接参数保存成功',
             duration=2000,
             position=InfoBarPosition.TOP,
-            parent=parent
+            parent=parentInterface
         )
 
 
