@@ -8,7 +8,7 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (FluentIcon, setFo
                                                                OptionsSettingCard, PushSettingCard, SettingCardGroup,
                                                                InfoBar, InfoBarPosition, CustomColorSettingCard,
                                                                ExpandLayout, SwitchSettingCard, MessageBoxBase,
-                                                               LineEdit, PasswordLineEdit, HeaderCardWidget)
+                                                               LineEdit, PasswordLineEdit)
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets.common.config import QConfig
 from FilenameChanger.Fluent_Widgets_GUI.app.common.config import Config as cfg
 
