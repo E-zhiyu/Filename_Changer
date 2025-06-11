@@ -265,7 +265,7 @@ class SettingInterface(QWidget):
             text='选择文件',
             icon=FluentIcon.DOWNLOAD,
             title='规则导入',
-            content='从外部json文件导入规则'
+            content='从外部JSON文件导入规则'
         )
 
         def importRule():
@@ -307,7 +307,7 @@ class SettingInterface(QWidget):
             text='选择位置',
             icon=FluentIcon.SHARE,
             title='规则导出',
-            content='备份你的规则'
+            content='将规则导出为JSON文件'
         )
 
         def exportRule():
