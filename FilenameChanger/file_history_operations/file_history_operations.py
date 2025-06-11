@@ -9,6 +9,7 @@ from FilenameChanger import history_file_path
 from FilenameChanger.rename_rules.rule_applier import *
 
 from FilenameChanger.Fluent_Widgets_GUI.app.common.config import Config as cfg
+from FilenameChanger.database.database_connector import create_connection
 
 
 def is_directory_usable(directory: str):
@@ -211,21 +212,31 @@ def load_history() -> list:
     返回：历史记录列表
     """
     logging.info('正在读取历史记录……')
-    # 创建历史记录文件夹
-    if not os.path.isdir(os.path.dirname(history_file_path)):
-        os.mkdir(os.path.dirname(history_file_path))
 
-    # 读取现有历史记录
-    try:
-        with open(history_file_path, 'r', encoding='utf-8') as f:
-            logging.info('成功读取已保存的历史记录')
-            history_list = json.load(f)
-    except (FileNotFoundError, JSONDecodeError):
-        with open(history_file_path, 'w', encoding='utf-8') as f:
-            logging.info('历史记录文件不存在，正在初始化……')
-            history_list = []
-            json.dump(history_list, f, ensure_ascii=False, indent=4)
-            logging.info('历史记录文件初始化成功')
+    if cfg.get(cfg, cfg.databaseMode):
+        connection = create_connection()
+        if not connection:  # 连接出错则返回空列表
+            return []
+
+        pass
+
+        connection.close()
+    else:
+        # 创建历史记录文件夹
+        if not os.path.isdir(os.path.dirname(history_file_path)):
+            os.mkdir(os.path.dirname(history_file_path))
+
+        # 读取现有历史记录
+        try:
+            with open(history_file_path, 'r', encoding='utf-8') as f:
+                logging.info('成功读取已保存的历史记录')
+                history_list = json.load(f)
+        except (FileNotFoundError, JSONDecodeError):
+            with open(history_file_path, 'w', encoding='utf-8') as f:
+                logging.info('历史记录文件不存在，正在初始化……')
+                history_list = []
+                json.dump(history_list, f, ensure_ascii=False, indent=4)
+                logging.info('历史记录文件初始化成功')
 
     return history_list
 
