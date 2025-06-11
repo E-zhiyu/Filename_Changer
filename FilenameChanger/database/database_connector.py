@@ -77,13 +77,13 @@ def create_connection():
     except pymysql.err.OperationalError as e:
         error_code = e.args[0]
         if error_code == 2003:
-            message = '目标主机的数据库服务未运行'
+            message = '目标主机未运行数据库服务，请检查主机地址'
         elif error_code == 1045:
             message = '用户名或密码错误'
         elif error_code == 1049:
-            message = '目标数据库不存在'
+            message = '目标数据库不存在，请检查数据库名称是否拼写错误'
         else:
             message = '连接至数据库时出错'
         return None, False, message
-
-    return connection, True, '数据库连接成功'
+    else:
+        return connection, True, '数据库连接成功'

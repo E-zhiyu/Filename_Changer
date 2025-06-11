@@ -8,14 +8,42 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (FluentIcon, setFo
                                                                OptionsSettingCard, PushSettingCard, SettingCardGroup,
                                                                InfoBar, InfoBarPosition, CustomColorSettingCard,
                                                                ExpandLayout, SwitchSettingCard, MessageBoxBase,
-                                                               LineEdit, PasswordLineEdit)
+                                                               LineEdit, PasswordLineEdit, HeaderCardWidget)
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets.common.config import QConfig
 from FilenameChanger.Fluent_Widgets_GUI.app.common.config import Config as cfg
 
 from FilenameChanger.rename_rules.rule_manager import (import_rule, export_rule)
 from FilenameChanger.log.log_recorder import *
 from FilenameChanger.database.connection_recorder import saveConnectionInfos
-from FilenameChanger.database.database_connector import loadConnectionInfos
+from FilenameChanger.database.database_connector import loadConnectionInfos, create_connection
+
+
+def testConnection(parentInterface):
+    """测试数据库连接"""
+    # 如果没有启用数据库模式直接结束运行
+    if not cfg.get(cfg, cfg.databaseMode):
+        return
+
+    connection, flag, message = create_connection()
+    if flag:
+        InfoBar.success(
+            '成功',
+            message,
+            duration=2000,
+            position=InfoBarPosition.TOP,
+            parent=parentInterface
+        )
+    else:
+        InfoBar.error(
+            '失败',
+            message,
+            duration=2000,
+            position=InfoBarPosition.TOP,
+            parent=parentInterface
+        )
+
+    if connection:  # 如果connection不是None则运行close方法
+        connection.close()
 
 
 def editDatabaseConnection(parentInterface):
@@ -26,7 +54,7 @@ def editDatabaseConnection(parentInterface):
         """创建编辑连接参数的窗口"""
         connection_dict = {
             'host': '',
-            'port': '3306',
+            'port': 3306,
             'user': '',
             'password': '',
             'database': ''
@@ -112,14 +140,17 @@ def editDatabaseConnection(parentInterface):
 
             """设置输入框文本"""
             hostLineEdit.setText(self.info_dict['host'])
-            portLineEdit.setText(self.info_dict['port'])
+            portLineEdit.setText(str(self.info_dict['port']))
             userLineEdit.setText(self.info_dict['user'])
             passwordLineEdit.setText(self.info_dict['password'])
             databaseLineEdit.setText(self.info_dict['database'])
 
         def recordConnection(self, k, v):
             """将键值对保存至字典"""
-            self.connection_dict[k] = v
+            if k == 'port':
+                self.connection_dict[k] = int(v)  # 端口号保存为整型
+            else:
+                self.connection_dict[k] = v
 
     window = EditWindow(connection_infos, parentInterface)
     if window.exec():
@@ -127,13 +158,18 @@ def editDatabaseConnection(parentInterface):
         saveConnectionInfos(connection_dict)
 
         logging.info('数据库连接参数保存成功')
-        InfoBar.success(
-            '成功',
-            '数据库连接参数保存成功',
-            duration=2000,
-            position=InfoBarPosition.TOP,
-            parent=parentInterface
-        )
+
+        # 编辑完成后如果启用了数据库模式则测试连接状态
+        if cfg.get(cfg, cfg.databaseMode):
+            testConnection(parentInterface)
+        else:
+            InfoBar.success(
+                '成功',
+                '数据库连接参数保存成功',
+                duration=2000,
+                position=InfoBarPosition.TOP,
+                parent=parentInterface
+            )
 
 
 class SettingInterface(QWidget):
@@ -211,6 +247,7 @@ class SettingInterface(QWidget):
             cfg.databaseMode
         )
         self.dataManagementGroup.addSettingCard(self.databaseCard)
+        self.databaseCard.checkedChanged.connect(lambda: testConnection(self))
 
         # 数据库连接参数设置
         self.databaseConnectionCard = PushSettingCard(
