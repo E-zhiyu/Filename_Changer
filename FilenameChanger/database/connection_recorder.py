@@ -10,7 +10,7 @@ from cryptography.fernet import Fernet
 def encrypt_password(password):
     """加密密码"""
     with open(os.path.join(database_directory, 'secret.key'), 'rb') as key_file:
-        key = key_file.read()
+        key = key_file.read()  # 无需处理文件不存在的情况，因为调用该函数前会创建密钥文件
     f = Fernet(key)
     return f.encrypt(password.encode())
 

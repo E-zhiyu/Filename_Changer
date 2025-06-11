@@ -1,10 +1,12 @@
 """
 数据库连接模块
 """
-import os, json
+import json
+
 import pymysql.cursors
 from cryptography.fernet import Fernet
 
+from FilenameChanger.log.log_recorder import *
 from FilenameChanger import database_directory
 
 
@@ -18,16 +20,27 @@ def decrypt_password(encrypted_password):
 
 def loadConnectionInfos():
     """读取文件中的连接参数"""
-    with open(os.path.join(database_directory, 'password.dat'), 'rb') as password_file:
-        b_password = password_file.read()
-    password = decrypt_password(b_password)  # 解密密码
+    try:
+        with open(os.path.join(database_directory, 'password.dat'), 'rb') as password_file:
+            b_password = password_file.read()
+            password = decrypt_password(b_password)  # 解密密码
+    except FileNotFoundError:
+        logging.warning('密钥文件或密码文件丢失，密码自动填充为空')
+        password = ''  # 密码文件或密钥文件丢失则默认为空
 
-    with open(os.path.join(database_directory, 'connection.json'), 'r') as connection_file:
-        connection = json.load(connection_file)
-    host = connection['host']
-    port = connection['port']
-    user = connection['user']
-    database = connection['database']
+    try:
+        with open(os.path.join(database_directory, 'connection.json'), 'r') as connection_file:
+            connection = json.load(connection_file)
+        host = connection['host']
+        port = connection['port']
+        user = connection['user']
+        database = connection['database']
+    except FileNotFoundError:
+        logging.warning('数据库连接参数文件丢失，各参数已自动填充为空值')
+        host = ''
+        port = ''
+        user = ''
+        database = ''
 
     dictionary = {
         'host': host,
