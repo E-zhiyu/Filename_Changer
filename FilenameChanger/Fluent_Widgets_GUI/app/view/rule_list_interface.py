@@ -15,8 +15,7 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, se
                                                                InfoBar, InfoBarPosition, ToolTipFilter, themeColor,
                                                                isDarkTheme)
 
-from FilenameChanger.rename_rules.rule_manager import (load_rule, activate_rule, del_rules, save_new_rule, analise_rule,
-                                                       revise_rule)
+from FilenameChanger.rename_rules.rule_manager import (load_rule, activate_rule, del_rules, save_new_rule, revise_rule)
 
 from FilenameChanger.log.log_recorder import *
 
@@ -604,9 +603,11 @@ class RuleCard(CardWidget):
 
 class PositionBtnLayout(QHBoxLayout):
     """存放位置单选按钮的容器"""
+    positionChanged = pyqtSignal()
 
     def __init__(self, parent):
         super().__init__()
+        self.pos = 'head'
         parent.new_layout_list.append(self)  # 将自身添加到父容器的新布局列表中
 
         """文本标签"""
@@ -617,13 +618,21 @@ class PositionBtnLayout(QHBoxLayout):
         self.tailBtn = RadioButton('文件名尾')
         self.headBtn = RadioButton('文件名首')
         self.btnGroup = QButtonGroup(parent)
-        self.btnGroup.addButton(self.tailBtn)
-        self.btnGroup.addButton(self.headBtn)
+        self.btnGroup.addButton(self.tailBtn, 2)
+        self.btnGroup.addButton(self.headBtn, 1)
 
+        self.btnGroup.buttonToggled.connect(self.revisePos)
         self.headBtn.setChecked(True)
 
         self.addWidget(self.headBtn, 0, Qt.AlignmentFlag.AlignRight)
         self.addWidget(self.tailBtn, 0, Qt.AlignmentFlag.AlignRight)
+
+    def revisePos(self):
+        if self.btnGroup.checkedId() == 1:
+            self.pos = 'head'
+        elif self.btnGroup.checkedId() == 2:
+            self.pos = 'tail'
+        self.positionChanged.emit()
 
 
 class RuleInputInterface(MessageBoxBase):
@@ -637,6 +646,7 @@ class RuleInputInterface(MessageBoxBase):
         super().__init__(parent=parent)
         self.num_types = None
         self.errorInfoLabel = BodyLabel(text='你还有必填的选项未填写！')  # 提示错误信息的标签
+        self.rule = {'type': 0, 'name': '', 'desc': ''}  # 定义规则字典
 
         """基本设置"""
         self.widget.setMinimumWidth(450)  # 设置对话框最小宽度
@@ -682,6 +692,7 @@ class RuleInputInterface(MessageBoxBase):
         self.ruleNameLineEdit.setPlaceholderText('输入规则名称（必填）')
         self.ruleNameLineEdit.setFixedWidth(200)
         self.ruleNameLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.ruleNameLineEdit.textChanged.connect(lambda: self.setKeyValue('name', self.ruleNameLineEdit.text(), 'str'))
 
         self.ruleNameLayout.addWidget(self.ruleNameLabel)
         self.ruleNameLayout.addWidget(self.ruleNameLineEdit)
@@ -695,6 +706,7 @@ class RuleInputInterface(MessageBoxBase):
         self.ruleDescLineEdit.setPlaceholderText('请输入规则描述')
         self.ruleDescLineEdit.setFixedWidth(200)
         self.ruleDescLayout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.ruleDescLineEdit.textChanged.connect(lambda: self.setKeyValue('desc', self.ruleDescLineEdit.text(), 'str'))
 
         self.ruleDescLayout.addWidget(self.ruleDescLabel)
         self.ruleDescLayout.addWidget(self.ruleDescLineEdit)
@@ -707,7 +719,12 @@ class RuleInputInterface(MessageBoxBase):
             self.errorInfoLabel.setHidden(False)
             return False
 
-        if self.new_rule_type == 1:
+        if self.new_rule_type == 0:
+            self.errorInfoLabel.setText('请选择一种规则！')
+            self.errorInfoLabel.setHidden(False)
+            return False
+
+        elif self.new_rule_type == 1:
             if not self.splitCharLineEdit.text():
                 self.errorInfoLabel.setText('未输入分隔符！')
                 self.errorInfoLabel.setHidden(False)
@@ -720,7 +737,7 @@ class RuleInputInterface(MessageBoxBase):
                 return False
 
         elif self.new_rule_type == 3:
-            if not self.oldStrLineEdit.text():
+            if not self.targetStrLineEdit.text():
                 self.errorInfoLabel.setText('未输入匹配字符串！')
                 self.errorInfoLabel.setHidden(False)
                 return False
@@ -739,10 +756,20 @@ class RuleInputInterface(MessageBoxBase):
 
         return True
 
+    def setKeyValue(self, key: str, value, value_type: str):
+        """将键值对写入规则字典"""
+        if value_type == 'int':
+            self.rule[key] = int(value)
+        elif value_type == 'str' or value_type == 'bool':
+            self.rule[key] = value
+
     def refreshLayout(self):
         """选择的规则类型改变时改变窗口布局"""
         self.yesButton.setEnabled(True)  # 一旦选择了规则类型就将该按钮设置为可用
         self.new_rule_type = self.ruleTypeComboBox.currentIndex() + 1
+
+        # 将规则字典重置
+        self.rule = {'type': self.new_rule_type, 'name': '', 'desc': ''}
 
         """创建输入框限制器，防止输入文件名不能存在的字符"""
         char_regex = QRegularExpression(r'[^\\/:*?"<>|]+')  # 限制器内容
@@ -782,9 +809,16 @@ class RuleInputInterface(MessageBoxBase):
                 splitCharInputLayout.addWidget(self.splitCharLineEdit)
                 self.splitCharLineEdit.setValidator(char_validator)  # 设置限制器
 
+                self.splitCharLineEdit.textChanged.connect(
+                    lambda: self.setKeyValue('split_char', self.splitCharLineEdit.text(), 'str'))
+
                 # 启用正则表达式复选框
                 self.enableReCheckBox = CheckBox(text='使用正则表达式', parent=self.widget)
                 splitCharInputLayout.addWidget(self.enableReCheckBox)
+
+                self.rule['enable_re'] = False  # 先将对应的键值对初始化
+                self.enableReCheckBox.checkStateChanged.connect(
+                    lambda: self.setKeyValue('enable_re', self.enableReCheckBox.isChecked(), 'bool'))
 
                 # 将新控件的水平布局添加到主布局
                 splitCharLayout.addLayout(splitCharInputLayout)
@@ -807,6 +841,9 @@ class RuleInputInterface(MessageBoxBase):
                 extLayout.addWidget(self.extLineEdit)
                 self.extLineEdit.setValidator(char_validator)  # 设置限制器
 
+                self.extLineEdit.textChanged.connect(
+                    lambda: self.setKeyValue('new_ext', self.extLineEdit.text().lstrip('.'), 'str'))
+
                 # 将新布局添加至主布局
                 self.viewLayout.addLayout(extLayout)
 
@@ -823,14 +860,21 @@ class RuleInputInterface(MessageBoxBase):
                 oldStrLayout.addWidget(oldStrLabel)
 
                 # 输入框
-                self.oldStrLineEdit = SpaceAwareLineEdit()
-                self.oldStrLineEdit.setPlaceholderText('请输入匹配字符串（必填）')
-                self.oldStrLineEdit.setFixedWidth(200)
-                oldStrInputLayout.addWidget(self.oldStrLineEdit)
+                self.targetStrLineEdit = SpaceAwareLineEdit()
+                self.targetStrLineEdit.setPlaceholderText('请输入匹配字符串（必填）')
+                self.targetStrLineEdit.setFixedWidth(200)
+                oldStrInputLayout.addWidget(self.targetStrLineEdit)
+
+                self.targetStrLineEdit.textChanged.connect(
+                    lambda: self.setKeyValue('target_str', self.targetStrLineEdit.text(), 'str'))
 
                 # 正则表达式复选框
-                self.useReCheckBox = CheckBox('使用正则表达式', parent=self)
-                oldStrInputLayout.addWidget(self.useReCheckBox)
+                self.enableReCheckBox = CheckBox('使用正则表达式', parent=self)
+                oldStrInputLayout.addWidget(self.enableReCheckBox)
+
+                self.rule['enable_re'] = False
+                self.enableReCheckBox.checkStateChanged.connect(
+                    lambda: self.setKeyValue('enable_re', self.enableReCheckBox.isChecked(), 'bool'))
 
                 # 将旧字符串相关布局添加到主布局
                 oldStrLayout.addLayout(oldStrInputLayout)
@@ -851,14 +895,18 @@ class RuleInputInterface(MessageBoxBase):
                 self.newStrLineEdit.setFixedWidth(200)
                 newStrLayout.addWidget(self.newStrLineEdit)
 
+                self.setKeyValue('new_str', '', 'str')  # 设置新字符串的初值
+                self.newStrLineEdit.textChanged.connect(
+                    lambda: self.setKeyValue('new_str', self.newStrLineEdit.text(), 'str'))
+
                 def set_validator():
                     """设置新字符串输入框限制器"""
-                    if self.useReCheckBox.isChecked():
+                    if self.enableReCheckBox.isChecked():
                         self.newStrLineEdit.setValidator(None)
                     else:
                         self.newStrLineEdit.setValidator(char_validator)
 
-                self.useReCheckBox.checkStateChanged.connect(set_validator)
+                self.enableReCheckBox.checkStateChanged.connect(set_validator)
 
                 # 将旧字符串相关布局添加到主布局
                 self.viewLayout.addLayout(newStrLayout)
@@ -889,15 +937,28 @@ class RuleInputInterface(MessageBoxBase):
                 self.customDatePicker.setFixedWidth(150)
                 self.customDatePicker.setVisible(False)  # 默认为不可见，只有下拉框选择自定义才会显示
 
+                self.customDatePicker.dateChanged.connect(
+                    lambda: self.setKeyValue('date', self.customDatePicker.date.toString('yyyy MM dd'), 'str'))
+
                 dateTypeLayout.addWidget(self.customDatePicker)
 
                 def setDateLineEditVisible(comboBox, dateLineEdit):
                     """根据下拉框选择的内容修改日期输入框的可见性"""
+                    self.setKeyValue('date_type', comboBox.currentIndex(), 'int')
+
                     if comboBox.currentIndex() == 4:
+                        self.setKeyValue('date', '', 'str')  # 设置自定义日期初值为空串
                         dateLineEdit.setVisible(True)
                     else:
+                        # 删除date键值对
+                        try:
+                            del self.rule['date']
+                        except KeyError:
+                            pass
+
                         dateLineEdit.setVisible(False)
 
+                self.setKeyValue('date_type', 0, 'int')  # 设置日期种类的初值
                 self.dateTypeComboBox.currentIndexChanged.connect(
                     lambda: setDateLineEditVisible(self.dateTypeComboBox, self.customDatePicker))
 
@@ -908,6 +969,10 @@ class RuleInputInterface(MessageBoxBase):
                 """填充位置选择"""
                 self.posLayout = PositionBtnLayout(self)
                 self.viewLayout.addLayout(self.posLayout)
+
+                self.setKeyValue('position', 'head', 'str')  # 设定位置初始值
+                self.posLayout.positionChanged.connect(
+                    lambda: self.setKeyValue('position', self.posLayout.pos, 'str'))
 
                 """日期分隔符选择"""
                 splitCharLayout = QHBoxLayout()
@@ -935,13 +1000,19 @@ class RuleInputInterface(MessageBoxBase):
                 self.customSplitCharLineEdit.setValidator(char_validator)
                 self.customSplitCharLineEdit.setVisible(False)  # 默认不显示，当选择自定义分隔符才显示
 
+                self.customSplitCharLineEdit.textChanged.connect(
+                    lambda: self.setKeyValue('split_char', self.customSplitCharLineEdit.text(), 'str'))
+
                 def setSplitCharLineEditVisible(comboBox, dateLineEdit):
                     """根据下拉框选择的内容修改分隔符输入框的可见性"""
+                    self.setKeyValue('split_char', comboBox.text(), 'str')
+
                     if comboBox.currentIndex() == 4:
                         dateLineEdit.setVisible(True)
                     else:
                         dateLineEdit.setVisible(False)
 
+                self.setKeyValue('split_char', '-', 'str')  # 设定分隔符初始值
                 self.splitCharComboBox.currentIndexChanged.connect(
                     lambda: setSplitCharLineEditVisible(self.splitCharComboBox, self.customSplitCharLineEdit))
 
@@ -976,12 +1047,23 @@ class RuleInputInterface(MessageBoxBase):
                 self.newNameLineEdit.setValidator(char_validator)
                 self.newNameLineEdit.setVisible(False)  # 默认设置为不可见
 
+                self.newNameLineEdit.textChanged.connect(
+                    lambda: self.setKeyValue('new_name', self.newNameLineEdit.text(), 'str'))
+
                 def switchNewNameLineEditVisible():
                     if self.fileNameComboBox.currentIndex() == 1:
+                        self.setKeyValue('use_original_name', False, 'bool')
                         self.newNameLineEdit.setVisible(True)
                     else:
+                        self.setKeyValue('use_original_name', True, 'bool')
+                        try:
+                            del self.rule['new_name']
+                        except KeyError:
+                            pass
+
                         self.newNameLineEdit.setVisible(False)
 
+                self.setKeyValue('use_original_name', True, 'bool')
                 self.fileNameComboBox.currentIndexChanged.connect(switchNewNameLineEditVisible)
 
                 # 将新水平布局添加至主布局
@@ -1003,6 +1085,10 @@ class RuleInputInterface(MessageBoxBase):
                 self.numTypeComboBox.addItems(self.num_types)
                 numTypeLayout.addWidget(self.numTypeComboBox)
 
+                self.setKeyValue('num_type', '1.', 'str')  # 设置编号样式初值
+                self.numTypeComboBox.currentIndexChanged.connect(
+                    lambda: self.setKeyValue('num_type', self.numTypeComboBox.text(), 'str'))
+
                 # 将水平布局添加至主布局
                 self.viewLayout.addLayout(numTypeLayout)
 
@@ -1019,6 +1105,12 @@ class RuleInputInterface(MessageBoxBase):
                 self.startNumLineEdit.setPlaceholderText('输入起始编号')
                 self.startNumLineEdit.setFixedWidth(125)
                 startNumLayout.addWidget(self.startNumLineEdit)
+
+                self.setKeyValue('start_num', 1, 'int')  # 设置起始编号初值
+                self.startNumLineEdit.textChanged.connect(
+                    lambda: self.setKeyValue('start_num',
+                                             self.startNumLineEdit.text() if self.startNumLineEdit.text() else 1,
+                                             'int'))
 
                 num_regex = QRegularExpression(r'\d+')  # 限制只能输入数字
                 num_validator = QRegularExpressionValidator(num_regex)
@@ -1040,6 +1132,11 @@ class RuleInputInterface(MessageBoxBase):
                 self.stepLengthLineEdit.setFixedWidth(125)
                 stepLengthLayout.addWidget(self.stepLengthLineEdit)
 
+                self.setKeyValue('step_length', 1, 'int')  # 设置步长初值
+                self.stepLengthLineEdit.textChanged.connect(lambda: self.setKeyValue('step_length',
+                                                                                     self.stepLengthLineEdit.text() if self.stepLengthLineEdit.text() else 1,
+                                                                                     'int'))
+
                 step_regex = QRegularExpression(r'^[^0]\d*$')  # 限制不能以0开头并且只能输入数字
                 step_validator = QRegularExpressionValidator(step_regex)
                 self.stepLengthLineEdit.setValidator(step_validator)
@@ -1049,6 +1146,10 @@ class RuleInputInterface(MessageBoxBase):
                 """位置选择"""
                 self.posLayout = PositionBtnLayout(self)
                 self.viewLayout.addLayout(self.posLayout)
+
+                self.setKeyValue('position', 'head', 'str')
+                self.posLayout.positionChanged.connect(
+                    lambda: self.setKeyValue('position', self.posLayout.pos, 'str'))
 
             elif self.new_rule_type == 6:
                 """作用域选择"""
@@ -1077,6 +1178,10 @@ class RuleInputInterface(MessageBoxBase):
                 actionScopeBtnLayout.addWidget(fileNameBtn)
                 actionScopeBtnLayout.addWidget(extBtn)
                 actionScopeBtnLayout.addWidget(bothBtn)
+
+                self.setKeyValue('action_scope', 1, 'int')  # 设置作用域初值
+                self.actionScopeGroup.buttonToggled.connect(
+                    lambda: self.setKeyValue('action_scope', self.actionScopeGroup.checkedId(), 'int'))
 
                 actionScopeLayout.addLayout(actionScopeBtnLayout)
                 self.viewLayout.addLayout(actionScopeLayout)
@@ -1108,6 +1213,10 @@ class RuleInputInterface(MessageBoxBase):
                 functionBtnLayout.addWidget(lowerBtn)
                 functionBtnLayout.addWidget(titleBtn)
 
+                self.setKeyValue('function', 1, 'int')  # 设置功能初值
+                self.functionGroup.buttonToggled.connect(
+                    lambda: self.setKeyValue('function', self.functionGroup.checkedId(), 'int'))
+
                 functionLayout.addLayout(functionBtnLayout)
                 self.viewLayout.addLayout(functionLayout)
 
@@ -1127,11 +1236,18 @@ class RuleInputInterface(MessageBoxBase):
                 self.strInputLineEdit.setValidator(char_validator)
                 strLayout.addWidget(self.strInputLineEdit, 0, Qt.AlignmentFlag.AlignRight)
 
+                self.strInputLineEdit.textChanged.connect(
+                    lambda: self.setKeyValue('string', self.strInputLineEdit.text(), 'str'))
+
                 self.viewLayout.addLayout(strLayout)
 
                 """填充位置选择"""
                 self.posLayout = PositionBtnLayout(self)
                 self.viewLayout.addLayout(self.posLayout)
+
+                self.setKeyValue('position', 'head', 'str')
+                self.posLayout.positionChanged.connect(
+                    lambda: self.setKeyValue('position', self.posLayout.pos, 'str'))
 
         """添加新的布局"""
         addNewControls()
@@ -1407,7 +1523,7 @@ class RuleListInterface(QWidget):
             if addRuleWindow.exec():
                 logging.info('用户确认添加规则')
 
-                rule = analise_rule(addRuleWindow)  # 解析添加规则时输入的内容
+                rule = addRuleWindow.rule
                 addRuleWindow.addNewRule.emit(self.rule_dict, rule)  # 发送规则种类、名称和描述的信号
 
                 new_card = RuleCard(rule, len(self.ruleCardList), parent=self)
@@ -1466,8 +1582,8 @@ class RuleListInterface(QWidget):
             target_str = rule['target_str']
             new_str = rule['new_str']
 
-            reviseRuleWindow.oldStrLineEdit.setText(target_str)
-            reviseRuleWindow.useReCheckBox.setChecked(rule.get('enable_re', False))
+            reviseRuleWindow.targetStrLineEdit.setText(target_str)
+            reviseRuleWindow.enableReCheckBox.setChecked(rule.get('enable_re', False))
             reviseRuleWindow.newStrLineEdit.setText(new_str)
         elif type == 4:
             split_char = rule['split_char']
@@ -1539,7 +1655,7 @@ class RuleListInterface(QWidget):
 
         if reviseRuleWindow.exec():  # 显示窗口
             logging.info('用户确认修改规则，以下为修改后的规则内容')
-            revised_rule = analise_rule(reviseRuleWindow)
+            revised_rule = reviseRuleWindow.rule
             reviseRuleWindow.reviseRule.emit(self.rule_dict, revised_rule, index)  # 发送信号给规则保存函数
 
             old_card = self.ruleCardLayout.itemAt(index).widget()
