@@ -390,10 +390,10 @@ class HistoryListInterface(QWidget):
         参数 index：从外部调用时传递的下标值
         """
         if self.history_list:
-            if index != -1:  # 外部参数优先级高于历史记录列表界面选择卡片的下标
-                del_index = index
+            if index != -1:
+                del_index = index  # 如果外部传值给index，则将其设置为待删除的记录下标
             else:
-                del_index = self.currentIndex
+                del_index = self.currentIndex  # 如果外部没有传值给index，则将选中的卡片下标作为待删除的记录下标
 
             self.setSelected(-1)  # 取消选中卡片防止出现显示BUG
 
