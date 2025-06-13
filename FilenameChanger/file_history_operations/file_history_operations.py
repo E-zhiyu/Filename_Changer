@@ -163,8 +163,7 @@ def rename_files(directory: str, old_names: (tuple, list), new_name_list: list, 
                     new_history_dict['new_name_list'].append(new_name)
 
     """保存重命名历史记录"""
-    if (new_history_dict['new_name_list'] or new_history_dict['error_files']
-            and record_history):
+    if (new_history_dict['new_name_list'] or new_history_dict['error_files']) and record_history:
         if cfg.get(cfg, cfg.databaseMode):
             connection = create_connection()[0]
             cursor = connection.cursor()
@@ -177,6 +176,7 @@ def rename_files(directory: str, old_names: (tuple, list), new_name_list: list, 
             """
             cursor.execute(sql, (directory, new_history_dict['time'], folder_mode))
             operation_id = cursor.lastrowid  # 获取刚插入的主表ID
+            new_history_dict['operation_id'] = operation_id  # 数据库模式下需要记录重命名操作的ID
 
             # 保存修改的文件
             for old, new in zip(old_names, new_name_list):
@@ -359,14 +359,8 @@ def cancel_rename_operation():
 
     # 判断旧文件夹路径是否可用
     if not os.path.isdir(directory):
-        logging.error('无法撤销：旧文件夹路径无效')
+        logging.warning('无法撤销：旧文件夹路径无效')
         return False, '无法撤销：旧文件夹路径无效'  # 提前返回，目的是不修改历史记录文件
-
-    # 运行到此处则将删除了一条记录的内容写入文件
-    if not os.path.isdir(os.path.dirname(history_file_path)):  # 若该记录对应的文件夹被删除则不将删除一条记录的列表覆写到文件中
-        os.mkdir(os.path.dirname(history_file_path))
-    with open(history_file_path, 'w', encoding='utf-8') as f:
-        json.dump(history_list, f, ensure_ascii=False, indent=4)
 
     # 撤销上一次重命名
     logging.info('开始撤销重命名……')
@@ -389,7 +383,30 @@ def history_del(history_list: list, index: int):
     参数 history_list：历史记录列表
     参数 index：指定删除的历史记录下标
     """
-    del history_list[index]
-    logging.info(f'删除历史记录，下标：{index}')
-    with open(history_file_path, 'w', encoding='utf-8') as f:
-        json.dump(history_list, f, ensure_ascii=False, indent=4)
+    if cfg.get(cfg, cfg.databaseMode):
+        connection = create_connection()[0]
+        cursor = connection.cursor()
+        operation_id = history_list[index]['operation_id']
+        del history_list[index]
+
+        # 删除主表数据
+        sql = 'DELETE FROM history WHERE operation_id=%s'
+        cursor.execute(sql, operation_id)
+
+        # 删除修改的文件记录
+        sql = 'DELETE FROM changed_files WHERE operation_id=%s'
+        cursor.execute(sql, operation_id)
+
+        # 删除出错的文件记录
+        sql = 'DELETE FROM error_files WHERE operation_id=%s'
+        cursor.execute(sql, operation_id)
+
+        connection.commit()
+        connection.close()
+    else:
+        del history_list[index]
+        logging.info(f'已删除历史记录，下标：{index}')
+        if not os.path.isdir(os.path.dirname(history_file_path)):
+            os.mkdir(os.path.dirname(history_file_path))  # 防止历史记录文件夹被移除
+        with open(history_file_path, 'w', encoding='utf-8') as f:
+            json.dump(history_list, f, ensure_ascii=False, indent=4)
