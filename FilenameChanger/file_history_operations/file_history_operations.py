@@ -123,7 +123,7 @@ def rename_operation(directory: str, old_names):
 
 def rename_files(directory: str, old_names: (tuple, list), new_name_list: list, record_history: bool = True):
     """
-    功能：执行重命名操作并记录
+    功能：执行重命名操作并新增历史记录
     参数 directory：目标文件夹
     参数 old_names：被替换的文件名序列
     参数 new_name_list：新文件名序列
@@ -168,8 +168,6 @@ def rename_files(directory: str, old_names: (tuple, list), new_name_list: list, 
         with open(history_file_path, 'w', encoding='utf-8') as f:
             json.dump(history_list, f, ensure_ascii=False, indent=4)
             logging.info('新增的历史记录已追加至文件中')
-    elif not new_history_dict['new_name_list'] and record_history:
-        logging.info('未追加新的重命名记录，因为所有文件新旧文件名都相同')
 
     # 统计成功和失败的文件数
     fail = len(new_history_dict['error_files'])
@@ -201,6 +199,8 @@ def get_new_name_list(selected_rule: dict, old_names: (tuple, list), directory: 
         new_name_list = use_type_6(selected_rule, old_names)
     elif rule_type == 7:
         new_name_list = use_type_7(selected_rule, old_names)
+    else:
+        new_name_list = []  # 正常情况不会触发该语句
 
     logging.info('已生成新文件名列表')
     return new_name_list
@@ -217,8 +217,67 @@ def load_history() -> list:
         connection = create_connection()
         if not connection:  # 连接出错则返回空列表
             return []
+        cursor = connection.cursor()
 
-        pass
+        """表格不存在时创建空白表格"""
+        # 创建历史记录主表
+        sql = """\
+        CREATE TABLE IF NOT EXISTS history (
+            id INT,  # 历史记录的标识符，用于快速查找其对应的文件名
+            directory VARCHAR(255),
+            time VARCHAR(20),
+            folder_mode BOOLEAN
+        );"""
+        cursor.execute(sql)
+
+        # 创建更改的文件表格
+        sql = """\
+        CREATE TABLE IF NOT EXISTS changed_files (
+            id INT,
+            old_name VARCHAR(255),
+            new_name VARCHAR(255)
+        )"""
+        cursor.execute(sql)
+
+        # 创建出错的文件表格
+        sql = """\
+        CREATE TABLE IF NOT EXISTS error_files (
+            id INT,
+            reasonAndName VARCHAR(255)
+        )"""
+        cursor.execute(sql)
+
+        """读取历史记录"""
+        sql = 'SELECT * FROM history'
+        cursor.execute(sql)
+        fetched_histories = cursor.fetchall()
+
+        history_list = []  # 存放所有历史记录的列表
+        # 循环读取所有历史记录
+        for history in fetched_histories:
+            id = history['id']
+            one_history_record = {
+                'directory': history['directory'],
+                'time': history['time'],
+                'folder_mode': history['folder_mode'],
+            }  # 新建一条历史记录的字典
+
+            # 查询变化的文件
+            sql = f'SELECT * FROM changed_files WHERE id={id}'
+            cursor.execute(sql)
+            old_name_list = [name for name in cursor.fetchall()['old_name']]
+            new_name_list = [name for name in cursor.fetchall()['new_name']]
+            one_history_record['old_name_list'] = old_name_list
+            one_history_record['new_name_list'] = new_name_list
+
+            # 查询出错的文件
+            sql = f'SELECT * FROM error_files WHERE id={id}'
+            cursor.execute(sql)
+            error_files = [file for file in cursor.fetchall()['reasonAndName']]
+            one_history_record['error_files'] = error_files
+
+            # 将本次查询到的历史记录合并至历史记录列表
+            history_list.append(one_history_record)
 
         connection.close()
     else:
