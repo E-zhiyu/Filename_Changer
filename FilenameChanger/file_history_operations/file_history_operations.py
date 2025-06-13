@@ -169,30 +169,30 @@ def rename_files(directory: str, old_names: (tuple, list), new_name_list: list, 
             connection = create_connection()[0]
             cursor = connection.cursor()
 
-            id = len(history_list) + 1
             # 将内容插入主表
             sql = """
             INSERT INTO history 
-            (id, directory, time, folder_mode)
-            VALUES (%s, %s, %s, %s)
+            (directory, time, folder_mode)
+            VALUES (%s, %s, %s)
             """
-            cursor.execute(sql, (id, directory, new_history_dict['time'], folder_mode))
+            cursor.execute(sql, (directory, new_history_dict['time'], folder_mode))
+            operation_id = cursor.lastrowid  # 获取刚插入的主表ID
 
             # 保存修改的文件
             for old, new in zip(old_names, new_name_list):
                 sql = f"""\
                 INSERT INTO changed_files
-                (id, old_name, new_name)
+                (operation_id, old_name, new_name)
                 VALUES (%s, %s, %s)"""
-                cursor.execute(sql, (id, old, new))
+                cursor.execute(sql, (operation_id, old, new))
 
             # 保存出错的文件
             for error_file in new_history_dict['error_files']:
                 sql = f"""\
                 INSERT INTO error_files
-                (id, reasonAndName)
+                (operation_id, reasonAndName)
                 VALUES (%s, %s)"""
-                cursor.execute(sql, (id, error_file))
+                cursor.execute(sql, (operation_id, error_file))
 
             connection.commit()
             connection.close()
@@ -256,7 +256,7 @@ def load_history() -> list:
         # 创建历史记录主表
         sql = """\
         CREATE TABLE IF NOT EXISTS history (
-            id INT,  # 历史记录的标识符，用于快速查找其对应的文件名
+            operation_id INT AUTO_INCREMENT PRIMARY KEY,  # 历史记录的自增主键，用于快速查找其对应的文件名
             directory VARCHAR(255),
             time VARCHAR(20),
             folder_mode BOOLEAN
@@ -266,7 +266,7 @@ def load_history() -> list:
         # 创建更改的文件表格
         sql = """\
         CREATE TABLE IF NOT EXISTS changed_files (
-            id INT,
+            operation_id INT,
             old_name VARCHAR(255),
             new_name VARCHAR(255)
         )"""
@@ -275,20 +275,20 @@ def load_history() -> list:
         # 创建出错的文件表格
         sql = """\
         CREATE TABLE IF NOT EXISTS error_files (
-            id INT,
+            operation_id INT,
             reasonAndName VARCHAR(255)
         )"""
         cursor.execute(sql)
 
         """读取历史记录"""
-        sql = 'SELECT * FROM history ORDER BY id'
+        sql = 'SELECT * FROM history ORDER BY operation_id'
         cursor.execute(sql)
         fetched_histories = cursor.fetchall()
 
         history_list = []  # 存放所有历史记录的列表
         # 循环读取所有历史记录
         for history in fetched_histories:
-            id = history['id']
+            operation_id = history['operation_id']
             one_history_record = {
                 'directory': history['directory'],
                 'time': history['time'],
@@ -296,8 +296,8 @@ def load_history() -> list:
             }  # 新建一条历史记录的字典
 
             # 查询变化的文件
-            sql = f'SELECT * FROM changed_files WHERE id={id}'
-            cursor.execute(sql)
+            sql = 'SELECT * FROM changed_files WHERE operation_id=%s'
+            cursor.execute(sql, operation_id)
             records = cursor.fetchall()
 
             old_name_list = []
@@ -309,8 +309,8 @@ def load_history() -> list:
             one_history_record['new_name_list'] = new_name_list
 
             # 查询出错的文件
-            sql = f'SELECT * FROM error_files WHERE id={id}'
-            cursor.execute(sql)
+            sql = 'SELECT * FROM error_files WHERE operation_id=%s'
+            cursor.execute(sql, operation_id)
             records = cursor.fetchall()
 
             error_files = []
