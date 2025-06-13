@@ -131,7 +131,8 @@ def editDatabaseConnection(parentInterface):
             databaseLineEdit = LineEdit(self.widget)
             databaseLineEdit.setPlaceholderText('请输入数据库')
             databaseLineEdit.setFixedWidth(175)
-            databaseLineEdit.textChanged.connect(lambda: self.recordConnection('database', databaseLineEdit.text()))
+            databaseLineEdit.textChanged.connect(
+                lambda: self.recordConnection('database', databaseLineEdit.text().lower()))  # 数据库名称为小写
 
             databaseLayout.addWidget(databaseLabel)
             databaseLayout.addStretch(1)
