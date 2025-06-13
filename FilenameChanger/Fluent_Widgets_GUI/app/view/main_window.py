@@ -50,6 +50,10 @@ class MainWindow(FluentWindow):
         self.settingInterface.secureScanningCard.checkedChanged.connect(
             self.homeInterface.initFileList)  # 开关安全扫描后更新文件列表
 
+        # 切换数据库模式后刷新规则列表和历史记录界面
+        self.settingInterface.databaseCard.checkedChanged.connect(self.historyListInterface.initCardView)
+        self.settingInterface.databaseCard.checkedChanged.connect(self.ruleListInterface.initRuleViewArea)
+
     def initNavigation(self):
         """初始化导航栏"""
         self.navigationInterface.setExpandWidth(200)  # 设置导航栏展开宽度
