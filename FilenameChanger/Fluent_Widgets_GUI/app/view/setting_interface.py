@@ -10,21 +10,22 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (FluentIcon, setFo
                                                                ExpandLayout, SwitchSettingCard, MessageBoxBase,
                                                                LineEdit, PasswordLineEdit)
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets.common.config import QConfig
-from FilenameChanger.Fluent_Widgets_GUI.app.common.config import Config as cfg
+from FilenameChanger.Fluent_Widgets_GUI.app.common.config import cfg
 
 from FilenameChanger.rename_rules.rule_manager import (import_rule, export_rule)
 from FilenameChanger.log.log_recorder import *
 from FilenameChanger.database.connection_recorder import saveConnectionInfos
-from FilenameChanger.database.database_connector import loadConnectionInfos, create_connection
+from FilenameChanger.database.database_connector import loadConnectionParameter, create_connection
 
 
 def testConnection(parentInterface):
     """测试数据库连接"""
+
     # 如果没有启用数据库模式直接结束运行
-    if not cfg.get(cfg, cfg.databaseMode):
+    if not cfg.get(cfg.databaseMode):
         return
 
-    connection, flag, message = create_connection()
+    connection, flag, message = create_connection(1)
     if flag:
         InfoBar.success(
             '成功',
@@ -33,6 +34,7 @@ def testConnection(parentInterface):
             position=InfoBarPosition.TOP,
             parent=parentInterface
         )
+        connection.close()
     else:
         InfoBar.error(
             '失败',
@@ -41,14 +43,13 @@ def testConnection(parentInterface):
             position=InfoBarPosition.TOP,
             parent=parentInterface
         )
+        cfg.set(cfg.databaseMode,False)
 
-    if connection:  # 如果connection不是None则运行close方法
-        connection.close()
 
 
 def editDatabaseConnection(parentInterface):
     """编辑数据库连接参数"""
-    connection_infos = loadConnectionInfos()
+    connection_parameters = loadConnectionParameter()
 
     class EditWindow(MessageBoxBase):
         """创建编辑连接参数的窗口"""
@@ -153,7 +154,7 @@ def editDatabaseConnection(parentInterface):
             else:
                 self.connection_dict[k] = v
 
-    window = EditWindow(connection_infos, parentInterface)
+    window = EditWindow(connection_parameters, parentInterface)
     if window.exec():
         connection_dict = window.connection_dict
         saveConnectionInfos(connection_dict)
@@ -161,7 +162,7 @@ def editDatabaseConnection(parentInterface):
         logging.info('数据库连接参数保存成功')
 
         # 编辑完成后如果启用了数据库模式则测试连接状态
-        if cfg.get(cfg, cfg.databaseMode):
+        if cfg.get(cfg.databaseMode):
             testConnection(parentInterface)
         else:
             InfoBar.success(
@@ -364,7 +365,7 @@ class SettingInterface(QWidget):
 
         def secureScanning_log():
             """安全扫描模式值改变时写入日志"""
-            if cfg.get(cfg, cfg.secureScanning):
+            if cfg.get(cfg.secureScanning):
                 logging.info('设置项改变，安全扫描模式：开')
             else:
                 logging.info('设置项改变，安全扫描模式：关')
@@ -382,7 +383,7 @@ class SettingInterface(QWidget):
 
         def folderMode_log():
             """文件夹模式改变时写入日志"""
-            if cfg.get(cfg, cfg.folderMode):
+            if cfg.get(cfg.folderMode):
                 logging.info('设置项改变，文件夹模式：开')
             else:
                 logging.info('设置项改变，文件夹模式：关')

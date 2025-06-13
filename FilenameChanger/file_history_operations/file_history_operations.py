@@ -8,8 +8,7 @@ import stat  # 判断文件属性
 from FilenameChanger import history_file_path
 from FilenameChanger.rename_rules.rule_applier import *
 
-import pymysql.cursors
-from FilenameChanger.Fluent_Widgets_GUI.app.common.config import Config as cfg
+from FilenameChanger.Fluent_Widgets_GUI.app.common.config import cfg
 from FilenameChanger.database.database_connector import create_connection
 
 
@@ -61,8 +60,8 @@ def scan_files(directory: str) -> list:
     参数 directory：目标路径
     返回：旧文件名列表
     """
-    folder_mode = cfg.get(cfg, cfg.folderMode)
-    secureScanning = cfg.get(cfg, cfg.secureScanning)
+    folder_mode = cfg.get(cfg.folderMode)
+    secureScanning = cfg.get(cfg.secureScanning)
     logging.info('获取文件名列表中……')
 
     if folder_mode:
@@ -116,10 +115,13 @@ def rename_operation(directory: str, old_names):
         logging.fatal('严重错误：新文件名列表为空')
         return False, '严重错误：新文件名列表为空', {}
 
-    success, fail, new_history_dict = rename_files(directory, old_names, new_name_list)  # 执行重命名操作
-    logging.info(f'重命名结束，成功：{success}个，失败：{fail}个')
-
-    return 1, f'重命名结束，成功：{success}个，失败：{fail}个', new_history_dict
+    flag, success, fail, new_history_dict = rename_files(directory, old_names, new_name_list)  # 执行重命名操作
+    if flag:
+        logging.info(f'重命名结束，成功：{success}个，失败：{fail}个')
+        return True, f'重命名结束，成功：{success}个，失败：{fail}个', new_history_dict
+    else:
+        logging.error('重命名失败：连接至数据库时出错')
+        return False, '重命名失败，连接至数据库时出错', {}
 
 
 def rename_files(directory: str, old_names: (tuple, list), new_name_list: list, record_history: bool = True):
@@ -133,8 +135,12 @@ def rename_files(directory: str, old_names: (tuple, list), new_name_list: list, 
     logging.info('进行文件名修改操作中……')
     history_list = load_history()
 
+    """启用数据库模式时先创建数据库连接"""
+    connection = create_connection()[0]
+    if not connection: return False, 0, 0, {}
+
     """文件重命名"""
-    folder_mode = cfg.get(cfg, cfg.folderMode)
+    folder_mode = cfg.get(cfg.folderMode)
     new_history_dict = {'directory': directory, 'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                         'old_name_list': [], 'new_name_list': [], 'error_files': [], 'folder_mode': folder_mode}
     for old_name, new_name in zip(old_names, new_name_list):
@@ -164,8 +170,7 @@ def rename_files(directory: str, old_names: (tuple, list), new_name_list: list, 
 
     """保存重命名历史记录"""
     if (new_history_dict['new_name_list'] or new_history_dict['error_files']) and record_history:
-        if cfg.get(cfg, cfg.databaseMode):
-            connection = create_connection()[0]
+        if cfg.get(cfg.databaseMode):
             cursor = connection.cursor()
 
             # 将内容插入主表
@@ -246,9 +251,10 @@ def load_history() -> list:
     """
     logging.info('正在读取历史记录……')
 
-    if cfg.get(cfg, cfg.databaseMode):
+    if cfg.get(cfg.databaseMode):
         connection = create_connection()[0]
         if not connection:  # 连接出错则返回空列表
+            logging.error('读取失败：连接至数据库时出错')
             return []
         cursor = connection.cursor()
 
@@ -364,17 +370,39 @@ def cancel_rename_operation():
 
     # 撤销上一次重命名
     logging.info('开始撤销重命名……')
-    rename_files(directory, new_name_list, old_name_list, False)  # 把新旧文件名反过来
-    logging.info('撤销重命名成功')
-
-    return True, '已成功撤销重命名'
+    flag = rename_files(directory, new_name_list, old_name_list, False)[0]  # 把新旧文件名反过来
+    if flag:
+        logging.info('撤销重命名成功')
+        return True, '已成功撤销重命名'
+    else:
+        logging.error('无法撤销，连接至数据库时出错')
+        return False, '无法撤销，连接至数据库时出错'
 
 
 def clear_history():
     """清除所有历史记录"""
-    logging.info('历史记录已清空')
-    with open(history_file_path, 'w', encoding='utf-8') as f:
-        json.dump([], f, ensure_ascii=False, indent=4)
+    if cfg.get(cfg.databaseMode):
+        connection = create_connection()[0]
+        if not connection:
+            logging.error('清除失败：连接至数据库时出错')
+            return False
+
+        cursor = connection.cursor()
+        sql = 'DELETE FROM history'
+        cursor.execute(sql)
+        sql = 'DELETE FROM changed_files'
+        cursor.execute(sql)
+        sql = 'DELETE FROM error_files'
+        cursor.execute(sql)
+
+        connection.commit()
+        connection.close()
+    else:
+        logging.info('历史记录已清空')
+        with open(history_file_path, 'w', encoding='utf-8') as f:
+            json.dump([], f, ensure_ascii=False, indent=4)
+
+    return True
 
 
 def history_del(history_list: list, index: int):
@@ -383,8 +411,12 @@ def history_del(history_list: list, index: int):
     参数 history_list：历史记录列表
     参数 index：指定删除的历史记录下标
     """
-    if cfg.get(cfg, cfg.databaseMode):
+    if cfg.get(cfg.databaseMode):
         connection = create_connection()[0]
+        if not connection:
+            logging.error('删除失败：连接至数据库时出错')
+            return False
+
         cursor = connection.cursor()
         operation_id = history_list[index]['operation_id']
         del history_list[index]
@@ -410,3 +442,5 @@ def history_del(history_list: list, index: int):
             os.mkdir(os.path.dirname(history_file_path))  # 防止历史记录文件夹被移除
         with open(history_file_path, 'w', encoding='utf-8') as f:
             json.dump(history_list, f, ensure_ascii=False, indent=4)
+
+    return True

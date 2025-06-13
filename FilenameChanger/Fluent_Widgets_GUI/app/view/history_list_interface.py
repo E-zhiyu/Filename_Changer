@@ -398,7 +398,27 @@ class HistoryListInterface(QWidget):
             self.setSelected(-1)  # 取消选中卡片防止出现显示BUG
 
             if del_index != -1:
-                history_del(self.history_list, del_index)  # 删除文件中的历史记录
+                flag = history_del(self.history_list, del_index)  # 删除文件中的历史记录
+
+                # 创建操作成功的消息框
+                if flag:
+                    if index == -1:  # 当该方法从外部调用并传值时不显示该消息
+                        InfoBar.success(
+                            title='成功',
+                            content='已删除选中的历史记录',
+                            position=InfoBarPosition.TOP,
+                            duration=2000,
+                            parent=self
+                        )
+                else:
+                    InfoBar.error(
+                        '无法删除',
+                        '连接至数据库时出错',
+                        position=InfoBarPosition.TOP,
+                        duration=2000,
+                        parent=self
+                    )
+                    return  # 无法连接至数据库则不进行操作
 
                 if self.history_list:  # 判断删除后是否还有历史记录
                     self.historyCardLayout.takeAt(del_index)  # 从界面中取出选中的卡片
@@ -414,16 +434,6 @@ class HistoryListInterface(QWidget):
                     self.historyScrollArea.verticalScrollBar().setValue(v_pos)
                 else:
                     self.initCardView()  # 若删除后没有历史记录，则直接刷新界面（以此显示历史记录为空的文本标签）
-
-                # 创建操作成功的消息框
-                if index == -1:  # 当该方法从外部调用并传值时不显示该消息
-                    InfoBar.success(
-                        title='成功',
-                        content='已删除选中的历史记录',
-                        position=InfoBarPosition.TOP,
-                        duration=2000,
-                        parent=self
-                    )
             else:
                 # 显示一个气泡弹窗
                 InfoBar.warning(
@@ -458,17 +468,28 @@ class HistoryListInterface(QWidget):
                 logging.info('正在确认操作：清空历史记录')
                 if confirmWindow.exec():
                     logging.info('用户确认清空历史记录')
-                    clear_history()
+                    flag = clear_history()
+
+                    if flag:
+                        InfoBar.success(
+                            title='成功',
+                            content='已清除全部历史记录',
+                            position=InfoBarPosition.TOP,
+                            duration=2000,
+                            parent=self
+                        )
+                    else:
+                        InfoBar.error(
+                            '无法清除',
+                            '连接至数据库时出错',
+                            position=InfoBarPosition.TOP,
+                            duration=2000,
+                            parent=self
+                        )
+                        return  # 无法连接至数据库则不进行操作
+
                     self.initCardView()  # （清空历史记录）刷新卡片布局
                     self.setSelected(-1)
-
-                    InfoBar.success(
-                        title='成功',
-                        content='已清除全部历史记录',
-                        position=InfoBarPosition.TOP,
-                        duration=2000,
-                        parent=self
-                    )
                 else:
                     logging.info('用户取消清空历史记录')
             else:

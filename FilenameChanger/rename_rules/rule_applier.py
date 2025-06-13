@@ -6,7 +6,7 @@ import re
 import time
 
 from FilenameChanger.rename_rules.rule_manager import *
-from FilenameChanger.Fluent_Widgets_GUI.app.common.config import Config as cfg
+from FilenameChanger.Fluent_Widgets_GUI.app.common.config import cfg
 
 
 def use_type_1(selected_rule, old_name_list):
@@ -23,7 +23,7 @@ def use_type_1(selected_rule, old_name_list):
     for old_name in old_name_list:
         name, ext = os.path.splitext(old_name)  # 分离文件名和扩展名
         # 如果是文件夹模式，则不分离扩展名
-        if cfg.get(cfg, cfg.folderMode):
+        if cfg.get(cfg.folderMode):
             name, ext = old_name, ''
 
         # 判断是否启用正则表达式
@@ -61,7 +61,7 @@ def use_type_2(selected_rule, old_name_list):
     返回：生成的新文件名列表
     """
     # 如果是文件夹模式，则不执行该函数
-    if cfg.get(cfg, cfg.folderMode):
+    if cfg.get(cfg.folderMode):
         return old_name_list
 
     new_ext = selected_rule['new_ext']
@@ -95,7 +95,7 @@ def use_type_3(selected_rule, old_name_list):
     for old_name in old_name_list:
         name, ext = os.path.splitext(old_name)
         # 如果是文件夹模式，则不分离扩展名
-        if cfg.get(cfg, cfg.folderMode):
+        if cfg.get(cfg.folderMode):
             name, ext = old_name, ''
 
         if enable_re:
@@ -172,7 +172,7 @@ def use_type_4(selected_rule, old_name_list, directory):
 
         name, ext = os.path.splitext(old_name)  # 分离文件名和扩展名
         # 如果是文件夹模式，则不分离扩展名
-        if cfg.get(cfg, cfg.folderMode):
+        if cfg.get(cfg.folderMode):
             name, ext = old_name, ''
 
         date_re = r'[-_ ]?\d{4}[-_ 年]\d{1,2}[-_ 月]\d{1,2}日?[-_ ]?'  # 日期匹配的模式串
@@ -225,7 +225,7 @@ def use_type_5(selected_rule, old_name_list):
         # 分离文件名和扩展名
         original_name, ext = os.path.splitext(old_name)
         # 如果是文件夹模式，则不分离扩展名
-        if cfg.get(cfg, cfg.folderMode):
+        if cfg.get(cfg.folderMode):
             original_name, ext = old_name, ''
 
         # 生成编号
@@ -293,7 +293,7 @@ def use_type_6(selected_rule, old_name_list):
     for old_name in old_name_list:
         name, ext = os.path.splitext(old_name)
         # 如果是文件夹模式，则不分离扩展名
-        if cfg.get(cfg, cfg.folderMode):
+        if cfg.get(cfg.folderMode):
             name, ext = old_name, ''
 
         if modify_name:
@@ -332,7 +332,7 @@ def use_type_7(selected_rule, old_name_list):
     for old_name in old_name_list:
         name, ext = os.path.splitext(old_name)
         # 如果是文件夹模式，则不分离扩展名
-        if cfg.get(cfg, cfg.folderMode):
+        if cfg.get(cfg.folderMode):
             name, ext = old_name, ''
 
         if position == 'head':
