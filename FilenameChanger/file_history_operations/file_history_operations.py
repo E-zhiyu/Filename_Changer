@@ -8,6 +8,7 @@ import stat  # 判断文件属性
 from FilenameChanger import history_file_path
 from FilenameChanger.rename_rules.rule_applier import *
 
+import pymysql.cursors
 from FilenameChanger.Fluent_Widgets_GUI.app.common.config import Config as cfg
 from FilenameChanger.database.database_connector import create_connection
 
@@ -161,13 +162,45 @@ def rename_files(directory: str, old_names: (tuple, list), new_name_list: list, 
                     new_history_dict['old_name_list'].append(old_name)
                     new_history_dict['new_name_list'].append(new_name)
 
-    """将重命名历史记录保存至文件中"""
+    """保存重命名历史记录"""
     if (new_history_dict['new_name_list'] or new_history_dict['error_files']
             and record_history):
-        history_list.insert(0, new_history_dict)
-        with open(history_file_path, 'w', encoding='utf-8') as f:
-            json.dump(history_list, f, ensure_ascii=False, indent=4)
-            logging.info('新增的历史记录已追加至文件中')
+        if cfg.get(cfg, cfg.databaseMode):
+            connection = create_connection()[0]
+            cursor = connection.cursor()
+
+            id = len(history_list) + 1
+            # 将内容插入主表
+            sql = """
+            INSERT INTO history 
+            (id, directory, time, folder_mode)
+            VALUES (%s, %s, %s, %s)
+            """
+            cursor.execute(sql, (id, directory, new_history_dict['time'], folder_mode))
+
+            # 保存修改的文件
+            for old, new in zip(old_names, new_name_list):
+                sql = f"""\
+                INSERT INTO changed_files
+                (id, old_name, new_name)
+                VALUES (%s, %s, %s)"""
+                cursor.execute(sql, (id, old, new))
+
+            # 保存出错的文件
+            for error_file in new_history_dict['error_files']:
+                sql = f"""\
+                INSERT INTO error_files
+                (id, reasonAndName)
+                VALUES (%s, %s)"""
+                cursor.execute(sql, (id, error_file))
+
+            connection.commit()
+            connection.close()
+        else:
+            history_list.insert(0, new_history_dict)
+            with open(history_file_path, 'w', encoding='utf-8') as f:
+                json.dump(history_list, f, ensure_ascii=False, indent=4)
+        logging.info('新增的历史记录已保存')
 
     # 统计成功和失败的文件数
     fail = len(new_history_dict['error_files'])
@@ -214,7 +247,7 @@ def load_history() -> list:
     logging.info('正在读取历史记录……')
 
     if cfg.get(cfg, cfg.databaseMode):
-        connection = create_connection()
+        connection = create_connection()[0]
         if not connection:  # 连接出错则返回空列表
             return []
         cursor = connection.cursor()
@@ -248,7 +281,7 @@ def load_history() -> list:
         cursor.execute(sql)
 
         """读取历史记录"""
-        sql = 'SELECT * FROM history'
+        sql = 'SELECT * FROM history ORDER BY id'
         cursor.execute(sql)
         fetched_histories = cursor.fetchall()
 
@@ -265,19 +298,28 @@ def load_history() -> list:
             # 查询变化的文件
             sql = f'SELECT * FROM changed_files WHERE id={id}'
             cursor.execute(sql)
-            old_name_list = [name for name in cursor.fetchall()['old_name']]
-            new_name_list = [name for name in cursor.fetchall()['new_name']]
+            records = cursor.fetchall()
+
+            old_name_list = []
+            new_name_list = []
+            for record in records:
+                old_name_list.append(record['old_name'])
+                new_name_list.append(record['new_name'])
             one_history_record['old_name_list'] = old_name_list
             one_history_record['new_name_list'] = new_name_list
 
             # 查询出错的文件
             sql = f'SELECT * FROM error_files WHERE id={id}'
             cursor.execute(sql)
-            error_files = [file for file in cursor.fetchall()['reasonAndName']]
+            records = cursor.fetchall()
+
+            error_files = []
+            for record in records:
+                error_files.append(record['reasonAndName'])
             one_history_record['error_files'] = error_files
 
             # 将本次查询到的历史记录合并至历史记录列表
-            history_list.append(one_history_record)
+            history_list.insert(0, one_history_record)
 
         connection.close()
     else:
