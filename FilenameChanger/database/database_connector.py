@@ -18,7 +18,7 @@ def decrypt_password(encrypted_password):
     return f.decrypt(encrypted_password).decode()
 
 
-def loadConnectionInfos():
+def loadConnectionParameter():
     """读取文件中的连接参数"""
     try:
         with open(os.path.join(database_directory, 'password.dat'), 'rb') as password_file:
@@ -42,7 +42,7 @@ def loadConnectionInfos():
         user = ''
         database = ''
 
-    dictionary = {
+    parameters = {
         'host': host,
         'port': port,
         'user': user,
@@ -50,20 +50,20 @@ def loadConnectionInfos():
         'database': database,
     }
 
-    return dictionary
+    return parameters
 
 
-def create_connection():
+def create_connection(connect_timeout: int = 5):
     """
     功能：创建数据库连接
     返回：数据库连接（出错则为None）、连接情况和提示信息
     """
-    connection_infos = loadConnectionInfos()
-    host = connection_infos['host']
-    port = connection_infos['port']
-    user = connection_infos['user']
-    database = connection_infos['database']
-    password = connection_infos['password']
+    parameters = loadConnectionParameter()
+    host = parameters['host']
+    port = parameters['port']
+    user = parameters['user']
+    database = parameters['database']
+    password = parameters['password']
 
     try:
         connection = pymysql.connect(
@@ -73,6 +73,9 @@ def create_connection():
             password=password,
             db=database,
             charset='utf8',
+            connect_timeout=connect_timeout,  # 设置默认超时时间
+            read_timeout=30,  # 读取操作超时时间（秒）
+            write_timeout=30,  # 写入操作超时时间（秒）
             cursorclass=pymysql.cursors.DictCursor  # 以字典形式返回每行信息
         )
     except pymysql.err.OperationalError as e:

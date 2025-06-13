@@ -8,11 +8,12 @@ from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (SubtitleLabel, Bo
                                                                PrimaryPushButton, SmoothScrollArea, MessageBox, InfoBar,
                                                                ToolButton, CardWidget, CheckBox, MessageBoxBase,
                                                                InfoBarPosition, ToolTipPosition, ToolTipFilter)
-from FilenameChanger.Fluent_Widgets_GUI.app.common.config import Config as cfg
+from FilenameChanger.Fluent_Widgets_GUI.app.common.config import cfg
 
 from FilenameChanger.file_history_operations.file_history_operations import (is_directory_usable, rename_operation,
                                                                              cancel_rename_operation, scan_files)
 from FilenameChanger.log.log_recorder import *
+from FilenameChanger.database.database_connector import create_connection
 
 
 class FileCard(CardWidget):
@@ -200,6 +201,28 @@ class HomeInterface(QWidget):
         self.scanned_objects = None
         self.selected_object_tuple = None
         self.path_flag = -1  # 标记输入路径的有效性
+
+        """数据库模式下测试数据库连接"""
+        if cfg.get(cfg.databaseMode):
+            connection, flag, message = create_connection()
+            if flag:
+                InfoBar.success(
+                    '成功',
+                    message,
+                    duration=2000,
+                    position=InfoBarPosition.TOP,
+                    parent=self
+                )
+                connection.close()
+            else:
+                InfoBar.error(
+                    '数据库无法连接',
+                    '已自动关闭数据库模式',
+                    duration=2000,
+                    position=InfoBarPosition.TOP,
+                    parent=self
+                )
+                cfg.set(cfg.databaseMode, False)
 
         """基本布局设置"""
         self.totalWidget = QWidget(self)  # 创建一个总容器存放所有控件，使得调整窗口大小的时候各控件不会相互分离
