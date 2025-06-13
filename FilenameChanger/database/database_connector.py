@@ -56,7 +56,7 @@ def loadConnectionInfos():
 def create_connection():
     """
     功能：创建数据库连接
-    返回：数据库连接、连接情况和提示信息
+    返回：数据库连接（出错则为None）、连接情况和提示信息
     """
     connection_infos = loadConnectionInfos()
     host = connection_infos['host']
@@ -72,7 +72,8 @@ def create_connection():
             user=user,
             password=password,
             db=database,
-            charset='utf8'
+            charset='utf8',
+            cursorclass=pymysql.cursors.DictCursor  # 以字典形式返回每行信息
         )
     except pymysql.err.OperationalError as e:
         error_code = e.args[0]
