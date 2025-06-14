@@ -1,7 +1,7 @@
 """
 软件设置界面
 """
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtCore import Qt, pyqtSignal, QObject
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QFileDialog, QDialog, QHBoxLayout
 
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (FluentIcon, setFont, ScrollArea, SubtitleLabel,
@@ -18,165 +18,48 @@ from FilenameChanger.database.connection_recorder import saveConnectionInfos
 from FilenameChanger.database.database_connector import loadConnectionParameter, create_connection
 
 
-def testConnection(parentInterface):
-    """测试数据库连接"""
+class DatabaseTester(QObject):
+    """数据库连接有效性的测试器"""
+    databaseEnabled = pyqtSignal()  # 启用数据库模式的信号
+    turnOffDatabaseMode = pyqtSignal()  # 关闭数据库模式的信号
 
-    # 如果没有启用数据库模式直接结束运行
-    if not cfg.get(cfg.databaseMode):
-        return
+    def testConnection(self, parent):
+        """
+        功能：测试数据库连接
+        参数 parent：父亲界面
+        """
 
-    connection, flag, message = create_connection(1)
-    if flag:
-        InfoBar.success(
-            '成功',
-            message,
-            duration=2000,
-            position=InfoBarPosition.TOP,
-            parent=parentInterface
-        )
-        connection.close()
-    else:
-        InfoBar.error(
-            '失败',
-            message,
-            duration=2000,
-            position=InfoBarPosition.TOP,
-            parent=parentInterface
-        )
-        cfg.set(cfg.databaseMode,False)
+        # 如果没有启用数据库模式直接结束运行并发送关闭数据库模式的信号
+        if not cfg.get(cfg.databaseMode):
+            self.turnOffDatabaseMode.emit()
+            return
 
-
-
-def editDatabaseConnection(parentInterface):
-    """编辑数据库连接参数"""
-    connection_parameters = loadConnectionParameter()
-
-    class EditWindow(MessageBoxBase):
-        """创建编辑连接参数的窗口"""
-        connection_dict = {
-            'host': '',
-            'port': 3306,
-            'user': '',
-            'password': '',
-            'database': ''
-        }  # 存放数据库连接参数的字典
-
-        def __init__(self, info_dict, parent):
-            super().__init__(parent)
-            self.info_dict = info_dict
-
-            self.yesButton.setText('确定')
-            self.cancelButton.setText('取消')
-
-            self.widget.setFixedWidth(350)
-
-            self.__initView__()
-
-        def __initView__(self):
-            """初始化界面布局"""
-            # 主机
-            hostLayout = QHBoxLayout(self.widget)
-            hostLabel = SubtitleLabel(text='主机', parent=self.widget)
-            hostLineEdit = LineEdit(self.widget)
-            hostLineEdit.setPlaceholderText('请输入主机地址')
-            hostLineEdit.setFixedWidth(175)
-            hostLineEdit.textChanged.connect(lambda: self.recordConnection('host', hostLineEdit.text()))
-
-            hostLayout.addWidget(hostLabel)
-            hostLayout.addStretch(1)
-            hostLayout.addWidget(hostLineEdit)
-            self.viewLayout.addLayout(hostLayout)
-
-            # 端口
-            portLayout = QHBoxLayout(self.widget)
-            portLabel = SubtitleLabel(text='端口', parent=self.widget)
-            portLineEdit = LineEdit(self.widget)
-            portLineEdit.setPlaceholderText('留空使用默认值3306')
-            portLineEdit.setFixedWidth(175)
-            portLineEdit.textChanged.connect(lambda: self.recordConnection('port', portLineEdit.text()))
-
-            portLayout.addWidget(portLabel)
-            portLayout.addStretch(1)
-            portLayout.addWidget(portLineEdit)
-            self.viewLayout.addLayout(portLayout)
-
-            # 用户
-            userLayout = QHBoxLayout(self.widget)
-            userLabel = SubtitleLabel(text='用户', parent=self.widget)
-            userLineEdit = LineEdit(self.widget)
-            userLineEdit.setPlaceholderText('请输入用户名')
-            userLineEdit.setFixedWidth(175)
-            userLineEdit.textChanged.connect(lambda: self.recordConnection('user', userLineEdit.text()))
-
-            userLayout.addWidget(userLabel)
-            userLayout.addStretch(1)
-            userLayout.addWidget(userLineEdit)
-            self.viewLayout.addLayout(userLayout)
-
-            # 密码
-            passwordLayout = QHBoxLayout(self.widget)
-            passwordLabel = SubtitleLabel(text='密码', parent=self.widget)
-            passwordLineEdit = PasswordLineEdit(self.widget)
-            passwordLineEdit.setPlaceholderText('请输入密码')
-            passwordLineEdit.setFixedWidth(175)
-            passwordLineEdit.textChanged.connect(lambda: self.recordConnection('password', passwordLineEdit.text()))
-
-            passwordLayout.addWidget(passwordLabel)
-            passwordLayout.addStretch(1)
-            passwordLayout.addWidget(passwordLineEdit)
-            self.viewLayout.addLayout(passwordLayout)
-
-            # 数据库
-            databaseLayout = QHBoxLayout(self.widget)
-            databaseLabel = SubtitleLabel(text='数据库', parent=self.widget)
-            databaseLineEdit = LineEdit(self.widget)
-            databaseLineEdit.setPlaceholderText('请输入数据库')
-            databaseLineEdit.setFixedWidth(175)
-            databaseLineEdit.textChanged.connect(
-                lambda: self.recordConnection('database', databaseLineEdit.text().lower()))  # 数据库名称为小写
-
-            databaseLayout.addWidget(databaseLabel)
-            databaseLayout.addStretch(1)
-            databaseLayout.addWidget(databaseLineEdit)
-            self.viewLayout.addLayout(databaseLayout)
-
-            """设置输入框文本"""
-            hostLineEdit.setText(self.info_dict['host'])
-            portLineEdit.setText(str(self.info_dict['port']))
-            userLineEdit.setText(self.info_dict['user'])
-            passwordLineEdit.setText(self.info_dict['password'])
-            databaseLineEdit.setText(self.info_dict['database'])
-
-        def recordConnection(self, k, v):
-            """将键值对保存至字典"""
-            if k == 'port':
-                self.connection_dict[k] = int(v)  # 端口号保存为整型
-            else:
-                self.connection_dict[k] = v
-
-    window = EditWindow(connection_parameters, parentInterface)
-    if window.exec():
-        connection_dict = window.connection_dict
-        saveConnectionInfos(connection_dict)
-
-        logging.info('数据库连接参数保存成功')
-
-        # 编辑完成后如果启用了数据库模式则测试连接状态
-        if cfg.get(cfg.databaseMode):
-            testConnection(parentInterface)
-        else:
+        connection, flag, message = create_connection(1)
+        if flag:
             InfoBar.success(
                 '成功',
-                '数据库连接参数保存成功',
+                message,
                 duration=2000,
                 position=InfoBarPosition.TOP,
-                parent=parentInterface
+                parent=parent
             )
+            connection.close()
+            self.databaseEnabled.emit()
+        else:
+            InfoBar.error(
+                '失败',
+                message,
+                duration=2000,
+                position=InfoBarPosition.TOP,
+                parent=parent
+            )
+            cfg.set(cfg.databaseMode, False)
 
 
 class SettingInterface(QWidget):
     """应用设置界面"""
-    ruleChanged = pyqtSignal()
+    ruleImported = pyqtSignal()
+    tester = DatabaseTester()  # 数据库连接性测试器
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -249,7 +132,7 @@ class SettingInterface(QWidget):
             cfg.databaseMode
         )
         self.dataManagementGroup.addSettingCard(self.databaseCard)
-        self.databaseCard.checkedChanged.connect(lambda: testConnection(self))
+        self.databaseCard.checkedChanged.connect(lambda: self.tester.testConnection(self))
 
         # 数据库连接参数设置
         self.databaseConnectionCard = PushSettingCard(
@@ -260,7 +143,7 @@ class SettingInterface(QWidget):
             self
         )
         self.dataManagementGroup.addSettingCard(self.databaseConnectionCard)
-        self.databaseConnectionCard.clicked.connect(lambda: editDatabaseConnection(self))
+        self.databaseConnectionCard.clicked.connect(lambda: self.editDatabaseConnection())
 
         # 规则导入
         self.ruleImportCard = PushSettingCard(
@@ -299,7 +182,7 @@ class SettingInterface(QWidget):
                     )
                     logging.info(f'用户从“{src_path}”导入规则失败')
                     logging.info(f'原因：{message}')
-            self.ruleChanged.emit()
+            self.ruleImported.emit()
 
         self.ruleImportCard.clicked.connect(importRule)
         self.dataManagementGroup.addSettingCard(self.ruleImportCard)
@@ -389,3 +272,129 @@ class SettingInterface(QWidget):
                 logging.info('设置项改变，文件夹模式：关')
 
         self.folderModeCard.checkedChanged.connect(folderMode_log)
+
+    def editDatabaseConnection(self):
+        """编辑数据库连接参数"""
+        connection_parameters = loadConnectionParameter()
+
+        class EditWindow(MessageBoxBase):
+            """创建编辑连接参数的窗口"""
+            connection_dict = {
+                'host': '',
+                'port': 3306,
+                'user': '',
+                'password': '',
+                'database': ''
+            }  # 存放数据库连接参数的字典
+
+            def __init__(self, parameters, parent):
+                super().__init__(parent)
+                self.parameters = parameters
+
+                self.yesButton.setText('确定')
+                self.cancelButton.setText('取消')
+
+                self.widget.setFixedWidth(350)
+
+                self.__initView__()
+
+            def __initView__(self):
+                """初始化界面布局"""
+                # 主机
+                hostLayout = QHBoxLayout(self.widget)
+                hostLabel = SubtitleLabel(text='主机', parent=self.widget)
+                hostLineEdit = LineEdit(self.widget)
+                hostLineEdit.setPlaceholderText('请输入主机地址')
+                hostLineEdit.setFixedWidth(175)
+                hostLineEdit.textChanged.connect(lambda: self.recordConnection('host', hostLineEdit.text()))
+
+                hostLayout.addWidget(hostLabel)
+                hostLayout.addStretch(1)
+                hostLayout.addWidget(hostLineEdit)
+                self.viewLayout.addLayout(hostLayout)
+
+                # 端口
+                portLayout = QHBoxLayout(self.widget)
+                portLabel = SubtitleLabel(text='端口', parent=self.widget)
+                portLineEdit = LineEdit(self.widget)
+                portLineEdit.setPlaceholderText('留空使用默认值3306')
+                portLineEdit.setFixedWidth(175)
+                portLineEdit.textChanged.connect(lambda: self.recordConnection('port', portLineEdit.text()))
+
+                portLayout.addWidget(portLabel)
+                portLayout.addStretch(1)
+                portLayout.addWidget(portLineEdit)
+                self.viewLayout.addLayout(portLayout)
+
+                # 用户
+                userLayout = QHBoxLayout(self.widget)
+                userLabel = SubtitleLabel(text='用户', parent=self.widget)
+                userLineEdit = LineEdit(self.widget)
+                userLineEdit.setPlaceholderText('请输入用户名')
+                userLineEdit.setFixedWidth(175)
+                userLineEdit.textChanged.connect(lambda: self.recordConnection('user', userLineEdit.text()))
+
+                userLayout.addWidget(userLabel)
+                userLayout.addStretch(1)
+                userLayout.addWidget(userLineEdit)
+                self.viewLayout.addLayout(userLayout)
+
+                # 密码
+                passwordLayout = QHBoxLayout(self.widget)
+                passwordLabel = SubtitleLabel(text='密码', parent=self.widget)
+                passwordLineEdit = PasswordLineEdit(self.widget)
+                passwordLineEdit.setPlaceholderText('请输入密码')
+                passwordLineEdit.setFixedWidth(175)
+                passwordLineEdit.textChanged.connect(lambda: self.recordConnection('password', passwordLineEdit.text()))
+
+                passwordLayout.addWidget(passwordLabel)
+                passwordLayout.addStretch(1)
+                passwordLayout.addWidget(passwordLineEdit)
+                self.viewLayout.addLayout(passwordLayout)
+
+                # 数据库
+                databaseLayout = QHBoxLayout(self.widget)
+                databaseLabel = SubtitleLabel(text='数据库', parent=self.widget)
+                databaseLineEdit = LineEdit(self.widget)
+                databaseLineEdit.setPlaceholderText('请输入数据库')
+                databaseLineEdit.setFixedWidth(175)
+                databaseLineEdit.textChanged.connect(
+                    lambda: self.recordConnection('database', databaseLineEdit.text().lower()))  # 数据库名称为小写
+
+                databaseLayout.addWidget(databaseLabel)
+                databaseLayout.addStretch(1)
+                databaseLayout.addWidget(databaseLineEdit)
+                self.viewLayout.addLayout(databaseLayout)
+
+                """设置输入框文本"""
+                hostLineEdit.setText(self.parameters['host'])
+                portLineEdit.setText(str(self.parameters['port']))
+                userLineEdit.setText(self.parameters['user'])
+                passwordLineEdit.setText(self.parameters['password'])
+                databaseLineEdit.setText(self.parameters['database'])
+
+            def recordConnection(self, k, v):
+                """将键值对保存至字典"""
+                if k == 'port':
+                    self.connection_dict[k] = int(v)  # 端口号保存为整型
+                else:
+                    self.connection_dict[k] = v
+
+        window = EditWindow(connection_parameters, self)
+        if window.exec():
+            connection_dict = window.connection_dict
+            saveConnectionInfos(connection_dict)
+
+            logging.info('数据库连接参数保存成功')
+
+            # 编辑完成后如果启用了数据库模式则测试连接状态
+            if cfg.get(cfg.databaseMode):
+                self.tester.testConnection(self)
+            else:
+                InfoBar.success(
+                    '成功',
+                    '数据库连接参数保存成功',
+                    duration=2000,
+                    position=InfoBarPosition.TOP,
+                    parent=self
+                )

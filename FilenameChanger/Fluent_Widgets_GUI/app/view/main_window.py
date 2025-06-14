@@ -45,14 +45,16 @@ class MainWindow(FluentWindow):
         # 将各窗口的信号连接至对应方法
         self.homeInterface.addNewHistory.connect(self.historyListInterface.addHistory)
         self.homeInterface.cancelRename.connect(self.historyListInterface.delHistory)
-        self.settingInterface.ruleChanged.connect(self.ruleListInterface.initRuleViewArea)
+        self.settingInterface.ruleImported.connect(self.ruleListInterface.initRuleViewArea)
         self.settingInterface.folderModeCard.checkedChanged.connect(self.homeInterface.initFileList)  # 切换重命名模式后刷新文件列表
         self.settingInterface.secureScanningCard.checkedChanged.connect(
             self.homeInterface.initFileList)  # 开关安全扫描后更新文件列表
 
-        # 切换数据库模式后刷新规则列表和历史记录界面
-        self.settingInterface.databaseCard.checkedChanged.connect(self.historyListInterface.initCardView)
-        self.settingInterface.databaseCard.checkedChanged.connect(self.ruleListInterface.initRuleViewArea)
+        # 启用或关闭数据库模式后刷新规则列表和历史记录界面
+        self.settingInterface.tester.databaseEnabled.connect(self.historyListInterface.initCardView)
+        self.settingInterface.tester.databaseEnabled.connect(self.ruleListInterface.initRuleViewArea)
+        self.settingInterface.tester.turnOffDatabaseMode.connect(self.historyListInterface.initCardView)
+        self.settingInterface.tester.turnOffDatabaseMode.connect(self.ruleListInterface.initRuleViewArea)
 
     def initNavigation(self):
         """初始化导航栏"""

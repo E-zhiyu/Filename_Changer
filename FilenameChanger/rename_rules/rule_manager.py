@@ -5,6 +5,7 @@
 import json, shutil
 from json import JSONDecodeError
 
+from FilenameChanger.Fluent_Widgets_GUI.app.common.config import cfg
 from FilenameChanger import rule_path
 from FilenameChanger.log.log_recorder import *
 
@@ -14,21 +15,24 @@ def load_rule():
     功能：加载配置文件
     返回：json文件根字典
     """
-    try:
-        with open(rule_path, 'r', encoding='utf-8') as f:
-            logging.info('加载规则配置……')
-            rule_dict = json.load(f)
+    if cfg.get(cfg.databaseMode):
+        pass
+    else:
+        try:
+            with open(rule_path, 'r', encoding='utf-8') as f:
+                logging.info('加载规则配置……')
+                rule_dict = json.load(f)
 
-            if not rule_dict:  # 防止规则文件存在但是被修改为空
-                raise FileNotFoundError
+                if not rule_dict:  # 防止规则文件存在但是被修改为空
+                    raise FileNotFoundError
 
-            return rule_dict
-    except (JSONDecodeError, FileNotFoundError):  # 防止规则文件被篡改为非法值
-        logging.info('配置文件为空或不存在，正在初始化……')
-        init_json()
-        with open(rule_path, 'r', encoding='utf-8') as f:
-            logging.info('规则配置已初始化并成功加载')
-            return json.load(f)
+                return rule_dict
+        except (JSONDecodeError, FileNotFoundError):  # 防止规则文件被篡改为非法值
+            logging.info('配置文件为空或不存在，正在初始化……')
+            init_json()
+            with open(rule_path, 'r', encoding='utf-8') as f:
+                logging.info('规则配置已初始化并成功加载')
+                return json.load(f)
 
 
 def save_new_rule(rule_dict, new_rule):
