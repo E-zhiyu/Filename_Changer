@@ -88,6 +88,6 @@ def create_connection(connect_timeout: int = 5):
             message = '目标数据库不存在，请检查数据库名称是否拼写错误'
         else:
             message = '连接至数据库时出错'
-        return None, False, message
+        return None, message
     else:
-        return connection, True, '数据库连接成功'
+        return connection, '数据库连接成功'

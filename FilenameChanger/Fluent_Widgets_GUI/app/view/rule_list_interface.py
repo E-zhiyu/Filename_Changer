@@ -638,10 +638,6 @@ class PositionBtnLayout(QHBoxLayout):
 class RuleInputInterface(MessageBoxBase):
     """规则参数输入窗口"""
 
-    """定义发送给外部变量的信号"""
-    addNewRule = pyqtSignal(dict, dict)  # 增加规则的信号
-    reviseRule = pyqtSignal(dict, dict, int)  # 修改规则的信号
-
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.num_types = None
@@ -1362,7 +1358,7 @@ class RuleListInterface(QWidget):
     def initRuleViewArea(self):
         """初始化规则卡片显示区域"""
         logging.info('开始更新规则卡片布局……')
-        self.rule_dict = load_rule()
+        self.rule_dict = load_rule()[0]
         self.rule_list = self.rule_dict['rules']
         selected_index = self.rule_dict['selected_index']
         self.currentIndex = -1  # 先将目前选中的卡片下标置为-1，否则会有下标越界风险
@@ -1519,27 +1515,34 @@ class RuleListInterface(QWidget):
             """添加规则"""
             logging.info('进行操作：添加规则')
             addRuleWindow = RuleInputInterface(self)
-            addRuleWindow.addNewRule.connect(save_new_rule)  # 将发射的信号传递给信号处理函数
             if addRuleWindow.exec():
                 logging.info('用户确认添加规则')
 
                 rule = addRuleWindow.rule
-                addRuleWindow.addNewRule.emit(self.rule_dict, rule)  # 发送规则种类、名称和描述的信号
+                flag = save_new_rule(self.rule_dict, rule)  # 将规则保存
+                if flag:
+                    InfoBar.success(
+                        title='成功',
+                        content='已添加一条新规则',
+                        position=InfoBarPosition.TOP,
+                        duration=2000,
+                        parent=self
+                    )
+                else:
+                    InfoBar.error(
+                        '失败',
+                        '连接至数据库时出错',
+                        position=InfoBarPosition.TOP,
+                        duration=2000,
+                        parent=self
+                    )
+                    return
 
                 new_card = RuleCard(rule, len(self.ruleCardList), parent=self)
                 self.addNewCard(new_card)  # 新卡片添加至布局
 
                 QTimer.singleShot(10, lambda: self.ruleScrollArea.verticalScrollBar().setValue(
                     self.ruleScrollArea.verticalScrollBar().maximum()))  # 增加10ms延迟，防止UI未更新完全就滚动
-
-                # 创建成功添加规则的消息框
-                InfoBar.success(
-                    title='成功',
-                    content='已添加一条新规则',
-                    position=InfoBarPosition.TOP,
-                    duration=2000,
-                    parent=self
-                )
             else:
                 logging.info('用户取消添加规则')
 
@@ -1651,12 +1654,30 @@ class RuleListInterface(QWidget):
                 reviseRuleWindow.posLayout.tailBtn.setChecked(True)
 
         """窗口关闭后执行的操作"""
-        reviseRuleWindow.reviseRule.connect(revise_rule)  # 设置信号传值连接到的函数
-
         if reviseRuleWindow.exec():  # 显示窗口
-            logging.info('用户确认修改规则，以下为修改后的规则内容')
+            logging.info('用户确认修改规则')
             revised_rule = reviseRuleWindow.rule
-            reviseRuleWindow.reviseRule.emit(self.rule_dict, revised_rule, index)  # 发送信号给规则保存函数
+            flag = revise_rule(self.rule_dict, revised_rule, index)
+
+            if flag:
+                InfoBar.success(
+                    title='成功',
+                    content='已成功修改指定规则',
+                    position=InfoBarPosition.TOP,
+                    duration=2000,
+                    parent=self
+                )
+                logging.info('规则修改成功')
+            else:
+                InfoBar.error(
+                    '失败',
+                    '连接至数据库时出错',
+                    position=InfoBarPosition.TOP,
+                    duration=2000,
+                    parent=self
+                )
+                logging.error('规则修改失败：连接至数据库时出错')
+                return
 
             old_card = self.ruleCardLayout.itemAt(index).widget()
             if old_card.isActive:
@@ -1669,14 +1690,5 @@ class RuleListInterface(QWidget):
 
             v_pos = self.ruleScrollArea.verticalScrollBar().value()
             self.ruleScrollArea.verticalScrollBar().setValue(v_pos)
-
-            # 创建修改成功的消息框
-            InfoBar.success(
-                title='成功',
-                content='已成功修改指定规则',
-                position=InfoBarPosition.TOP,
-                duration=2000,
-                parent=self
-            )
         else:
             logging.info('用户取消修改规则')

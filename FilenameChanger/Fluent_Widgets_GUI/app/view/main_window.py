@@ -35,8 +35,8 @@ class MainWindow(FluentWindow):
         # 初始化导航栏
         self.initNavigation()
 
-        # 初始化主题
-        self.changeTheme(reset_interface=False)  # 初始化滚动区域背景色
+        # 初始化滚动区域背景色
+        self.changeTheme(reset_interface=False)
 
         # 捕获主题切换和主题色切换的信号
         cfg.themeChanged.connect(self.changeTheme)

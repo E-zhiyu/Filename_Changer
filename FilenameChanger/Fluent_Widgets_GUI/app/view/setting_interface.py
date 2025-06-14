@@ -34,8 +34,8 @@ class DatabaseTester(QObject):
             self.turnOffDatabaseMode.emit()
             return
 
-        connection, flag, message = create_connection(1)
-        if flag:
+        connection, message = create_connection(1)
+        if connection is not None:
             InfoBar.success(
                 '成功',
                 message,

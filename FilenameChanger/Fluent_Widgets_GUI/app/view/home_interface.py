@@ -204,8 +204,8 @@ class HomeInterface(QWidget):
 
         """数据库模式下测试数据库连接"""
         if cfg.get(cfg.databaseMode):
-            connection, flag, message = create_connection()
-            if flag:
+            connection, message = create_connection()
+            if connection is not None:
                 InfoBar.success(
                     '成功',
                     message,

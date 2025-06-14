@@ -89,20 +89,25 @@ def scan_files(directory: str) -> list:
         return old_name
 
 
-def rename_operation(directory: str, old_names):
+def rename_operation(directory: str, old_names: tuple):
     """
     功能：执行“文件重命名”操作
     参数 directory：目标文件夹路径
     参数 old_names：旧文件名序列
+    返回：重命名是否正常结束、重命名提示消息、新历史记录字典
     """
     if not old_names:
         logging.info(f'文件夹：“{directory}”为空')
         return False, '文件夹为空或未选择任何文件', {}
 
-    config_dict = load_rule()  # 重命名时加载已保存的规则
-    if not config_dict['rules']:  # 若规则为空，则结束本函数
+    config_dict, flag = load_rule()  # 重命名时加载已保存的规则
+    if flag and not config_dict['rules']:  # 若读取成功但是规则为空，则结束本函数
         logging.warning('规则为空，请先前往规则设置写入规则')
         return False, '规则为空，请先前往规则设置写入规则！', {}
+    elif not flag:
+        logging.error('规则读取失败：连接至数据库时出错')
+        return False, '规则读取失败：连接至数据库时出错！', {}
+
     selected_rule = config_dict['rules'][config_dict['selected_index']]
     logging.info(
         f'当前活跃的规则为“规则{config_dict['selected_index'] + 1}”，'
@@ -141,7 +146,7 @@ def rename_files(directory: str, old_names: (tuple, list), new_name_list: list, 
     """启用数据库模式时先创建数据库连接"""
     if database_mode:
         connection = create_connection()[0]
-        if not connection:
+        if connection is None:
             logging.error('重命名失败，连接至数据库时出错')
             return False, 0, 0, {}
 
@@ -258,7 +263,7 @@ def load_history() -> list:
 
     if cfg.get(cfg.databaseMode):
         connection = create_connection()[0]
-        if not connection:  # 连接出错则返回空列表
+        if connection is None:  # 连接出错则返回空列表
             logging.error('读取失败：连接至数据库时出错')
             return []
         cursor = connection.cursor()
@@ -388,7 +393,7 @@ def clear_history():
     """清除所有历史记录"""
     if cfg.get(cfg.databaseMode):
         connection = create_connection()[0]
-        if not connection:
+        if connection is None:
             logging.error('清除失败：连接至数据库时出错')
             return False
 
@@ -418,7 +423,7 @@ def history_del(history_list: list, index: int):
     """
     if cfg.get(cfg.databaseMode):
         connection = create_connection()[0]
-        if not connection:
+        if connection is None:
             logging.error('删除失败：连接至数据库时出错')
             return False
 
