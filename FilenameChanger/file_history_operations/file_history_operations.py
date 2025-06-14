@@ -135,12 +135,17 @@ def rename_files(directory: str, old_names: (tuple, list), new_name_list: list, 
     logging.info('进行文件名修改操作中……')
     history_list = load_history()
 
+    folder_mode = cfg.get(cfg.folderMode)
+    database_mode = cfg.get(cfg.databaseMode)
+
     """启用数据库模式时先创建数据库连接"""
-    connection = create_connection()[0]
-    if not connection: return False, 0, 0, {}
+    if database_mode:
+        connection = create_connection()[0]
+        if not connection:
+            logging.error('重命名失败，连接至数据库时出错')
+            return False, 0, 0, {}
 
     """文件重命名"""
-    folder_mode = cfg.get(cfg.folderMode)
     new_history_dict = {'directory': directory, 'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                         'old_name_list': [], 'new_name_list': [], 'error_files': [], 'folder_mode': folder_mode}
     for old_name, new_name in zip(old_names, new_name_list):
@@ -170,7 +175,7 @@ def rename_files(directory: str, old_names: (tuple, list), new_name_list: list, 
 
     """保存重命名历史记录"""
     if (new_history_dict['new_name_list'] or new_history_dict['error_files']) and record_history:
-        if cfg.get(cfg.databaseMode):
+        if database_mode:
             cursor = connection.cursor()
 
             # 将内容插入主表
@@ -354,7 +359,7 @@ def cancel_rename_operation():
 
     # 判断历史记录是否为空
     if not history_list:
-        logging.error('历史记录为空，无法撤销重命名')
+        logging.warning('历史记录为空，无法撤销重命名')
         return False, '历史记录为空，无法撤销重命名'
 
     # 加载上一次的重命名记录
@@ -437,10 +442,10 @@ def history_del(history_list: list, index: int):
         connection.close()
     else:
         del history_list[index]
-        logging.info(f'已删除历史记录，下标：{index}')
         if not os.path.isdir(os.path.dirname(history_file_path)):
             os.mkdir(os.path.dirname(history_file_path))  # 防止历史记录文件夹被移除
         with open(history_file_path, 'w', encoding='utf-8') as f:
             json.dump(history_list, f, ensure_ascii=False, indent=4)
 
+    logging.info(f'已删除历史记录，下标：{index}')
     return True
