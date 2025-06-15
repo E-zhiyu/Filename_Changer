@@ -297,7 +297,7 @@ def load_history() -> list:
         cursor.execute(sql)
 
         """读取历史记录"""
-        sql = 'SELECT * FROM history ORDER BY operation_id'
+        sql = 'SELECT * FROM history ORDER BY time'  # 按照时间先后顺序排序
         cursor.execute(sql)
         fetched_histories = cursor.fetchall()
 
