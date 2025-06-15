@@ -1,6 +1,8 @@
 """
 主窗口内容设置模块
 """
+from PyQt6.QtCore import QSize, QEventLoop, QTimer
+
 from FilenameChanger import version
 
 from PyQt6.QtWidgets import QApplication
@@ -9,7 +11,7 @@ from PyQt6.QtGui import QIcon
 from FilenameChanger.Fluent_Widgets_GUI.app.common.config import cfg
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import FluentIcon as FIF, setTheme, isDarkTheme
 from FilenameChanger.Fluent_Widgets_GUI.qfluentwidgets import (NavigationItemPosition, FluentWindow,
-                                                               setCustomStyleSheet)
+                                                               setCustomStyleSheet, SplashScreen)
 
 from FilenameChanger.Fluent_Widgets_GUI.app.view.home_interface import HomeInterface
 from FilenameChanger.Fluent_Widgets_GUI.app.view.rule_list_interface import RuleListInterface
@@ -31,6 +33,9 @@ class MainWindow(FluentWindow):
         self.historyListInterface = HistoryListInterface('历史记录', self)
         self.settingInterface = SettingInterface(self)
         self.infoInterface = InfoInterface(self)
+
+        # 隐藏启动页面
+        self.splashScreen.finish()
 
         # 初始化导航栏
         self.initNavigation()
@@ -76,10 +81,18 @@ class MainWindow(FluentWindow):
         self.setWindowIcon(QIcon(':/qfluentwidgets/images/logo.png'))
         self.setWindowTitle(f'FilenameChanger-v{version}')
 
+        # 创建启动界面
+        self.splashScreen = SplashScreen(self.windowIcon(), self)
+        self.splashScreen.setIconSize(QSize(102, 102))
+
         desktop = QApplication.screens()[0].availableGeometry()
         w, h = desktop.width(), desktop.height()
         self.move(w // 2 - self.width() // 2, h // 2 - self.height() // 2)
         self.show()
+
+        loop = QEventLoop(self)
+        QTimer.singleShot(1000, loop.quit)
+        loop.exec()
 
     def changeTheme(self, theme=None, reset_interface=True):
         """
