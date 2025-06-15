@@ -58,7 +58,7 @@ def load_rule():
 
         """查询表内容"""
         # 查询规则数量和选中的下标
-        sql = 'SELECT * FROM rule_info'
+        sql = 'SELECT num, selected_index FROM rule_info'
         cursor.execute(sql)
         rule_info = cursor.fetchone()  # 保存一行记录
 
@@ -71,16 +71,13 @@ def load_rule():
 
         # 查询规则并保存至规则根字典
         sql = """\
-        SELECT type, name, description, split_char, enable_re,new_ext,
-               date_type, position, target_str, new_str, num_type,
-               new_name, use_original_name,action_scope, rule_function, start_num,
-               step_length, date_value, string
-        FROM rules
+        SELECT * FROM rules
         """
         cursor.execute(sql)
         rules = cursor.fetchall()
         for rule in rules:
             rule_data = {
+                "rule_id": rule['rule_id'],
                 "type": rule["type"],
                 "name": rule["name"],
                 "desc": rule["description"],
@@ -191,8 +188,6 @@ def revise_rule(rule_dict, revised_rule, index):
     参数 revised_rule：修改后的规则
     参数 index：需要修改的规则的下标
     """
-    rule_dict['rules'][index] = revised_rule
-
     if cfg.get(cfg.databaseMode):
         connection = create_connection()[0]
         if connection is None:
@@ -231,9 +226,13 @@ def revise_rule(rule_dict, revised_rule, index):
             rule_id
         ))
 
+        rule_dict['rules'][index] = revised_rule  # 更新规则字典（因为字典可以传值修改）
+        rule_dict['rules'][index]['rule_id'] = rule_id  # revised_rule字典中没有rule_id，需要加上
+
         connection.commit()
         connection.close()
     else:
+        rule_dict['rules'][index] = revised_rule
         with open(rule_path, 'w', encoding='utf-8') as f:
             json.dump(rule_dict, f, ensure_ascii=False, indent=4)
     return True
