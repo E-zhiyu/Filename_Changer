@@ -1419,25 +1419,33 @@ class RuleListInterface(QWidget):
         def activate_rule_callback():
             """切换激活的规则"""
             if self.currentIndex != -1:  # 防止用户在未选择卡片的时候点击激活按钮而产生BUG
+                index = self.currentIndex
+                flag = activate_rule(self.rule_dict, index)  # 切换规则并保存
+                if flag:
+                    InfoBar.success(
+                        title='成功',
+                        content='已激活选中的规则',
+                        position=InfoBarPosition.TOP,
+                        duration=2000,
+                        parent=self
+                    )
+                else:
+                    InfoBar.error(
+                        '无法激活',
+                        '数据库连接超时',
+                        position=InfoBarPosition.TOP,
+                        duration=2000,
+                        parent=self
+                    )
+                    return
+
                 # 将旧的规则卡片设置为未激活
                 current_index = self.rule_dict['selected_index']
                 self.ruleCardList[current_index].setActive(False)
 
-                index = self.currentIndex
-                activate_rule(self.rule_dict, index)  # 切换规则并保存至配置文件
-
                 # 并新的规则卡片设置为已激活
                 current_index = self.rule_dict['selected_index']
                 self.ruleCardList[current_index].setActive(True)
-
-                # 创建激活成功的提示框
-                InfoBar.success(
-                    title='成功',
-                    content='已激活选中的规则',
-                    position=InfoBarPosition.TOP,
-                    duration=2000,
-                    parent=self
-                )
 
                 # 将选中规则下标归位
                 self.setSelected(-1)
@@ -1531,7 +1539,7 @@ class RuleListInterface(QWidget):
                 else:
                     InfoBar.error(
                         '失败',
-                        '连接至数据库时出错',
+                        '数据库连接超时',
                         position=InfoBarPosition.TOP,
                         duration=2000,
                         parent=self
@@ -1671,12 +1679,12 @@ class RuleListInterface(QWidget):
             else:
                 InfoBar.error(
                     '失败',
-                    '连接至数据库时出错',
+                    '数据库连接超时',
                     position=InfoBarPosition.TOP,
                     duration=2000,
                     parent=self
                 )
-                logging.error('规则修改失败：连接至数据库时出错')
+                logging.error('规则修改失败：数据库连接超时')
                 return
 
             old_card = self.ruleCardLayout.itemAt(index).widget()

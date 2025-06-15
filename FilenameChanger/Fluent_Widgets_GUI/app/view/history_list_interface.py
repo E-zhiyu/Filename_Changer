@@ -413,7 +413,7 @@ class HistoryListInterface(QWidget):
                 else:
                     InfoBar.error(
                         '无法删除',
-                        '连接至数据库时出错',
+                        '数据库连接超时',
                         position=InfoBarPosition.TOP,
                         duration=2000,
                         parent=self
@@ -481,7 +481,7 @@ class HistoryListInterface(QWidget):
                     else:
                         InfoBar.error(
                             '无法清除',
-                            '连接至数据库时出错',
+                            '数据库连接超时',
                             position=InfoBarPosition.TOP,
                             duration=2000,
                             parent=self

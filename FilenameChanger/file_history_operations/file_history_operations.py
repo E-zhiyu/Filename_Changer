@@ -105,8 +105,8 @@ def rename_operation(directory: str, old_names: tuple):
         logging.warning('规则为空，请先前往规则设置写入规则')
         return False, '规则为空，请先前往规则设置写入规则！', {}
     elif not flag:
-        logging.error('规则读取失败：连接至数据库时出错')
-        return False, '规则读取失败：连接至数据库时出错！', {}
+        logging.error('规则读取失败：数据库连接超时')
+        return False, '规则读取失败：数据库连接超时！', {}
 
     selected_rule = config_dict['rules'][config_dict['selected_index']]
     logging.info(
@@ -125,8 +125,8 @@ def rename_operation(directory: str, old_names: tuple):
         logging.info(f'重命名结束，成功：{success}个，失败：{fail}个')
         return True, f'重命名结束，成功：{success}个，失败：{fail}个', new_history_dict
     else:
-        logging.error('重命名失败：连接至数据库时出错')
-        return False, '重命名失败，连接至数据库时出错', {}
+        logging.error('重命名失败：数据库连接超时')
+        return False, '重命名失败，数据库连接超时', {}
 
 
 def rename_files(directory: str, old_names: (tuple, list), new_name_list: list, record_history: bool = True):
@@ -147,7 +147,7 @@ def rename_files(directory: str, old_names: (tuple, list), new_name_list: list, 
     if database_mode:
         connection = create_connection()[0]
         if connection is None:
-            logging.error('重命名失败，连接至数据库时出错')
+            logging.error('重命名失败，数据库连接超时')
             return False, 0, 0, {}
 
     """文件重命名"""
@@ -264,7 +264,7 @@ def load_history() -> list:
     if cfg.get(cfg.databaseMode):
         connection = create_connection()[0]
         if connection is None:  # 连接出错则返回空列表
-            logging.error('读取失败：连接至数据库时出错')
+            logging.error('读取失败：数据库连接超时')
             return []
         cursor = connection.cursor()
 
@@ -385,8 +385,8 @@ def cancel_rename_operation():
         logging.info('撤销重命名成功')
         return True, '已成功撤销重命名'
     else:
-        logging.error('无法撤销，连接至数据库时出错')
-        return False, '无法撤销，连接至数据库时出错'
+        logging.error('无法撤销，数据库连接超时')
+        return False, '无法撤销，数据库连接超时'
 
 
 def clear_history():
@@ -394,7 +394,7 @@ def clear_history():
     if cfg.get(cfg.databaseMode):
         connection = create_connection()[0]
         if connection is None:
-            logging.error('清除失败：连接至数据库时出错')
+            logging.error('清除失败：数据库连接超时')
             return False
 
         cursor = connection.cursor()
@@ -424,7 +424,7 @@ def history_del(history_list: list, index: int):
     if cfg.get(cfg.databaseMode):
         connection = create_connection()[0]
         if connection is None:
-            logging.error('删除失败：连接至数据库时出错')
+            logging.error('删除失败：数据库连接超时')
             return False
 
         cursor = connection.cursor()

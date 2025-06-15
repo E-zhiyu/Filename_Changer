@@ -262,8 +262,8 @@ def del_rules(rule_dict, index):
         if cfg.get(cfg.databaseMode):
             connection = create_connection()[0]
             if connection is None:
-                logging.error('无法删除：连接至数据库时出错')
-                return False, '连接至数据库时出错'
+                logging.error('无法删除：数据库连接超时')
+                return False, '数据库连接超时'
 
         logging.info(f'正在删除第{index + 1}个规则，剩余规则{rule_dict['num'] - 1}个')
 
@@ -311,7 +311,7 @@ def activate_rule(config_dict, index):
     if cfg.get(cfg.databaseMode):
         connection = create_connection()[0]
         if connection is None:
-            logging.error('无法激活：连接至数据库时出错')
+            logging.error('无法激活：数据库连接超时')
             return False
         cursor = connection.cursor()
 
@@ -350,7 +350,7 @@ def import_rule(src_path):
                         if cfg.get(cfg.databaseMode):
                             connection = create_connection()[0]
                             if connection is None:
-                                return False, '连接至数据库时出错'
+                                return False, '数据库连接超时'
                             cursor = connection.cursor()
 
                             # 读取文件内容
@@ -444,7 +444,7 @@ def export_rule(dst_path):
     if cfg.get(cfg.databaseMode):
         rule_dict, flag = load_rule()
         if not flag:
-            return False, '连接至数据库时出错'
+            return False, '数据库连接超时'
 
         # 去除rule_id键值对
         for rule in rule_dict['rules']:
