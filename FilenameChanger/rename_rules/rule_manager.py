@@ -305,9 +305,6 @@ def activate_rule(config_dict, index):
     参数 config_dict：规则配置文件根字典
     参数 index：需要切换到的规则的下标
     """
-    logging.info(f'用户激活规则{index + 1}')
-    config_dict['selected_index'] = index
-
     if cfg.get(cfg.databaseMode):
         connection = create_connection()[0]
         if connection is None:
@@ -315,12 +312,17 @@ def activate_rule(config_dict, index):
             return False
         cursor = connection.cursor()
 
+        logging.info(f'用户激活规则{index + 1}')
+        config_dict['selected_index'] = index
+
         sql = 'UPDATE rule_info SET selected_index=%s'
         cursor.execute(sql, config_dict['selected_index'])
 
         connection.commit()
         connection.close()
     else:
+        logging.info(f'用户激活规则{index + 1}')
+        config_dict['selected_index'] = index
         with open(rule_path, 'w', encoding='utf-8') as f:
             json.dump(config_dict, f, ensure_ascii=False, indent=4)
 

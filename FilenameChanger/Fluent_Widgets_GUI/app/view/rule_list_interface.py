@@ -1419,6 +1419,10 @@ class RuleListInterface(QWidget):
         def activate_rule_callback():
             """切换激活的规则"""
             if self.currentIndex != -1:  # 防止用户在未选择卡片的时候点击激活按钮而产生BUG
+                # 将旧的规则卡片设置为未激活
+                current_index = self.rule_dict['selected_index']
+                self.ruleCardList[current_index].setActive(False)
+
                 index = self.currentIndex
                 flag = activate_rule(self.rule_dict, index)  # 切换规则并保存
                 if flag:
@@ -1429,6 +1433,13 @@ class RuleListInterface(QWidget):
                         duration=2000,
                         parent=self
                     )
+
+                    # 将新的规则卡片设置为已激活
+                    current_index = self.rule_dict['selected_index']
+                    self.ruleCardList[current_index].setActive(True)
+
+                    # 将选中规则下标归位
+                    self.setSelected(-1)
                 else:
                     InfoBar.error(
                         '无法激活',
@@ -1437,18 +1448,9 @@ class RuleListInterface(QWidget):
                         duration=2000,
                         parent=self
                     )
-                    return
 
-                # 将旧的规则卡片设置为未激活
-                current_index = self.rule_dict['selected_index']
-                self.ruleCardList[current_index].setActive(False)
-
-                # 并新的规则卡片设置为已激活
-                current_index = self.rule_dict['selected_index']
-                self.ruleCardList[current_index].setActive(True)
-
-                # 将选中规则下标归位
-                self.setSelected(-1)
+                    # 重新将卡片设置为已激活
+                    self.ruleCardList[current_index].setActive(True)
             else:
                 InfoBar.warning(
                     title='提示',
