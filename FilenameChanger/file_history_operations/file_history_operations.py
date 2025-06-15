@@ -220,7 +220,7 @@ def rename_files(directory: str, old_names: (tuple, list), new_name_list: list, 
     # 统计成功和失败的文件数
     fail = len(new_history_dict['error_files'])
     success = len(old_names) - fail
-    return success, fail, new_history_dict  # 返回成功重命名和重命名时出错的文件数，以及新增加的历史记录
+    return True, success, fail, new_history_dict  # 返回成功重命名和重命名时出错的文件数，以及新增加的历史记录
 
 
 def get_new_name_list(selected_rule: dict, old_names: (tuple, list), directory: str):
@@ -274,7 +274,7 @@ def load_history() -> list:
         CREATE TABLE IF NOT EXISTS history (
             operation_id INT AUTO_INCREMENT PRIMARY KEY,  # 历史记录的自增主键，用于快速查找其对应的文件名
             directory VARCHAR(255),
-            time VARCHAR(20),
+            time DATETIME,
             folder_mode BOOLEAN
         );"""
         cursor.execute(sql)
@@ -306,8 +306,9 @@ def load_history() -> list:
         for history in fetched_histories:
             operation_id = history['operation_id']
             one_history_record = {
+                'operation_id': operation_id,
                 'directory': history['directory'],
-                'time': history['time'],
+                'time': str(history['time']),
                 'folder_mode': history['folder_mode'],
             }  # 新建一条历史记录的字典
 

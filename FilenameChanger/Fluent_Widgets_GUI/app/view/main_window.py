@@ -91,7 +91,7 @@ class MainWindow(FluentWindow):
         self.show()
 
         loop = QEventLoop(self)
-        QTimer.singleShot(1000, loop.quit)
+        QTimer.singleShot(500, loop.quit)
         loop.exec()
 
     def changeTheme(self, theme=None, reset_interface=True):

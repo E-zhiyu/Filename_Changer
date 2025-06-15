@@ -70,9 +70,7 @@ def load_rule():
         }
 
         # 查询规则并保存至规则根字典
-        sql = """\
-        SELECT * FROM rules
-        """
+        sql = "SELECT * FROM rules ORDER BY rule_id"
         cursor.execute(sql)
         rules = cursor.fetchall()
         for rule in rules:
