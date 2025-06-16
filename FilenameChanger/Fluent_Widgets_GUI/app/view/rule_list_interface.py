@@ -272,7 +272,7 @@ class InfoDialog(MessageBoxBase):
             elif rule['date_type'] == 3:
                 date = '文件访问日期'
             elif rule['date_type'] == 4:
-                date = rule['date'] if rule['date'] else '<空>'
+                date = rule.get('date', '') if rule.get('date', '') else '<空>'
             self.dateContentLabel = BodyLabel(text=date, parent=self.widget)
 
             self.dateLayout = QHBoxLayout()
@@ -943,10 +943,9 @@ class RuleInputInterface(MessageBoxBase):
                     self.setKeyValue('date_type', comboBox.currentIndex(), 'int')
 
                     if comboBox.currentIndex() == 4:
-                        self.setKeyValue('date', '', 'str')  # 设置自定义日期初值为空串
+                        self.setKeyValue('date', '', 'str')  # 设置日期初值
                         dateLineEdit.setVisible(True)
                     else:
-                        # 删除date键值对
                         try:
                             del self.rule['date']
                         except KeyError:
@@ -1662,6 +1661,8 @@ class RuleListInterface(QWidget):
                 reviseRuleWindow.posLayout.headBtn.setChecked(True)
             elif position == 'tail':
                 reviseRuleWindow.posLayout.tailBtn.setChecked(True)
+
+        reviseRuleWindow.rule = rule  # 将传入的旧规则直接覆盖待传出的规则
 
         """窗口关闭后执行的操作"""
         if reviseRuleWindow.exec():  # 显示窗口
