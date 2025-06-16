@@ -922,7 +922,7 @@ class RuleInputInterface(MessageBoxBase):
 
                 # 日期种类下拉框
                 self.dateTypeComboBox = ComboBox()
-                date_type = ('系统日期', '文件创建日期', '文件修改日期', '文件访问日期', '自定义日期')
+                date_type = ('当前系统日期', '文件创建日期', '文件修改日期', '文件访问日期', '自定义日期')
                 self.dateTypeComboBox.addItems(date_type)
                 self.dateTypeComboBox.setFixedWidth(150)
 
@@ -1001,11 +1001,11 @@ class RuleInputInterface(MessageBoxBase):
 
                 def setSplitCharLineEditVisible(comboBox, dateLineEdit):
                     """根据下拉框选择的内容修改分隔符输入框的可见性"""
-                    self.setKeyValue('split_char', comboBox.text(), 'str')
-
                     if comboBox.currentIndex() == 4:
+                        self.setKeyValue('split_char', self.customSplitCharLineEdit.text(), 'str')
                         dateLineEdit.setVisible(True)
                     else:
+                        self.setKeyValue('split_char', comboBox.text(), 'str')
                         dateLineEdit.setVisible(False)
 
                 self.setKeyValue('split_char', '-', 'str')  # 设定分隔符初始值
