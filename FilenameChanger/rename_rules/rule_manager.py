@@ -34,8 +34,8 @@ def load_rule():
         sql = """\
         CREATE TABLE IF NOT EXISTS rules(
             rule_id INT AUTO_INCREMENT PRIMARY KEY,
-            type INT,
-            name VARCHAR(100),
+            type INT NOT NULL,
+            name VARCHAR(100) NOT NULL,
             description VARCHAR(255),
             split_char VARCHAR(50),
             enable_re BOOLEAN DEFAULT FALSE,

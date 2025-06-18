@@ -273,9 +273,9 @@ def load_history() -> list:
         sql = """\
         CREATE TABLE IF NOT EXISTS history (
             operation_id INT AUTO_INCREMENT PRIMARY KEY,  # 历史记录的自增主键，用于快速查找其对应的文件名
-            directory VARCHAR(255),
+            directory VARCHAR(255)  NOT NULL ,
             time DATETIME,
-            folder_mode BOOLEAN
+            folder_mode BOOLEAN DEFAULT FALSE
         );"""
         cursor.execute(sql)
 
