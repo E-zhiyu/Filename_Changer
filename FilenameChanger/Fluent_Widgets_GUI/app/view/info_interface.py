@@ -51,6 +51,11 @@ help_content_md = """\
 
 """
 changeLog_content_md = """\
+# v2.3.1
+
+### BUG修复
+- 修复使用数据库模式进行重命名时changed_files表会记录未重命名的文件的BUG
+
 # v2.3.0
 
 ### 新增内容

@@ -194,7 +194,7 @@ def rename_files(directory: str, old_names: (tuple, list), new_name_list: list, 
             new_history_dict['operation_id'] = operation_id  # 数据库模式下需要记录重命名操作的ID
 
             # 保存修改的文件
-            for old, new in zip(old_names, new_name_list):
+            for old, new in zip(new_history_dict['old_name_list'], new_history_dict['new_name_list']):
                 sql = f"""\
                 INSERT INTO changed_files
                 (operation_id, old_name, new_name)
