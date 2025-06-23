@@ -284,7 +284,9 @@ def load_history() -> list:
         CREATE TABLE IF NOT EXISTS changed_files (
             operation_id INT,
             old_name VARCHAR(255),
-            new_name VARCHAR(255)
+            new_name VARCHAR(255),
+            FOREIGN KEY (operation_id) REFERENCES history (operation_id)
+            ON DELETE CASCADE
         )"""
         cursor.execute(sql)
 
@@ -292,7 +294,9 @@ def load_history() -> list:
         sql = """\
         CREATE TABLE IF NOT EXISTS error_files (
             operation_id INT,
-            reasonAndName VARCHAR(255)
+            reasonAndName VARCHAR(255),
+            FOREIGN KEY (operation_id) REFERENCES history (operation_id)
+            ON DELETE CASCADE
         )"""
         cursor.execute(sql)
 
@@ -434,14 +438,6 @@ def history_del(history_list: list, index: int):
 
         # 删除主表数据
         sql = 'DELETE FROM history WHERE operation_id=%s'
-        cursor.execute(sql, operation_id)
-
-        # 删除修改的文件记录
-        sql = 'DELETE FROM changed_files WHERE operation_id=%s'
-        cursor.execute(sql, operation_id)
-
-        # 删除出错的文件记录
-        sql = 'DELETE FROM error_files WHERE operation_id=%s'
         cursor.execute(sql, operation_id)
 
         connection.commit()
